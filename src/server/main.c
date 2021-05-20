@@ -1,6 +1,9 @@
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
 
 int
 main(int argc, char **argv)
@@ -12,5 +15,14 @@ main(int argc, char **argv)
 		printf("Couldn't read the given configuration file. Abort.\n");
 		return EXIT_FAILURE;
 	}
+	int socket_desc = socket(AF_UNIX, SOCK_STREAM, 0);
+	if (socket_desc < 0) {
+		free(config);
+		printf("Socket operation failed. Abort.\n");
+		return EXIT_FAILURE;
+	}
+	struct sockaddr_un socket_address;
+	memset(&socket_address, 0, sizeof(socket_address));
+	socket_address.sun_family = AF_UNIX;
 	return EXIT_SUCCESS;
 }
