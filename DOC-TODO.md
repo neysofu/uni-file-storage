@@ -1,0 +1,1 @@
+- [ ] Document underscore vs CamelCase naming convention choice.
