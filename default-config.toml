@@ -1,0 +1,3 @@
+[server]
+max-files = 100
+max-storage = 80
