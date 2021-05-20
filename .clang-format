@@ -1,0 +1,19 @@
+# This is the clang-format tool configuration file. Most IDEs will pick this up
+# automatically and format both .c and .h files before writing to disk.
+#
+# Use
+#   $ clang-format -i <file>
+# to manually format files in-place.
+#
+# The current formatting options are simply a matter of personal preference by
+# the author; consistency is more important than any specific choices in this
+# regard.
+
+BasedOnStyle: Mozilla
+
+ColumnLimit: 92
+ContinuationIndentWidth: 2
+IndentWidth: 4
+PointerAlignment: Right
+TabWidth: 4
+UseTab: ForIndentation
