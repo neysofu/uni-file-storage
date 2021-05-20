@@ -9,6 +9,12 @@ int
 main(int argc, char **argv)
 {
 	int config_err = 0;
+	if (argc != 2) {
+		printf("Usage: $ server <config-filepath>\n"
+		       "\n"
+		       "Goodbye.\n");
+		return EXIT_FAILURE;
+	}
 	printf("Reading configuration file '%s'.\n", argv[1]);
 	struct Config *config = config_parse_file(argv[1], &config_err);
 	if (config_err) {
