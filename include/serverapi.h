@@ -1,12 +1,14 @@
-#ifndef SOL_API
-#define SOL_API
-
-enum FileFlag {
-    O_CREATE = 0b1,
-    O_LOCK = 0b10,
-};
+#ifndef SOL_SERVERAPI
+#define SOL_SERVERAPI
 
 #include <stddef.h>
+#include <time.h>
+
+enum FileFlag
+{
+	O_CREATE = 0b1,
+	O_LOCK = 0b10,
+};
 
 int
 openConnection(const char *sockname, int msec, const struct timespec abstime);

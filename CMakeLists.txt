@@ -37,6 +37,10 @@ set_source_files_properties(
   COMPILE_FLAGS "-w"
 )
 
+# API library
+add_library(server_api "${SRC_DIR}/serverapi.c")
+target_include_directories(server_api PUBLIC "${INCLUDE_DIR}")
+
 # Server
 file(
   GLOB_RECURSE
@@ -49,3 +53,4 @@ file(
 add_executable(server "${SRC_FILES}")
 target_include_directories(server PUBLIC "${LIB_DIR}" "${INCLUDE_DIR}")
 target_link_libraries(server pthread)
+
