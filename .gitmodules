@@ -1,3 +1,6 @@
 [submodule "lib/tomlc99"]
 	path = lib/tomlc99
 	url = git@github.com:cktan/tomlc99.git
+[submodule "lib/xxHash"]
+	path = lib/xxHash
+	url = git@github.com:Cyan4973/xxHash.git
