@@ -5,6 +5,7 @@ project(SOL_PROJECT VERSION 0.1 LANGUAGES C)
 set(
   CMAKE_C_FLAGS
   "${CMAKE_C_FLAGS} \
+  -std=c99 \
   -Wall \
   -Wpedantic \
   -Wextra \
@@ -44,13 +45,23 @@ target_include_directories(server_api PUBLIC "${INCLUDE_DIR}")
 # Server
 file(
   GLOB_RECURSE
-  SRC_FILES
+  SERVER_FILES
   "${SRC_DIR}/server/*.c"
   "${SRC_DIR}/server/*.h"
   "${LIB_DIR}/tomlc99/toml.c"
   "${LIB_DIR}/xxHash/xxhash.c"
 )
-add_executable(server "${SRC_FILES}")
+add_executable(server "${SERVER_FILES}")
 target_include_directories(server PUBLIC "${LIB_DIR}" "${INCLUDE_DIR}")
 target_link_libraries(server pthread)
 
+# Client
+file(
+  GLOB_RECURSE
+  CLIENT_FILES
+  "${SRC_DIR}/client/*.c"
+  "${SRC_DIR}/client/*.h"
+  "${SRC_DIR}/serverapi.c"
+)
+add_executable(client "${CLIENT_FILES}")
+target_include_directories(client PUBLIC "${INCLUDE_DIR}")

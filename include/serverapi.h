@@ -6,8 +6,8 @@
 
 enum FileFlag
 {
-	O_CREATE = 0b1,
-	O_LOCK = 0b10,
+	O_CREATE = 1,
+	O_LOCK = 2,
 };
 
 int
