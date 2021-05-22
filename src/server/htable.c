@@ -94,7 +94,7 @@ htable_insert(struct HTable *htable, const char *key)
 	if (!bucket->head) {
 		bucket->head = node;
 	}
-	return node;
+	return &(node->item);
 }
 
 struct HTable *
@@ -104,7 +104,7 @@ htable_clone(const struct HTable *htable)
 	// we're using chaining rather than open addressing, but it's a good
 	// default.
 	if (htable->items_count <= htable->buckets_count) {
-		return;
+		return NULL;
 	}
 	struct HTable *new = htable_new(htable->buckets_count * GROWTH_FACTOR);
 	if (!new) {
@@ -120,6 +120,7 @@ htable_clone(const struct HTable *htable)
 			node = node->next;
 		}
 	}
+	return new;
 }
 
 int
