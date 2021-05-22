@@ -1,4 +1,7 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "serverapi.h"
+#include "utils.h"
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -150,8 +153,11 @@ openConnection(const char *sockname, int msec, const struct timespec abstime)
 		state.socket_name = malloc(strlen(sockname) + 1);
 		strcpy(state.socket_name, sockname);
 		strcpy(socket_address.sun_path, sockname);
-		bind(socket_descriptor, &socket_address, SUN_LEN(&socket_address));
+		bind(socket_descriptor,
+		     &socket_address,
+		     ((struct sockaddr_un *)(NULL))->sun_path + strlen(socket_address.sun_path));
 		listen(socket_descriptor, 1);
+		wait_msec(msec);
 	}
 	return 0;
 }
