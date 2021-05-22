@@ -39,7 +39,12 @@ set_source_files_properties(
 )
 
 # API library
+add_library(utils "${SRC_DIR}/utils.c")
+target_include_directories(utils PUBLIC "${INCLUDE_DIR}")
+
+# API library
 add_library(server_api "${SRC_DIR}/serverapi.c")
+target_link_libraries(server_api utils)
 target_include_directories(server_api PUBLIC "${INCLUDE_DIR}")
 
 # Server
@@ -61,7 +66,7 @@ file(
   CLIENT_FILES
   "${SRC_DIR}/client/*.c"
   "${SRC_DIR}/client/*.h"
-  "${SRC_DIR}/serverapi.c"
 )
 add_executable(client "${CLIENT_FILES}")
+target_link_libraries(client server_api utils)
 target_include_directories(client PUBLIC "${INCLUDE_DIR}")
