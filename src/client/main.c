@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "cli.h"
+#include "logc/src/log.h"
 #include "serverapi.h"
 #include "utils.h"
 #include <assert.h>
@@ -14,7 +15,6 @@
 void
 print_help(void)
 {
-
 	puts("Client for file storage server. Options:");
 	puts("");
 	puts("-h            Prints this message and exits.");
@@ -29,9 +29,9 @@ print_help(void)
 void
 print_client_err(enum ClientErr err)
 {
+	assert(err);
+	puts("Command-line usage error.");
 	switch (err) {
-		case CLIENT_ERR_OK:
-			return;
 		case CLIENT_ERR_ALLOC:
 			puts("Out-of-memory error.");
 			break;
@@ -45,7 +45,7 @@ print_client_err(enum ClientErr err)
 			puts("Multiple -p options. Only one is allowed.");
 			break;
 		default:
-			puts("Generic error.");
+			puts("No further information is available.");
 	}
 }
 
@@ -76,8 +76,10 @@ run_actions(const struct CliArgs *cli_args)
 int
 main(int argc, char **argv)
 {
+	log_info("Starting client.");
 	struct CliArgs *cli_args = cli_args_parse(argc, argv);
 	if (!cli_args) {
+		puts("Allocation failure. Goodbye.");
 		print_client_err(CLIENT_ERR_ALLOC);
 		return EXIT_FAILURE;
 	} else if (cli_args->err) {

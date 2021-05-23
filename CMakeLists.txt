@@ -66,7 +66,7 @@ file(
   "${SRC_DIR}/*.h"
   "${SRC_DIR}/client/*.c"
   "${SRC_DIR}/client/*.h"
+  "${LIB_DIR}/logc/src/log.c"
 )
 add_executable(client "${CLIENT_FILES}")
-target_link_libraries(client)
-target_include_directories(client PUBLIC "${INCLUDE_DIR}")
+target_include_directories(client PUBLIC "${LIB_DIR}" "${INCLUDE_DIR}")

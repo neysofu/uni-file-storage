@@ -4,3 +4,6 @@
 [submodule "lib/xxHash"]
 	path = lib/xxHash
 	url = git@github.com:Cyan4973/xxHash.git
+[submodule "lib/logc"]
+	path = lib/logc
+	url = git@github.com:rxi/log.c.git

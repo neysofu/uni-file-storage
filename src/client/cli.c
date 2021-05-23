@@ -2,6 +2,7 @@
 
 #include "cli.h"
 #include "err.h"
+#include "logc/src/log.h"
 #include "serverapi_actions.h"
 #include <stdlib.h>
 #include <string.h>
@@ -247,10 +248,17 @@ cli_args_parse(int argc, char **argv)
 	}
 	char c = '\0';
 	while ((c = getopt(argc, argv, OPTSTRING)) != -1) {
+		log_debug("Parsing command-line option '%c' with value '%s'",
+		          c,
+		          optarg ? optarg : "[NONE]");
 		cli_args_parse_option(cli_args, c, optarg);
 		if (cli_args->err) {
+			log_error(
+			  "Failure during command-line parsing (err. code: %d). Stopping immediately.",
+			  cli_args->err);
 			break;
 		}
 	}
+	log_debug("Finished parsing command-line arguments.");
 	return cli_args;
 }
