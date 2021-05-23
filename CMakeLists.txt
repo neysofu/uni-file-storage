@@ -58,7 +58,7 @@ file(
 )
 add_executable(server "${SERVER_FILES}")
 target_include_directories(server PUBLIC "${LIB_DIR}" "${INCLUDE_DIR}")
-target_link_libraries(server pthread)
+target_link_libraries(server pthread utils)
 
 # Client
 file(
