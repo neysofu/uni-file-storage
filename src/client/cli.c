@@ -2,6 +2,7 @@
 
 #include "cli.h"
 #include "err.h"
+#include "serverapi_actions.h"
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>

@@ -39,18 +39,16 @@ set_source_files_properties(
 )
 
 # API library
-add_library(utils "${SRC_DIR}/utils.c")
-target_include_directories(utils PUBLIC "${INCLUDE_DIR}")
-
-# API library
 add_library(server_api "${SRC_DIR}/serverapi.c")
 target_link_libraries(server_api utils)
 target_include_directories(server_api PUBLIC "${INCLUDE_DIR}")
 
 # Server
 file(
-  GLOB_RECURSE
+  GLOB
   SERVER_FILES
+  "${SRC_DIR}/*.c"
+  "${SRC_DIR}/*.h"
   "${SRC_DIR}/server/*.c"
   "${SRC_DIR}/server/*.h"
   "${LIB_DIR}/tomlc99/toml.c"
@@ -58,15 +56,17 @@ file(
 )
 add_executable(server "${SERVER_FILES}")
 target_include_directories(server PUBLIC "${LIB_DIR}" "${INCLUDE_DIR}")
-target_link_libraries(server pthread utils)
+target_link_libraries(server pthread)
 
 # Client
 file(
-  GLOB_RECURSE
+  GLOB
   CLIENT_FILES
+  "${SRC_DIR}/*.c"
+  "${SRC_DIR}/*.h"
   "${SRC_DIR}/client/*.c"
   "${SRC_DIR}/client/*.h"
 )
 add_executable(client "${CLIENT_FILES}")
-target_link_libraries(client server_api utils)
+target_link_libraries(client)
 target_include_directories(client PUBLIC "${INCLUDE_DIR}")

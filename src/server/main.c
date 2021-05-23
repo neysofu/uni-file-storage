@@ -1,4 +1,5 @@
 #include "config.h"
+#include "serverapi_actions.h"
 #include "utils.h"
 #include <pthread.h>
 #include <signal.h>
@@ -12,6 +13,16 @@
 struct Config *global_config = NULL;
 
 struct WorkerPublicState *worker_states = NULL;
+
+pthread_mutex_t *thread_id_guard;
+unsigned thread_id_counter = 0;
+
+struct WorkerQueue
+{
+	pthread_mutex_t guard;
+	struct Action *next_action;
+	struct Action *last_action;
+};
 
 void
 close_all_connections(int signum)
