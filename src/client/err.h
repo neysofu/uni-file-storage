@@ -1,6 +1,7 @@
 #ifndef SOL_CLIENT_ERR
 #define SOL_CLIENT_ERR
 
+/* Sum type for all possible error causes during a client's execution. */
 enum ClientErr
 {
 	CLIENT_ERR_OK = 0,

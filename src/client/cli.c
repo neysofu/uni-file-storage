@@ -8,41 +8,41 @@
 
 #define OPTSTRING "hf:w:n:W::D:r::Rd:t:l::u::c::p"
 
-struct Config *
-config_default(void)
+struct CliArgs *
+cli_args_default(void)
 {
-	struct Config *config = malloc(sizeof(struct Config));
-	if (!config) {
+	struct CliArgs *cli_args = malloc(sizeof(struct CliArgs));
+	if (!cli_args) {
 		return NULL;
 	}
-	config->err = CLIENT_ERR_OK;
-	config->socket_name = NULL;
-	config->enable_log = false;
-	config->help_message = false;
-	config->head = NULL;
-	config->last = NULL;
-	return config;
+	cli_args->err = CLIENT_ERR_OK;
+	cli_args->socket_name = NULL;
+	cli_args->enable_log = false;
+	cli_args->help_message = false;
+	cli_args->head = NULL;
+	cli_args->last = NULL;
+	return cli_args;
 }
 
 void
-config_add_action(struct Config *config, struct Action action)
+cli_args_add_action(struct CliArgs *cli_args, struct Action action)
 {
 	action.next = NULL;
 	struct Action *next = malloc(sizeof(struct Action));
 	if (!next) {
-		config->err = CLIENT_ERR_ALLOC;
+		cli_args->err = CLIENT_ERR_ALLOC;
 	}
 	*next = action;
-	if (config->last) {
-		config->last->next = next;
+	if (cli_args->last) {
+		cli_args->last->next = next;
 	} else {
-		config->head = next;
+		cli_args->head = next;
 	}
-	config->last = next;
+	cli_args->last = next;
 }
 
 void
-config_push_w(struct Config *config, char *arg)
+cli_args_push_w(struct CliArgs *cli_args, char *arg)
 {
 	char *comma = strrchr(arg, ',');
 	char *equal_sign = strrchr(arg, '=');
@@ -55,201 +55,201 @@ config_push_w(struct Config *config, char *arg)
 		comma[0] = '\0';
 		action.arg_i = equal_sign + 1;
 	}
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_capd(struct Config *config, char *arg)
+cli_args_push_capd(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_SEND_DIR_CONTENTS;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_capw(struct Config *config, char *arg)
+cli_args_push_capw(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_SEND;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_f(struct Config *config, char *arg)
+cli_args_push_f(struct CliArgs *cli_args, char *arg)
 {
-	if (config->socket_name) {
-		config->err = CLIENT_ERR_REPEATED_F;
+	if (cli_args->socket_name) {
+		cli_args->err = CLIENT_ERR_REPEATED_F;
 	} else {
-		config->socket_name = arg;
+		cli_args->socket_name = arg;
 	}
 }
 
 void
-config_push_read(struct Config *config, char *arg)
+cli_args_push_read(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_READ;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_read_random(struct Config *config, char *arg)
+cli_args_push_read_random(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_READ_RANDOM;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_set_dir_destination(struct Config *config, char *arg)
+cli_args_push_set_dir_destination(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_SET_DIR_DESTINATION;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_wait(struct Config *config, char *arg)
+cli_args_push_wait(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_WAIT;
 	action.arg_s = NULL;
 	action.arg_i = atoi(arg);
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_lock(struct Config *config, char *arg)
+cli_args_push_lock(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_SEND_DIR_CONTENTS;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_unlock(struct Config *config, char *arg)
+cli_args_push_unlock(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_SEND_DIR_CONTENTS;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_push_remove(struct Config *config, char *arg)
+cli_args_push_remove(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_REMOVE;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
-	config_add_action(config, action);
+	cli_args_add_action(cli_args, action);
 }
 
 void
-config_enable_log(struct Config *config)
+cli_args_enable_log(struct CliArgs *cli_args)
 {
-	if (config->enable_log) {
-		config->err = CLIENT_ERR_REPEATED_P;
+	if (cli_args->enable_log) {
+		cli_args->err = CLIENT_ERR_REPEATED_P;
 	} else {
-		config->enable_log = true;
+		cli_args->enable_log = true;
 	}
 }
 
 void
-config_enable_help_message(struct Config *config)
+cli_args_enable_help_message(struct CliArgs *cli_args)
 {
-	if (config->help_message) {
-		config->err = CLIENT_ERR_REPEATED_H;
+	if (cli_args->help_message) {
+		cli_args->err = CLIENT_ERR_REPEATED_H;
 	} else {
-		config->help_message = true;
+		cli_args->help_message = true;
 	}
 }
 
 void
-config_push_arg(struct Config *config, const char option, char *arg)
+cli_args_push_arg(struct CliArgs *cli_args, const char option, char *arg)
 {
 	switch (option) {
 		case 'h':
-			config_enable_help_message(config);
+			cli_args_enable_help_message(cli_args);
 			break;
 		case 'f':
-			config_push_f(config, arg);
+			cli_args_push_f(cli_args, arg);
 			break;
 		case 'w':
-			config_push_w(config, arg);
+			cli_args_push_w(cli_args, arg);
 			break;
 		case 'n':
 			1;
 		case 'W':
-			config_push_capw(config, arg);
+			cli_args_push_capw(cli_args, arg);
 			break;
 		case 'D':
-			config_push_capd(config, arg);
+			cli_args_push_capd(cli_args, arg);
 			break;
 		case 'r':
-			config_push_read(config, arg);
+			cli_args_push_read(cli_args, arg);
 			break;
 		case 'R':
-			config_push_read_random(config, arg);
+			cli_args_push_read_random(cli_args, arg);
 			break;
 		case 'd':
-			config_push_set_dir_destination(config, arg);
+			cli_args_push_set_dir_destination(cli_args, arg);
 			break;
 		case 't':
-			config_push_wait(config, arg);
+			cli_args_push_wait(cli_args, arg);
 			break;
 		case 'l':
-			config_push_lock(config, arg);
+			cli_args_push_lock(cli_args, arg);
 			break;
 		case 'u':
-			config_push_unlock(config, arg);
+			cli_args_push_unlock(cli_args, arg);
 			break;
 		case 'c':
-			config_push_remove(config, arg);
+			cli_args_push_remove(cli_args, arg);
 			break;
 		case 'p':
-			config_enable_log(config);
+			cli_args_enable_log(cli_args);
 			break;
 		default:
 			abort();
 	}
 }
 
-struct Config *
-config_from_cli_args(int argc, char **argv)
+struct CliArgs *
+cli_args_parse(int argc, char **argv)
 {
-	struct Config *config = config_default();
-	if (!config) {
+	struct CliArgs *cli_args = cli_args_default();
+	if (!cli_args) {
 		return NULL;
 	}
 	char c = '\0';
 	while ((c = getopt(argc, argv, OPTSTRING)) != -1) {
-		config_push_arg(config, c, optarg);
-		if (config->err) {
+		cli_args_push_arg(cli_args, c, optarg);
+		if (cli_args->err) {
 			break;
 		}
 	}
-	return config;
+	return cli_args;
 }

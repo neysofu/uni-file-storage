@@ -50,16 +50,16 @@ print_client_err(enum ClientErr err)
 int
 main(int argc, char **argv)
 {
-	struct Config *config = config_from_cli_args(argc, argv);
-	if (config->err) {
-		print_client_err(config->err);
+	struct CliArgs *cli_args = cli_args_parse(argc, argv);
+	if (cli_args->err) {
+		print_client_err(cli_args->err);
 		return EXIT_FAILURE;
 	}
 	struct timespec empty;
 	empty.tv_sec = 0;
 	empty.tv_nsec = 0;
-	openConnection(config->socket_name, 0, empty);
-	for (struct Action *action = config->head; action; action = action->next) {
+	openConnection(cli_args->socket_name, 0, empty);
+	for (struct Action *action = cli_args->head; action; action = action->next) {
 		switch (action->type) {
 			case ACTION_REMOVE:
 				break;
@@ -74,6 +74,6 @@ main(int argc, char **argv)
 				assert(false);
 		}
 	}
-	closeConnection(config->socket_name);
+	closeConnection(cli_args->socket_name);
 	return EXIT_SUCCESS;
 }

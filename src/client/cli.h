@@ -32,7 +32,7 @@ struct Action
 	struct Action *next;
 };
 
-struct Config
+struct CliArgs
 {
 	enum ClientErr err;
 	char *socket_name;
@@ -42,7 +42,10 @@ struct Config
 	struct Action *last;
 };
 
-struct Config *
-config_from_cli_args(int argc, char **argv);
+/* Reads client command-line arguments into a `struct CliArgs` on the heap and
+ * returns a pointer to it. This function returns NULL on allocation failure and
+ * sets the `err` field for bad command-line arguments. */
+struct CliArgs *
+cli_args_parse(int argc, char **argv);
 
 #endif
