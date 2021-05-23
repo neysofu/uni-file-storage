@@ -1,6 +1,7 @@
 #ifndef SOL_SERVER_CONFIG
 #define SOL_SERVER_CONFIG
 
+/* Server configuration settings. */
 struct Config
 {
 	unsigned max_files;
