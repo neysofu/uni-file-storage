@@ -30,6 +30,8 @@ void
 print_client_err(enum ClientErr err)
 {
 	switch (err) {
+		case CLIENT_ERR_OK:
+			return;
 		case CLIENT_ERR_ALLOC:
 			puts("Out-of-memory error.");
 			break;
@@ -48,16 +50,9 @@ print_client_err(enum ClientErr err)
 }
 
 int
-main(int argc, char **argv)
+run_actions(const struct CliArgs *cli_args)
 {
-	struct CliArgs *cli_args = cli_args_parse(argc, argv);
-	if (cli_args->err) {
-		print_client_err(cli_args->err);
-		return EXIT_FAILURE;
-	}
-	struct timespec empty;
-	empty.tv_sec = 0;
-	empty.tv_nsec = 0;
+	struct timespec empty = { 0 };
 	openConnection(cli_args->socket_name, 0, empty);
 	for (struct Action *action = cli_args->head; action; action = action->next) {
 		switch (action->type) {
@@ -76,4 +71,21 @@ main(int argc, char **argv)
 	}
 	closeConnection(cli_args->socket_name);
 	return EXIT_SUCCESS;
+}
+
+int
+main(int argc, char **argv)
+{
+	struct CliArgs *cli_args = cli_args_parse(argc, argv);
+	if (!cli_args) {
+		print_client_err(CLIENT_ERR_ALLOC);
+		return EXIT_FAILURE;
+	} else if (cli_args->err) {
+		print_client_err(cli_args->err);
+		return EXIT_FAILURE;
+	} else if (cli_args->help_message) {
+		print_help();
+		return EXIT_SUCCESS;
+	}
+	return run_actions(cli_args);
 }
