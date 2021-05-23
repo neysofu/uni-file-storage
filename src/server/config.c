@@ -10,12 +10,14 @@ config_parse_file(char abs_path[], int *err)
 	assert(abs_path);
 	assert(err);
 	*err = 0;
+	toml_table_t *toml = NULL;
 	FILE *f = fopen(abs_path, "r");
-	if (!f) {
+	struct Config *config = malloc(sizeof(struct Config));
+	if (!config || !f) {
 		*err = 1;
 		goto cleanup_after_error;
 	}
-	toml_table_t *toml = toml_parse_file(f, NULL, 0);
+	toml = toml_parse_file(f, NULL, 0);
 	if (!toml) {
 		*err = 1;
 		goto cleanup_after_error;
@@ -35,32 +37,25 @@ config_parse_file(char abs_path[], int *err)
 		*err = 1;
 		goto cleanup_after_error;
 	}
-	unsigned max_files = param_max_files.u.i;
-	unsigned max_storage_in_bytes = param_max_storage.u.i;
-	unsigned num_workers = param_num_workers.u.i;
-	char *socket_filepath = param_socket_filepath.u.s;
-	char *log_filepath = param_log_filepath.u.s;
-	struct Config *config = malloc(sizeof(struct Config));
-	if (!config) {
-		*err = 1;
-		goto cleanup_after_error;
-	}
-	config->max_files = max_files;
-	config->max_storage_in_bytes = max_storage_in_bytes;
-	config->num_workers = num_workers;
-	config->socket_filepath = socket_filepath;
-	config->log_filepath = log_filepath;
+	config->max_files = param_max_files.u.i;
+	config->max_storage_in_bytes = param_max_storage.u.i;
+	config->num_workers = param_num_workers.u.i;
+	config->socket_filepath = param_socket_filepath.u.s;
+	config->log_filepath = param_log_filepath.u.s;
 	toml_free(toml);
 	fclose(f);
 	return config;
 cleanup_after_error:
+	free(config);
 	toml_free(toml);
-	fclose(f);
+	if (f) {
+		fclose(f);
+	}
 	return NULL;
 }
 
 void
-config_delete(struct Config *config)
+config_free(struct Config *config)
 {
 	if (!config) {
 		return;

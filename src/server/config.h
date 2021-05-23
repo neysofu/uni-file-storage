@@ -14,6 +14,6 @@ struct Config *
 config_parse_file(char abs_path[], int *err);
 
 void
-config_delete(struct Config *config);
+config_free(struct Config *config);
 
 #endif
