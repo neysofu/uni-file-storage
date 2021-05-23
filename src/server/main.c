@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
-struct CliArgs *global_config = NULL;
+struct Config *global_config = NULL;
 
 struct WorkerPublicState *worker_states = NULL;
 
