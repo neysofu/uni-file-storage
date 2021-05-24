@@ -1,10 +1,17 @@
-#ifndef SOL_SERVER_PARSER
-#define SOL_SERVER_PARSER
+#ifndef SOL_SERVER_DESERIALIZER
+#define SOL_SERVER_DESERIALIZER
 
 #include "serverapi_actions.h"
 #include <stdlib.h>
 
 struct Deserializer;
+
+// struct Deserializer
+//{
+//	void *buffer;
+//	size_t size_in_bytes;
+//	size_t nominal_size_in_bytes;
+//};
 
 struct Message
 {
