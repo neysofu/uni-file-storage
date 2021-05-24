@@ -5,9 +5,10 @@
 
 struct HTable;
 
-struct HTableItem {
-    char *key;
-    char *value;
+struct HTableItem
+{
+	char *key;
+	char *value;
 };
 
 struct HTable *
