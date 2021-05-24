@@ -6,13 +6,6 @@
 
 struct Deserializer;
 
-// struct Deserializer
-//{
-//	void *buffer;
-//	size_t size_in_bytes;
-//	size_t nominal_size_in_bytes;
-//};
-
 struct Message
 {
 	size_t size_in_bytes;
