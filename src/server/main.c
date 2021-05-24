@@ -1,4 +1,5 @@
 #include "config.h"
+#include "receiver.h"
 #include "serverapi_actions.h"
 #include "utils.h"
 #include <pthread.h>
@@ -6,9 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
+
+#define CONNECTION_BACKLOG_SIZE 8
 
 struct Config *global_config = NULL;
 
@@ -67,10 +71,15 @@ inner_main(struct Config *config)
 	bind(socket_descriptor,
 	     &socket_address,
 	     ((struct sockaddr_un *)(NULL))->sun_path + strlen(socket_address.sun_path));
-	listen(socket_descriptor, 1);
+	listen(socket_descriptor, CONNECTION_BACKLOG_SIZE);
+	struct Receiver *receiver = receiver_create(socket_descriptor);
 	while (1) {
-		int connection_fd = accept(socket_descriptor, NULL, NULL);
+		int *fds;
+		int err = receiver_poll(receiver, &fds);
+		for (size_t i = 0; i < 0; i++) {
+		}
 	}
+	receiver_free(receiver);
 	return EXIT_SUCCESS;
 }
 

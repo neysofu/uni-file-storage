@@ -7,7 +7,7 @@ struct Receiver *
 receiver_create(int socket_descriptor);
 
 int
-receiver_wait_read(struct Receiver *receiver);
+receiver_poll(struct Receiver *receiver, int **fds);
 
 void
 receiver_free(struct Receiver *receiver);
