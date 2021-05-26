@@ -1,5 +1,7 @@
 client
 server
+!client/
+!server/
 
 # Inspired by <https://github.com/github/gitignore/blob/master/C.gitignore>.
 
