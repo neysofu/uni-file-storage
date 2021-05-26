@@ -38,7 +38,7 @@ cli_args_set_socket_name(struct CliArgs *cli_args, char *arg)
 }
 
 void
-cli_args_add_action_w(struct CliArgs *cli_args, char *arg)
+cli_args_add_action_write_dir(struct CliArgs *cli_args, char *arg)
 {
 	char *comma = strrchr(arg, ',');
 	char *equal_sign = strrchr(arg, '=');
@@ -55,10 +55,10 @@ cli_args_add_action_w(struct CliArgs *cli_args, char *arg)
 }
 
 void
-cli_args_add_action_capd(struct CliArgs *cli_args, char *arg)
+cli_args_set_evicted_dir(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
-	action.type = ACTION_SEND_DIR_CONTENTS;
+	action.type = ACTION_SET_EVICTED_DIR;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
@@ -66,7 +66,7 @@ cli_args_add_action_capd(struct CliArgs *cli_args, char *arg)
 }
 
 void
-cli_args_add_action_capw(struct CliArgs *cli_args, char *arg)
+cli_args_add_action_write_files(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
 	action.type = ACTION_SEND;
@@ -99,10 +99,10 @@ cli_args_add_action_read_random(struct CliArgs *cli_args, char *arg)
 }
 
 void
-cli_args_add_action_set_dir_destination(struct CliArgs *cli_args, char *arg)
+cli_args_set_read_dir(struct CliArgs *cli_args, char *arg)
 {
 	struct Action action;
-	action.type = ACTION_SET_DIR_DESTINATION;
+	action.type = ACTION_SET_READ_DIR;
 	action.arg_s = arg;
 	action.arg_i = 0;
 	action.next = NULL;
@@ -184,15 +184,13 @@ cli_args_parse_option(struct CliArgs *cli_args, const char option, char *arg)
 			cli_args_set_socket_name(cli_args, arg);
 			break;
 		case 'w':
-			cli_args_add_action_w(cli_args, arg);
+			cli_args_add_action_write_dir(cli_args, arg);
 			break;
-		case 'n':
-			1;
 		case 'W':
-			cli_args_add_action_capw(cli_args, arg);
+			cli_args_add_action_write_files(cli_args, arg);
 			break;
 		case 'D':
-			cli_args_add_action_capd(cli_args, arg);
+			cli_args_set_evicted_dir(cli_args, arg);
 			break;
 		case 'r':
 			cli_args_add_action_read(cli_args, arg);
@@ -201,7 +199,7 @@ cli_args_parse_option(struct CliArgs *cli_args, const char option, char *arg)
 			cli_args_add_action_read_random(cli_args, arg);
 			break;
 		case 'd':
-			cli_args_add_action_set_dir_destination(cli_args, arg);
+			cli_args_set_read_dir(cli_args, arg);
 			break;
 		case 't':
 			cli_args_add_action_wait(cli_args, arg);
@@ -219,7 +217,7 @@ cli_args_parse_option(struct CliArgs *cli_args, const char option, char *arg)
 			cli_args_enable_log(cli_args);
 			break;
 		default:
-			abort();
+			cli_args->err = CLIENT_ERR_UNKNOWN_OPTION;
 	}
 }
 
