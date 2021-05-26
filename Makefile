@@ -1,6 +1,4 @@
-FLAGS           = $(DBGFLAGS) $(OPTFLAGS)
-
-# compilatore da usare
+SHELL = /bin/sh
 CC			= gcc
 CCFLAGS    += \
 	-std=c99 \
@@ -21,15 +19,19 @@ CCFLAGS    += \
 	-Wunreachable-code \
 	-Wunused-macros
 
-default_target: all
+all: server client serverapi
 
+default_target: all
 .PHONY: default_target
 
 clean: 
-	rm -f client server
+	@echo "Clearing current directory from build artifacts..."
+	@rm -f client server
+	@echo "Done."
+.PHONY: clean
 
 cleanall: clean
-	make clean
+.PHONY: cleanall
 
 client:
 	$(CC) $(CCFLAGS) \
@@ -42,6 +44,8 @@ client:
 		src/serverapi.c \
 		src/utils.c \
 		lib/logc/src/log.c
+	@echo "-- Done building the client binary."
+.PHONY: client
 
 server:
 	$(CC) $(CCFLAGS) \
@@ -64,6 +68,8 @@ server:
 		lib/xxHash/xxhash.c \
 		lib/tomlc99/toml.c \
 		-lpthread
+	@echo "-- Done building the server binary."
+.PHONY: server
 
 serverapi:
 	$(CC) $(CCFLAGS) -c \
@@ -74,26 +80,27 @@ serverapi:
 		-o serverapi.o \
 		-I include \
 		src/serverapi.c
-	ld -r -o serverapi.o serverapi.o utils.o
-	rm -f utils.o
+	@ld -r -o serverapi.o serverapi.o utils.o
+	@rm -f utils.o
+	@echo "-- Done building the server API library."
+.PHONY: serverapi
 
 test1: server client
-	./test/test1.sh
+	@./test/test1.sh
+.PHONY: test1
 
 test2: server client
-	./test/test2.sh
-
-# The shell in which to execute make rules.
-SHELL = /bin/sh
+	@./test/test2.sh
+.PHONY: test2
 
 help:
 	@echo "List of valid targets for this Makefile:"
-	@echo "... all (default)"
-	@echo "... clean"
-	@echo "... cleanall"
-	@echo "... client"
-	@echo "... server"
-	@echo "... serverapi"
-	@echo "... test1"
-	@echo "... test2"
+	@echo "- all (default)"
+	@echo "- clean"
+	@echo "- cleanall"
+	@echo "- client"
+	@echo "- server"
+	@echo "- serverapi"
+	@echo "- test1"
+	@echo "- test2"
 .PHONY: help
