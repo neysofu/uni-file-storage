@@ -77,6 +77,12 @@ serverapi:
 	ld -r -o serverapi.o serverapi.o utils.o
 	rm -f utils.o
 
+test1: server client
+	./test/test1.sh
+
+test2: server client
+	./test/test2.sh
+
 # The shell in which to execute make rules.
 SHELL = /bin/sh
 
@@ -88,4 +94,6 @@ help:
 	@echo "... client"
 	@echo "... server"
 	@echo "... serverapi"
+	@echo "... test1"
+	@echo "... test2"
 .PHONY: help
