@@ -14,6 +14,7 @@ struct Config
 struct Config *
 config_parse_file(char abs_path[], int *err);
 
+/* Frees all memory used by `config` after `config_parse_file`. */
 void
 config_free(struct Config *config);
 
