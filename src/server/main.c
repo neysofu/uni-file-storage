@@ -1,7 +1,10 @@
 #include "config.h"
 #include "receiver.h"
 #include "serverapi_actions.h"
+#include "shutdown.h"
+#include "ts_counter.h"
 #include "utils.h"
+#include "workload_queue.h"
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
@@ -16,18 +19,6 @@
 
 struct Config *global_config = NULL;
 
-struct WorkerPublicState *worker_states = NULL;
-
-pthread_mutex_t *thread_id_guard;
-unsigned thread_id_counter = 0;
-
-struct WorkloadQueue
-{
-	pthread_mutex_t guard;
-	struct Action *next_action;
-	struct Action *last_action;
-};
-
 void
 print_command_line_usage_info(void)
 {
@@ -35,42 +26,56 @@ print_command_line_usage_info(void)
 }
 
 void
-close_all_connections(int signum)
+hard_signal_handler(int signum)
 {
+	/* To avoid a compiler warning. */
 	UNUSED(signum);
+	shutdown_hard();
 }
 
 void
-disable_new_connections(int signum)
+soft_signal_handler(int signum)
 {
+	/* To avoid a compiler warning. */
 	UNUSED(signum);
+	shutdown_soft();
 }
 
 void
 worker_entry_point(void)
 {
+	unsigned worker_id = ts_counter();
 	int socket_desc = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (socket_desc < 0) {
 		printf("Socket operation failed. Abort.\n");
 	}
 }
 
-void
-handle_incoming_connection(void)
-{}
-
 int
 listen_for_connections(const char *socket_filepath, int *socket_fd)
 {
 	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+	if (fd < 0) {
+		return -1;
+	}
 	struct sockaddr_un socket_address;
-	memset(&socket_address, 0, sizeof(socket_address));
+	int err = 0;
+	err = memset(&socket_address, 0, sizeof(socket_address));
+	if (err < 0) {
+		return -1;
+	}
 	socket_address.sun_family = AF_UNIX;
 	strcpy(socket_address.sun_path, socket_filepath);
-	bind(fd,
-	     &socket_address,
-	     ((struct sockaddr_un *)(NULL))->sun_path + strlen(socket_address.sun_path));
-	listen(fd, CONNECTION_BACKLOG_SIZE);
+	err = bind(fd,
+	           &socket_address,
+	           ((struct sockaddr_un *)(NULL))->sun_path + strlen(socket_address.sun_path));
+	if (err < 0) {
+		return -1;
+	}
+	err = listen(fd, CONNECTION_BACKLOG_SIZE);
+	if (err < 0) {
+		return -1;
+	}
 	*socket_fd = fd;
 	return 0;
 }
@@ -89,39 +94,63 @@ inner_main(struct Config *config)
 {
 	global_config = config;
 	int socket_fd = 0;
-	listen_for_connections(config->socket_filepath, &socket_fd);
+	int err = 0;
+	err = listen_for_connections(config->socket_filepath, &socket_fd);
+	if (err < 0) {
+		return -1;
+	}
 	spawn_workers(config->num_workers);
 	struct Receiver *receiver = receiver_create(socket_fd);
-	while (1) {
-		int *fds;
-		int err = receiver_poll(receiver, &fds);
+	if (!receiver) {
+		return -1;
+	}
+	while (!detect_shutdown_soft() && !detect_shutdown_hard()) {
+		struct Message *message = receiver_poll(receiver);
 		for (size_t i = 0; i < 0; i++) {
+			unsigned thread_id = rand() % config->num_workers;
+			workload_queue_add(message, thread_id);
+			message = message->next;
+		}
+	}
+	if (detect_shutdown_soft()) {
+		receiver_disable_new_connections(receiver);
+		while (!detect_shutdown_hard()) {
+			struct Message *message = receiver_poll(receiver);
+			for (size_t i = 0; i < 0; i++) {
+				unsigned thread_id = rand() % config->num_workers;
+				workload_queue_add(message, thread_id);
+				message = message->next;
+			}
 		}
 	}
 	receiver_free(receiver);
-	return EXIT_SUCCESS;
+	return 0;
 }
 
 int
 main(int argc, char **argv)
 {
+	if (ts_counter_init() < 0) {
+		puts("System error. Abort.");
+		return EXIT_FAILURE;
+	}
 	/* Seed the PRNG (pseudorandom number generator). */
 	srand(time(NULL));
 	/* Set signal handlers. */
-	signal(SIGHUP, disable_new_connections);
-	signal(SIGINT, close_all_connections);
-	signal(SIGQUIT, close_all_connections);
+	signal(SIGHUP, soft_signal_handler);
+	signal(SIGINT, hard_signal_handler);
+	signal(SIGQUIT, hard_signal_handler);
 	if (argc != 2) {
 		print_command_line_usage_info();
 		puts("Goodbye.");
 		return EXIT_FAILURE;
-	} else if (argv[1] == "-h") {
+	} else if (strcmp(argv[1], "-h") == 0) {
 		print_command_line_usage_info();
 		return EXIT_SUCCESS;
 	}
 	printf("Reading configuration file '%s'.\n", argv[1]);
 	int config_err = 0;
-	const struct Config *config = config_parse_file(argv[1], &config_err);
+	struct Config *config = config_parse_file(argv[1], &config_err);
 	if (config_err) {
 		printf("Couldn't read the given configuration file. Abort.\n");
 		return EXIT_FAILURE;

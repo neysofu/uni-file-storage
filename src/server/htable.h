@@ -1,19 +1,28 @@
-#ifndef SOL_HTABLE
-#define SOL_HTABLE
+#ifndef SOL_SERVER_HTABLE
+#define SOL_SERVER_HTABLE
 
 #include <stdlib.h>
+
+struct File
+{
+	void *contents;
+	size_t contents_length_in_bytes;
+	int flags;
+};
 
 struct HTable;
 
 struct HTableItem
 {
 	char *key;
-	char *value;
+	struct File value;
 };
 
+/* Creates an empty `struct HTable`. */
 struct HTable *
 htable_new(size_t buckets);
 
+/* Deletes `htable` and its contents from memory. */
 void
 htable_free(struct HTable *htable);
 

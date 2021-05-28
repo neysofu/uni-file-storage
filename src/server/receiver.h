@@ -1,6 +1,7 @@
 #ifndef SOL_SERVER_RECEIVER
 #define SOL_SERVER_RECEIVER
 
+#include "deserializer.h"
 #include "serverapi_actions.h"
 #include <stdlib.h>
 
@@ -10,20 +11,23 @@
  */
 struct Receiver;
 
-/* The data type of messages as processed by `struct Receiver`. */
+/* The data type of incoming messages. */
 struct Message
 {
 	int fd;
-	size_t size_in_bytes;
-	void *raw;
-	enum ActionType action_type;
-	struct ActionArgs args;
+	struct Buffer buffer;
+	struct Message *next;
 };
 
 /* Creates a new `struct Receiver` that listens for incoming connections on
  * `socket_fd`. */
 struct Receiver *
 receiver_create(int socket_fd);
+
+/* After disabling new connections via this function, `receiver_poll` will only
+ * keep listening on existing connections. */
+void
+receiver_disable_new_connections(struct Receiver *receiver);
 
 /* Suspends the execution of the current thread until one or more incoming
  * messages are available. After this call, `*messages` will point to a
@@ -32,8 +36,8 @@ receiver_create(int socket_fd);
  *
  * New connection attempts are automatically accepted. It returns 0 on success
  * and -1 on failure. */
-int
-receiver_poll(struct Receiver *receiver, struct Message **messages);
+struct Message *
+receiver_poll(struct Receiver *receiver);
 
 /* Frees all memory and system resources used by `receiver`. */
 void
