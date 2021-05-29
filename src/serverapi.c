@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -14,9 +15,6 @@
 #include <sys/un.h>
 #include <time.h>
 #include <unistd.h>
-
-#define SOCKNAME "./cs_sock"
-#define MAXBACKLOG 32
 
 struct ConnectionState
 {
@@ -37,6 +35,25 @@ void
 setLogging(bool enable)
 {
 	state.log = enable;
+}
+
+void
+log_stdout(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	if (state.log) {
+		vprintf(fmt, args);
+		/* New line. */
+		puts("");
+	}
+	va_end(args);
+}
+
+void
+log_no_connection(void)
+{
+	log_stdout("  Unable to proceed. No connection to server.");
 }
 
 /** Evita letture parziali
@@ -111,19 +128,6 @@ write_op(int fd, enum Operation op)
 	write(fd, &op_byte, 1);
 }
 
-void
-log(const char *fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-	if (state.log) {
-		vprintf(fmt, args);
-		/* New line. */
-		puts("");
-	}
-	va_end(args);
-}
-
 static void
 u64_to_big_endian(uint64_t data, char bytes[8])
 {
@@ -188,12 +192,12 @@ int
 openConnection(const char *sockname, int msec, const struct timespec abstime)
 {
 	assert(sockname);
-	log("- API call `openConnection`.");
+	log_stdout("- API call `openConnection`.");
 	if (state.connection_is_open) {
 		return -1;
 	}
 	while (1) {
-		log("  New connection attempt.");
+		log_stdout("  New connection attempt.");
 		int err = attempt_connection(sockname);
 		if (!err) {
 			break;
@@ -206,7 +210,7 @@ openConnection(const char *sockname, int msec, const struct timespec abstime)
 int
 closeConnection(const char *sockname)
 {
-	log("- API call `closeConnection`.");
+	log_stdout("- API call `closeConnection`.");
 	if (!state.connection_is_open) {
 		errno = EPERM;
 		return -1;
@@ -228,109 +232,135 @@ closeConnection(const char *sockname)
 int
 openFile(const char *pathname, int flags)
 {
-	log("- API call `openFile`.");
+	log_stdout("- API call `openFile`.");
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op_with_string(state.fd, OP_OPEN_FILE, pathname);
+	char buffer[1] = { '\0' };
+	read(state.fd, buffer, 1);
 	return 0;
 }
 
 int
 readFile(const char *pathname, void **buf, size_t *size)
 {
-	log("- API call `readFile`.");
+	log_stdout("- API call `readFile`.");
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op_with_string(state.fd, OP_READ_FILE, pathname);
+	char buffer[1] = { '\0' };
+	read(state.fd, buffer, 1);
 	return 0;
 }
 
 int
 readNFiles(int n, const char *dirname)
 {
-	log("- API call `readNFiles`.");
+	log_stdout("- API call `readNFiles`.");
 	assert(n >= 0);
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op(state.fd, OP_READ_N_FILES);
 	write_string(state.fd, dirname);
 	write_u64_big_endian(state.fd, n);
+	char buffer[1] = { '\0' };
+	read(state.fd, buffer, 1);
 	return 0;
 }
 
 int
 writeFile(const char *pathname, const char *dirname)
 {
-	log("- API call `writeFile`.");
+	log_stdout("- API call `writeFile`.");
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op(state.fd, OP_WRITE_FILE);
 	write_string(state.fd, pathname);
 	write_string(state.fd, dirname);
+	char buffer[1] = { '\0' };
+	read(state.fd, buffer, 1);
 	return 0;
 }
 
 int
 appendToFile(const char *pathname, void *buf, size_t size, const char *dirname)
 {
-	log("- API call `appendToFile`.");
+	log_stdout("- API call `appendToFile`.");
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op(state.fd, OP_APPEND_TO_FILE);
 	write_string(state.fd, pathname);
 	write_string(state.fd, dirname);
+	char buffer[1] = { '\0' };
+	read(state.fd, buffer, 1);
 	return 0;
 }
 
 int
 lockFile(const char *pathname)
 {
-	log("- API call `lockFile`.");
+	log_stdout("- API call `lockFile`.");
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op(state.fd, OP_LOCK_FILE);
 	write_string(state.fd, pathname);
+	char buffer[1] = { '\0' };
+	read(state.fd, buffer, 1);
 	return 0;
 }
 
 int
 unlockFile(const char *pathname)
 {
-	log("- API call `unlockFile`.");
+	log_stdout("- API call `unlockFile`.");
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op(state.fd, OP_UNLOCK_FILE);
 	write_string(state.fd, pathname);
+	char buffer[1] = { '\0' };
+	read(state.fd, buffer, 1);
 	return 0;
 }
 
 int
 closeFile(const char *pathname)
 {
-	log("- API call `closeFile`.");
+	log_stdout("- API call `closeFile`.");
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op(state.fd, OP_CLOSE_FILE);
 	write_string(state.fd, pathname);
+	char buffer[1] = { '\0' };
+	read(state.fd, buffer, 1);
 	return 0;
 }
 
 int
 removeFile(const char *pathname)
 {
-	log("- API call `removeFile`.");
+	log_stdout("- API call `removeFile`.");
 	if (!state.connection_is_open) {
+		log_no_connection();
 		return -1;
 	}
 	write_op(state.fd, OP_REMOVE_FILE);
 	write_string(state.fd, pathname);
+
 	return 0;
 }

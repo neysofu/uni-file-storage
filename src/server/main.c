@@ -1,10 +1,13 @@
 #include "config.h"
+#include "global_state.h"
+#include "htable.h"
 #include "logc/src/log.h"
 #include "receiver.h"
 #include "serverapi_actions.h"
 #include "shutdown.h"
 #include "ts_counter.h"
 #include "utils.h"
+#include "worker.h"
 #include "workload_queue.h"
 #include <pthread.h>
 #include <signal.h>
@@ -18,8 +21,6 @@
 #include <unistd.h>
 
 #define CONNECTION_BACKLOG_SIZE 8
-
-struct Config *global_config = NULL;
 
 void
 print_command_line_usage_info(void)
@@ -43,16 +44,6 @@ soft_signal_handler(int signum)
 	shutdown_soft();
 }
 
-void
-worker_entry_point(void)
-{
-	unsigned worker_id = ts_counter();
-	int socket_desc = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (socket_desc < 0) {
-		printf("Socket operation failed. Abort.\n");
-	}
-}
-
 int
 listen_for_connections(const char *socket_filepath, int *socket_fd)
 {
@@ -65,7 +56,7 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 	log_debug("`socket` syscall done.");
 	struct sockaddr_un addr;
 	addr.sun_family = AF_UNIX;
-	strcpy(&addr.sun_path, socket_filepath);
+	strcpy(addr.sun_path, socket_filepath);
 	err = bind(fd, (struct sockaddr *)&addr, SUN_LEN(&addr));
 	if (err < 0) {
 		log_fatal("`bind` syscall failed.");
@@ -80,15 +71,6 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 	log_debug("`listen` syscall done.");
 	*socket_fd = fd;
 	return 0;
-}
-
-void
-spawn_workers(unsigned num)
-{
-	for (unsigned i = 0; i < num; i++) {
-		pthread_t worker;
-		pthread_create(&worker, NULL, worker_entry_point, NULL);
-	}
 }
 
 int
@@ -139,6 +121,7 @@ inner_main(struct Config *config)
 int
 main(int argc, char **argv)
 {
+	htable = htable_new(100);
 	log_debug("Starting server. Initializing some internal resources.");
 	/* Seed the PRNG (pseudorandom number generator). */
 	srand(time(NULL));
