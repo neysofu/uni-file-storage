@@ -4,9 +4,6 @@
 #include <stdbool.h>
 
 int
-init_shutdown_system(void);
-
-int
 shutdown_soft(void);
 
 int

@@ -1,5 +1,6 @@
 #include "receiver.h"
 #include "deserializer.h"
+#include "logc/src/log.h"
 #include <assert.h>
 #include <poll.h>
 #include <stdbool.h>

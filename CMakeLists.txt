@@ -51,6 +51,7 @@ file(
   "${SRC_DIR}/*.h"
   "${SRC_DIR}/server/*.c"
   "${SRC_DIR}/server/*.h"
+  "${LIB_DIR}/logc/src/log.c"
   "${LIB_DIR}/tomlc99/toml.c"
   "${LIB_DIR}/xxHash/xxhash.c"
 )
