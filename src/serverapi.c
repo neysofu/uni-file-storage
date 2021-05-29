@@ -33,6 +33,12 @@ struct ConnectionState state = (struct ConnectionState){
 	.log = false,
 };
 
+void
+setLogging(bool enable)
+{
+	state.log = enable;
+}
+
 /** Evita letture parziali
  *
  *   \retval -1   errore (errno settato)
@@ -112,6 +118,8 @@ log(const char *fmt, ...)
 	va_start(args, fmt);
 	if (state.log) {
 		vprintf(fmt, args);
+		/* New line. */
+		puts("");
 	}
 	va_end(args);
 }

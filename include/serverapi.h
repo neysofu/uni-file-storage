@@ -1,8 +1,12 @@
 #ifndef SOL_SERVERAPI
 #define SOL_SERVERAPI
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <time.h>
+
+void
+setLogging(bool enable);
 
 enum FileFlag
 {

@@ -82,6 +82,7 @@ inner_main(const struct CliArgs *cli_args)
 		log_fatal("Socket path not specified.");
 		return EXIT_FAILURE;
 	}
+	setLogging(cli_args->enable_log);
 	openConnection(cli_args->socket_name, 0, empty);
 	for (struct Action *action = cli_args->head; action; action = action->next) {
 		switch (action->type) {
