@@ -1,10 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "serverapi.h"
-#include "logc/src/log.h"
 #include "utils.h"
 #include <assert.h>
 #include <errno.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -23,12 +23,14 @@ struct ConnectionState
 	bool connection_is_open;
 	int fd;
 	char *socket_name;
+	bool log;
 };
 
 struct ConnectionState state = (struct ConnectionState){
 	.connection_is_open = false,
 	.fd = -1,
 	.socket_name = NULL,
+	.log = false,
 };
 
 /** Evita letture parziali
@@ -103,6 +105,17 @@ write_op(int fd, enum Operation op)
 	write(fd, &op_byte, 1);
 }
 
+void
+log(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	if (state.log) {
+		vprintf(fmt, args);
+	}
+	va_end(args);
+}
+
 static void
 u64_to_big_endian(uint64_t data, char bytes[8])
 {
@@ -167,12 +180,12 @@ int
 openConnection(const char *sockname, int msec, const struct timespec abstime)
 {
 	assert(sockname);
-	puts("- API call `openConnection`.");
+	log("- API call `openConnection`.");
 	if (state.connection_is_open) {
 		return -1;
 	}
 	while (1) {
-		puts("  New connection attempt.");
+		log("  New connection attempt.");
 		int err = attempt_connection(sockname);
 		if (!err) {
 			break;
@@ -185,6 +198,7 @@ openConnection(const char *sockname, int msec, const struct timespec abstime)
 int
 closeConnection(const char *sockname)
 {
+	log("- API call `closeConnection`.");
 	if (!state.connection_is_open) {
 		errno = EPERM;
 		return -1;
@@ -206,6 +220,7 @@ closeConnection(const char *sockname)
 int
 openFile(const char *pathname, int flags)
 {
+	log("- API call `openFile`.");
 	if (!state.connection_is_open) {
 		return -1;
 	}
@@ -216,6 +231,7 @@ openFile(const char *pathname, int flags)
 int
 readFile(const char *pathname, void **buf, size_t *size)
 {
+	log("- API call `readFile`.");
 	if (!state.connection_is_open) {
 		return -1;
 	}
@@ -226,6 +242,7 @@ readFile(const char *pathname, void **buf, size_t *size)
 int
 readNFiles(int n, const char *dirname)
 {
+	log("- API call `readNFiles`.");
 	assert(n >= 0);
 	if (!state.connection_is_open) {
 		return -1;
@@ -239,6 +256,7 @@ readNFiles(int n, const char *dirname)
 int
 writeFile(const char *pathname, const char *dirname)
 {
+	log("- API call `writeFile`.");
 	if (!state.connection_is_open) {
 		return -1;
 	}
@@ -251,6 +269,7 @@ writeFile(const char *pathname, const char *dirname)
 int
 appendToFile(const char *pathname, void *buf, size_t size, const char *dirname)
 {
+	log("- API call `appendToFile`.");
 	if (!state.connection_is_open) {
 		return -1;
 	}
@@ -263,6 +282,7 @@ appendToFile(const char *pathname, void *buf, size_t size, const char *dirname)
 int
 lockFile(const char *pathname)
 {
+	log("- API call `lockFile`.");
 	if (!state.connection_is_open) {
 		return -1;
 	}
@@ -274,6 +294,7 @@ lockFile(const char *pathname)
 int
 unlockFile(const char *pathname)
 {
+	log("- API call `unlockFile`.");
 	if (!state.connection_is_open) {
 		return -1;
 	}
@@ -285,6 +306,7 @@ unlockFile(const char *pathname)
 int
 closeFile(const char *pathname)
 {
+	log("- API call `closeFile`.");
 	if (!state.connection_is_open) {
 		return -1;
 	}
@@ -296,6 +318,7 @@ closeFile(const char *pathname)
 int
 removeFile(const char *pathname)
 {
+	log("- API call `removeFile`.");
 	if (!state.connection_is_open) {
 		return -1;
 	}
