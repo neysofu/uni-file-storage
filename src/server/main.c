@@ -15,6 +15,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <unistd.h>
 
 #define CONNECTION_BACKLOG_SIZE 8
 
@@ -62,7 +63,9 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 		return -1;
 	}
 	log_debug("`socket` syscall done.");
-	struct sockaddr_un addr = { .sun_family = AF_UNIX, .sun_path = socket_filepath };
+	struct sockaddr_un addr;
+	addr.sun_family = AF_UNIX;
+	strcpy(&addr.sun_path, socket_filepath);
 	err = bind(fd, (struct sockaddr *)&addr, SUN_LEN(&addr));
 	if (err < 0) {
 		log_fatal("`bind` syscall failed.");
@@ -159,5 +162,7 @@ main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	log_debug("Configuration was deemed valid.");
+	/* Remove the server socket file, if it exists. We simply ignore any error. */
+	unlink(config->socket_filepath);
 	return inner_main(config);
 }

@@ -106,6 +106,10 @@ receiver_free(struct Receiver *r)
 	if (!r) {
 		return;
 	}
+	for (size_t i = 1; i < r->active_sockets_count; i++) {
+		close(r->active_sockets[i].fd);
+	}
+	close(r->active_sockets[0].fd);
 	free(r->active_sockets);
 	free(r);
 }

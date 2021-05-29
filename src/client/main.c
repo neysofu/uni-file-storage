@@ -78,6 +78,10 @@ int
 inner_main(const struct CliArgs *cli_args)
 {
 	struct timespec empty = { 0 };
+	if (!cli_args->socket_name) {
+		log_fatal("Socket path not specified.");
+		return EXIT_FAILURE;
+	}
 	openConnection(cli_args->socket_name, 0, empty);
 	for (struct Action *action = cli_args->head; action; action = action->next) {
 		switch (action->type) {

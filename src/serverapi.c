@@ -148,17 +148,15 @@ attempt_connection(const char *sockname)
 		return -1;
 	}
 	state.fd = fd;
-	struct sockaddr_un addr = { .sun_family = AF_UNIX, .sun_path = sockname };
+	struct sockaddr_un addr;
+	addr.sun_family = AF_UNIX;
+	strcpy(&addr.sun_path, sockname);
 	state.socket_name = malloc(strlen(sockname) + 1);
 	if (!state.socket_name) {
 		return -1;
 	}
 	strcpy(state.socket_name, sockname);
-	int err = bind(fd, (struct sockaddr *)&addr, SUN_LEN(&addr));
-	if (err < 0) {
-		return -1;
-	}
-	err = listen(fd, 1);
+	int err = connect(fd, (struct sockaddr *)(&addr), SUN_LEN(&addr));
 	if (err < 0) {
 		return -1;
 	}
