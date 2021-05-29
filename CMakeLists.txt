@@ -33,15 +33,16 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 # Suppress warnings for dependencies.
 set_source_files_properties(
   "${LIB_DIR}/tomlc99/toml.c"
+  "${LIB_DIR}/logc/src/log.c"
   "${LIB_DIR}/xxHash/xxhash.c"
   PROPERTIES
   COMPILE_FLAGS "-w"
 )
 
 # API library
-add_library(server_api "${SRC_DIR}/serverapi.c")
+add_library(server_api "${SRC_DIR}/serverapi.c" "${LIB_DIR}/logc/src/log.c")
 target_link_libraries(server_api utils)
-target_include_directories(server_api PUBLIC "${INCLUDE_DIR}")
+target_include_directories(server_api PUBLIC "${INCLUDE_DIR}" "${LIB_DIR}")
 
 # Server
 file(

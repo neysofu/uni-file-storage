@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "serverapi.h"
+#include "logc/src/log.h"
 #include "utils.h"
 #include <assert.h>
 #include <errno.h>
@@ -139,24 +140,45 @@ write_op_with_string(int fd, enum Operation op, const char *operand)
 }
 
 int
+attempt_connection(const char *sockname)
+{
+	assert(sockname);
+	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+	if (fd < 0) {
+		return -1;
+	}
+	state.fd = fd;
+	struct sockaddr_un addr = { .sun_family = AF_UNIX, .sun_path = sockname };
+	state.socket_name = malloc(strlen(sockname) + 1);
+	if (!state.socket_name) {
+		return -1;
+	}
+	strcpy(state.socket_name, sockname);
+	int err = bind(fd, (struct sockaddr *)&addr, SUN_LEN(&addr));
+	if (err < 0) {
+		return -1;
+	}
+	err = listen(fd, 1);
+	if (err < 0) {
+		return -1;
+	}
+	return 0;
+}
+
+int
 openConnection(const char *sockname, int msec, const struct timespec abstime)
 {
+	assert(sockname);
+	puts("- API call `openConnection`.");
 	if (state.connection_is_open) {
 		return -1;
 	}
 	while (1) {
-		int socket_descriptor = socket(AF_UNIX, SOCK_STREAM, 0);
-		state.fd = socket_descriptor;
-		struct sockaddr_un socket_address;
-		memset(&socket_address, 0, sizeof(socket_address));
-		socket_address.sun_family = AF_UNIX;
-		state.socket_name = malloc(strlen(sockname) + 1);
-		strcpy(state.socket_name, sockname);
-		strcpy(socket_address.sun_path, sockname);
-		bind(socket_descriptor,
-		     &socket_address,
-		     ((struct sockaddr_un *)(NULL))->sun_path + strlen(socket_address.sun_path));
-		listen(socket_descriptor, 1);
+		puts("  New connection attempt.");
+		int err = attempt_connection(sockname);
+		if (!err) {
+			break;
+		}
 		wait_msec(msec);
 	}
 	return 0;

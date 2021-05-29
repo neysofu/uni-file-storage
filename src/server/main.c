@@ -18,12 +18,6 @@
 
 #define CONNECTION_BACKLOG_SIZE 8
 
-// SUN_LEN isn't standard POSIX, so let's define it ourselves.
-#ifndef SUN_LEN : w
-#define SUN_LEN(ptr)                                                                       \
-	((size_t)(((struct sockaddr_un *)0)->sun_path) + strlen((ptr)->sun_path))
-#endif
-
 struct Config *global_config = NULL;
 
 void
@@ -64,19 +58,20 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 	int err = 0;
 	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
+		log_fatal("`socket` syscall failed.");
 		return -1;
 	}
 	log_debug("`socket` syscall done.");
-	struct sockaddr_un socket_address;
-	memset(&socket_address.sun_path, 0, sizeof(socket_address));
-	socket_address.sun_family = AF_UNIX;
-	err = bind(fd, (struct sockaddr *)&socket_address, SUN_LEN(&socket_address));
+	struct sockaddr_un addr = { .sun_family = AF_UNIX, .sun_path = socket_filepath };
+	err = bind(fd, (struct sockaddr *)&addr, SUN_LEN(&addr));
 	if (err < 0) {
+		log_fatal("`bind` syscall failed.");
 		return -1;
 	}
 	log_debug("`bind` syscall done.");
 	err = listen(fd, CONNECTION_BACKLOG_SIZE);
 	if (err < 0) {
+		log_fatal("`listen` syscall failed.");
 		return -1;
 	}
 	log_debug("`listen` syscall done.");
