@@ -8,7 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define OPTSTRING "hf:w:n:W::D:r::Rd:t:l::u::c::p"
+#define OPTSTRING "hf:w:n:W:D:r:Rd:t:l:u:c:p"
 
 void
 cli_args_add_action(struct CliArgs *cli_args, struct Action action)
@@ -68,6 +68,10 @@ cli_args_set_evicted_dir(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_write_files(struct CliArgs *cli_args, char *arg)
 {
+	if (!arg) {
+		cli_args->err = CLIENT_ERR_MISSING_ARG;
+		return;
+	}
 	struct Action action;
 	action.type = ACTION_SEND;
 	action.arg_s = arg;
@@ -79,6 +83,10 @@ cli_args_add_action_write_files(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_read(struct CliArgs *cli_args, char *arg)
 {
+	if (!arg) {
+		cli_args->err = CLIENT_ERR_MISSING_ARG;
+		return;
+	}
 	struct Action action;
 	action.type = ACTION_READ;
 	action.arg_s = arg;
@@ -101,6 +109,10 @@ cli_args_add_action_read_random(struct CliArgs *cli_args, char *arg)
 void
 cli_args_set_read_dir(struct CliArgs *cli_args, char *arg)
 {
+	if (!arg) {
+		cli_args->err = CLIENT_ERR_MISSING_ARG;
+		return;
+	}
 	struct Action action;
 	action.type = ACTION_SET_READ_DIR;
 	action.arg_s = arg;
@@ -112,6 +124,10 @@ cli_args_set_read_dir(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_wait(struct CliArgs *cli_args, char *arg)
 {
+	if (!arg) {
+		cli_args->err = CLIENT_ERR_MISSING_ARG;
+		return;
+	}
 	struct Action action;
 	action.type = ACTION_WAIT;
 	action.arg_s = NULL;
@@ -123,6 +139,10 @@ cli_args_add_action_wait(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_lock(struct CliArgs *cli_args, char *arg)
 {
+	if (!arg) {
+		cli_args->err = CLIENT_ERR_MISSING_ARG;
+		return;
+	}
 	struct Action action;
 	action.type = ACTION_LOCK;
 	action.arg_s = arg;
@@ -134,6 +154,10 @@ cli_args_add_action_lock(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_unlock(struct CliArgs *cli_args, char *arg)
 {
+	if (!arg) {
+		cli_args->err = CLIENT_ERR_MISSING_ARG;
+		return;
+	}
 	struct Action action;
 	action.type = ACTION_UNLOCK;
 	action.arg_s = arg;
@@ -145,6 +169,10 @@ cli_args_add_action_unlock(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_remove(struct CliArgs *cli_args, char *arg)
 {
+	if (!arg) {
+		cli_args->err = CLIENT_ERR_MISSING_ARG;
+		return;
+	}
 	struct Action action;
 	action.type = ACTION_REMOVE;
 	action.arg_s = arg;
