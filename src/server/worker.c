@@ -11,6 +11,7 @@
 void
 worker_handle_read(void *buffer, size_t len_in_bytes)
 {
+	log_info("New API request `readFile`.");
 	if (len_in_bytes < 8) {
 		return;
 	}
@@ -19,6 +20,7 @@ worker_handle_read(void *buffer, size_t len_in_bytes)
 void
 worker_handle_send(void *buffer, size_t len_in_bytes)
 {
+	log_info("New API request `readFile`.");
 	if (len_in_bytes < 8) {
 		return;
 	}
@@ -27,6 +29,7 @@ worker_handle_send(void *buffer, size_t len_in_bytes)
 void
 worker_handle_lock(void *buffer, size_t len_in_bytes)
 {
+	log_info("New API request `lockFile`.");
 	if (len_in_bytes < 8) {
 		return;
 	}
@@ -35,6 +38,7 @@ worker_handle_lock(void *buffer, size_t len_in_bytes)
 void
 worker_handle_unlock(void *buffer, size_t len_in_bytes)
 {
+	log_info("New API request `unlockFile`.");
 	if (len_in_bytes < 8) {
 		return;
 	}
@@ -43,6 +47,7 @@ worker_handle_unlock(void *buffer, size_t len_in_bytes)
 void
 worker_handle_remove(void *buffer, size_t len_in_bytes)
 {
+	log_info("New API request `removeFile`.");
 	if (len_in_bytes < 8) {
 		return;
 	}

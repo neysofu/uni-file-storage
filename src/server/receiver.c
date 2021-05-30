@@ -90,10 +90,10 @@ receiver_add_new_connection(struct Receiver *r)
 	r->active_sockets[0].revents = 0;
 }
 
+/* Removes dead connetions from this `struct Receiver`. */
 void
 receiver_cleanup(struct Receiver *r)
 {
-	/* Remove connections that have been flagged for deletion. */
 	size_t last_i = r->active_sockets_count - 1;
 	for (size_t i = 1; i <= last_i; i++) {
 		if (r->active_sockets[i].fd < 0) {
@@ -114,6 +114,7 @@ receiver_cleanup(struct Receiver *r)
 struct Message *
 receiver_poll(struct Receiver *r)
 {
+	receiver_cleanup(r);
 	/* The first socket is not an active connection, remember. */
 	log_debug("New iteration in the polling loop (%zu connection(s)).",
 	          r->active_sockets_count - 1);
