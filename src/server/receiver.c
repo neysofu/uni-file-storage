@@ -114,6 +114,9 @@ receiver_cleanup(struct Receiver *r)
 struct Message *
 receiver_poll(struct Receiver *r)
 {
+	/* The first socket is not an active connection, remember. */
+	log_debug("New iteration in the polling loop (%zu connection(s)).",
+	          r->active_sockets_count - 1);
 	assert(r);
 	/* Block until something happens. */
 	int num_reads = poll(r->active_sockets, r->active_sockets_count, -1);

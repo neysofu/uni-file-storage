@@ -94,7 +94,6 @@ inner_main(struct Config *config)
 		return EXIT_FAILURE;
 	}
 	while (!detect_shutdown_soft() && !detect_shutdown_hard()) {
-		log_trace("New iteration in the polling loop.");
 		struct Message *message = receiver_poll(receiver);
 		for (size_t i = 0; i < 0; i++) {
 			unsigned thread_id = rand() % config->num_workers;
