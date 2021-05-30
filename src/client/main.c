@@ -63,7 +63,8 @@ inner_main(const struct CliArgs *cli_args)
 int
 main(int argc, char **argv)
 {
-	log_info("Starting client.");
+	/* Disable logs by default. */
+	log_set_quiet(true);
 	struct CliArgs *cli_args = cli_args_parse(argc, argv);
 	if (!cli_args) {
 		print_client_err(CLIENT_ERR_ALLOC);
@@ -74,6 +75,10 @@ main(int argc, char **argv)
 	} else if (cli_args->help_message) {
 		print_help();
 		return EXIT_SUCCESS;
+	}
+	/* Write logs to STDOUT as per specification. */
+	if (cli_args->enable_log) {
+		log_add_fp(stdout, LOG_TRACE);
 	}
 	return inner_main(cli_args);
 }

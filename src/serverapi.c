@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "serverapi.h"
+#include "logc/src/log.h"
 #include "utils.h"
 #include <assert.h>
 #include <errno.h>
@@ -38,22 +39,9 @@ setLogging(bool enable)
 }
 
 void
-log_stdout(const char *fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-	if (state.log) {
-		vprintf(fmt, args);
-		/* New line. */
-		puts("");
-	}
-	va_end(args);
-}
-
-void
 log_no_connection(void)
 {
-	log_stdout("  Unable to proceed. No connection to server.");
+	log_debug("  Unable to proceed. No connection to server.");
 }
 
 /** Evita letture parziali
@@ -185,6 +173,8 @@ attempt_connection(const char *sockname)
 	if (err < 0) {
 		return -1;
 	}
+	state.connection_is_open = true;
+	state.fd = fd;
 	return 0;
 }
 
@@ -192,12 +182,12 @@ int
 openConnection(const char *sockname, int msec, const struct timespec abstime)
 {
 	assert(sockname);
-	log_stdout("- API call `openConnection`.");
+	log_debug("- API call `openConnection`.");
 	if (state.connection_is_open) {
 		return -1;
 	}
 	while (1) {
-		log_stdout("  New connection attempt.");
+		log_debug("  New connection attempt.");
 		int err = attempt_connection(sockname);
 		if (!err) {
 			break;
@@ -210,7 +200,7 @@ openConnection(const char *sockname, int msec, const struct timespec abstime)
 int
 closeConnection(const char *sockname)
 {
-	log_stdout("- API call `closeConnection`.");
+	log_debug("- API call `closeConnection`.");
 	if (!state.connection_is_open) {
 		errno = EPERM;
 		return -1;
@@ -232,7 +222,7 @@ closeConnection(const char *sockname)
 int
 openFile(const char *pathname, int flags)
 {
-	log_stdout("- API call `openFile`.");
+	log_debug("- API call `openFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
 		return -1;
@@ -246,7 +236,7 @@ openFile(const char *pathname, int flags)
 int
 readFile(const char *pathname, void **buf, size_t *size)
 {
-	log_stdout("- API call `readFile`.");
+	log_debug("- API call `readFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
 		return -1;
@@ -260,7 +250,7 @@ readFile(const char *pathname, void **buf, size_t *size)
 int
 readNFiles(int n, const char *dirname)
 {
-	log_stdout("- API call `readNFiles`.");
+	log_debug("- API call `readNFiles`.");
 	assert(n >= 0);
 	if (!state.connection_is_open) {
 		log_no_connection();
@@ -277,7 +267,7 @@ readNFiles(int n, const char *dirname)
 int
 writeFile(const char *pathname, const char *dirname)
 {
-	log_stdout("- API call `writeFile`.");
+	log_debug("- API call `writeFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
 		return -1;
@@ -285,6 +275,7 @@ writeFile(const char *pathname, const char *dirname)
 	write_op(state.fd, OP_WRITE_FILE);
 	write_string(state.fd, pathname);
 	write_string(state.fd, dirname);
+	puts("written");
 	char buffer[1] = { '\0' };
 	read(state.fd, buffer, 1);
 	return 0;
@@ -293,7 +284,7 @@ writeFile(const char *pathname, const char *dirname)
 int
 appendToFile(const char *pathname, void *buf, size_t size, const char *dirname)
 {
-	log_stdout("- API call `appendToFile`.");
+	log_debug("- API call `appendToFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
 		return -1;
@@ -309,7 +300,7 @@ appendToFile(const char *pathname, void *buf, size_t size, const char *dirname)
 int
 lockFile(const char *pathname)
 {
-	log_stdout("- API call `lockFile`.");
+	log_debug("- API call `lockFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
 		return -1;
@@ -324,7 +315,7 @@ lockFile(const char *pathname)
 int
 unlockFile(const char *pathname)
 {
-	log_stdout("- API call `unlockFile`.");
+	log_debug("- API call `unlockFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
 		return -1;
@@ -339,7 +330,7 @@ unlockFile(const char *pathname)
 int
 closeFile(const char *pathname)
 {
-	log_stdout("- API call `closeFile`.");
+	log_debug("- API call `closeFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
 		return -1;
@@ -354,7 +345,7 @@ closeFile(const char *pathname)
 int
 removeFile(const char *pathname)
 {
-	log_stdout("- API call `removeFile`.");
+	log_debug("- API call `removeFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
 		return -1;
