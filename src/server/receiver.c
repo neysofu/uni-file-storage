@@ -1,6 +1,7 @@
 #include "receiver.h"
 #include "deserializer.h"
 #include "logc/src/log.h"
+#include "workload_queue.h"
 #include <assert.h>
 #include <poll.h>
 #include <stdbool.h>
@@ -111,6 +112,17 @@ receiver_cleanup(struct Receiver *r)
 	r->deserializers = new_deserializers;
 }
 
+void
+hand_over_buf_to_worker(struct Receiver *r, struct Buf *buf)
+{
+	unsigned thread_id = rand() % (r->active_sockets_count - 1);
+	r->deserializers[thread_id] = deserializer_create();
+	struct WorkloadQueue *queue = workload_queue_get(thread_id);
+	assert(queue);
+	workload_queue_add(buf, thread_id);
+	sem_post(&queue->sem);
+}
+
 struct Message *
 receiver_poll(struct Receiver *r)
 {
@@ -146,7 +158,9 @@ receiver_poll(struct Receiver *r)
 				r->active_sockets[i].fd = -1;
 			}
 			struct Buffer *buf = deserializer_detach(r->deserializers[i], num_bytes);
-			// TODO
+			if (buf) {
+				hand_over_buf_to_worker(r, buf);
+			}
 		}
 		/* Clear all events. */
 		r->active_sockets[i].revents = 0;

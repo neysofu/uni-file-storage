@@ -4,6 +4,8 @@
 #include "serverapi_actions.h"
 #include "ts_counter.h"
 #include "utils.h"
+#include "workload_queue.h"
+#include <semaphore.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -82,9 +84,6 @@ worker_entry_point(void *args)
 {
 	UNUSED(args);
 	unsigned worker_id = ts_counter();
-	int socket_desc = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (socket_desc < 0) {
-		printf("Socket operation failed. Abort.\n");
-	}
+	sem_wait(&workload_queue_get(worker_id)->sem);
 	return NULL;
 }

@@ -3,9 +3,11 @@
 
 #include "receiver.h"
 #include <pthread.h>
+#include <semaphore.h>
 
 struct WorkloadQueue
 {
+	sem_t sem;
 	pthread_mutex_t guard;
 	struct Message *next_incoming;
 	struct Message *last_incoming;
