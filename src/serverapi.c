@@ -36,58 +36,6 @@ log_no_connection(void)
 	log_debug("  Unable to proceed. No connection to server.");
 }
 
-/** Evita letture parziali
- *
- *   \retval -1   errore (errno settato)
- *   \retval  0   se durante la lettura da fd leggo EOF
- *   \retval size se termina con successo
- */
-static inline int
-readn(long fd, void *buf, size_t size)
-{
-	size_t left = size;
-	int r;
-	char *bufptr = (char *)buf;
-	while (left > 0) {
-		if ((r = read((int)fd, bufptr, left)) == -1) {
-			if (errno == EINTR)
-				continue;
-			return -1;
-		}
-		if (r == 0)
-			return 0; // EOF
-		left -= r;
-		bufptr += r;
-	}
-	return size;
-}
-
-/** Evita scritture parziali
- *
- *   \retval -1   errore (errno settato)
- *   \retval  0   se durante la scrittura la write ritorna 0
- *   \retval  1   se la scrittura termina con successo
- */
-static inline int
-writen(long fd, void *buf, size_t size)
-{
-	size_t left = size;
-	int r;
-	char *bufptr = (char *)buf;
-	while (left > 0) {
-		if ((r = write((int)fd, bufptr, left)) == -1) {
-			if (errno == EINTR)
-				continue;
-			return -1;
-		}
-		if (r == 0)
-			return 0;
-		left -= r;
-		bufptr += r;
-	}
-	return 1;
-}
-
 enum Operation
 {
 	OP_OPEN_FILE,
@@ -106,20 +54,6 @@ write_op(int fd, enum Operation op)
 {
 	char op_byte = op;
 	return write(fd, &op_byte, 1);
-}
-
-static void
-u64_to_big_endian(uint64_t data, char bytes[8])
-{
-
-	bytes[0] = data >> 56;
-	bytes[1] = data >> 48;
-	bytes[2] = data >> 40;
-	bytes[3] = data >> 32;
-	bytes[4] = data >> 24;
-	bytes[5] = data >> 16;
-	bytes[6] = data >> 8;
-	bytes[7] = data;
 }
 
 int

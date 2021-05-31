@@ -5,7 +5,9 @@
 #include "ts_counter.h"
 #include "utils.h"
 #include "workload_queue.h"
+#include <assert.h>
 #include <semaphore.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -19,53 +21,47 @@ void
 worker_handle_read(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	log_info("New API request `readFile`.");
-	if (len_in_bytes < 8) {
-		return;
-	}
+	char response[1] = { RESPONSE_OK };
+	writen(fd, response, 1);
 }
 
 void
-worker_handle_write_files(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
-	log_info("New API request `readFile`.");
-	if (len_in_bytes < 8) {
-		return;
-	}
-	htable_insert(htable, "");
+	log_info("New API request `writeFile`.");
+	char response[1] = { RESPONSE_OK };
+	writen(fd, response, 1);
 }
 
 void
 worker_handle_lock(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	log_info("New API request `lockFile`.");
-	if (len_in_bytes < 8) {
-		return;
-	}
+	char response[1] = { RESPONSE_OK };
+	writen(fd, response, 1);
 }
 
 void
 worker_handle_unlock(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	log_info("New API request `unlockFile`.");
-	if (len_in_bytes < 8) {
-		return;
-	}
+	char response[1] = { RESPONSE_OK };
+	writen(fd, response, 1);
 }
 
 void
 worker_handle_remove(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	log_info("New API request `removeFile`.");
-	if (len_in_bytes < 8) {
-		return;
-	}
+	char response[1] = { RESPONSE_OK };
+	writen(fd, response, 1);
 }
 
 void
 worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
-	/* Please note that workers receive messages WITH their length-prefix
-	 * header (8 bytes). */
+	/* Validate the header, which contains the length of the payload in bytes. */
+	assert(big_endian_to_u64(buffer) == len_in_bytes - 8);
 	if (len_in_bytes == 8) {
 		return;
 	}
@@ -77,7 +73,7 @@ worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in
 			worker_handle_read(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_WRITE_FILE:
-			worker_handle_write_files(worker, fd, buffer, len_in_bytes);
+			worker_handle_write_file(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_UNLOCK_FILE:
 			worker_handle_unlock(worker, fd, buffer, len_in_bytes);

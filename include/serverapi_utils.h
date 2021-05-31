@@ -16,6 +16,13 @@ enum ApiOp
 	API_OP_REMOVE_FILE,
 };
 
+/* The anatomy of the server's response to any request:
+ * - Header: 8 bytes (length of payload in bytes).
+ * Payload:
+ * - Response type: 1 byte.
+ * - N. of evicted files (if relevant): 8 bytes.
+ * - Evicted files' details...
+ */
 enum ResponseType {
 	RESPONSE_OK,
 	RESPONSE_ERR,
