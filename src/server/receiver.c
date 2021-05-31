@@ -11,6 +11,7 @@
 
 struct Receiver
 {
+	unsigned num_workers;
 	int max_fd;
 	unsigned active_sockets_count;
 	struct pollfd *active_sockets;
@@ -19,7 +20,7 @@ struct Receiver
 };
 
 struct Receiver *
-receiver_create(int socket_descriptor)
+receiver_create(int socket_descriptor, unsigned num_workers)
 {
 	struct Receiver *r = malloc(sizeof(struct Receiver));
 	if (!r) {
@@ -27,6 +28,7 @@ receiver_create(int socket_descriptor)
 	}
 	r->max_fd = socket_descriptor;
 	r->active_sockets_count = 1;
+	r->num_workers = num_workers;
 	r->accept_new_connections = true;
 	r->active_sockets = malloc(sizeof(struct pollfd));
 	if (!r->active_sockets) {
@@ -113,13 +115,14 @@ receiver_cleanup(struct Receiver *r)
 }
 
 void
-hand_over_buf_to_worker(struct Receiver *r, struct Buf *buf)
+hand_over_buf_to_worker(struct Receiver *r, struct Buffer *buf)
 {
-	unsigned thread_id = rand() % (r->active_sockets_count - 1);
-	r->deserializers[thread_id] = deserializer_create();
-	struct WorkloadQueue *queue = workload_queue_get(thread_id);
+	unsigned thread_i = rand() % r->num_workers;
+	log_debug("Handing over message to worker n. %u/%u.", thread_i + 1, r->num_workers);
+	r->deserializers[thread_i] = deserializer_create();
+	struct WorkloadQueue *queue = workload_queue_get(thread_i);
 	assert(queue);
-	workload_queue_add(buf, thread_id);
+	workload_queue_add(buf, thread_i);
 	sem_post(&queue->sem);
 }
 
@@ -140,9 +143,7 @@ receiver_poll(struct Receiver *r)
 		num_reads--;
 		receiver_add_new_connection(r);
 	}
-	size_t fd_counter = 0;
 	struct Message *head = NULL;
-	struct Message *last = NULL;
 	/* We start counting from 1 because the first element contains the root
 	 * socket connection and we're not interested in that. */
 	for (size_t i = 1; i < r->active_sockets_count; i++) {
@@ -150,21 +151,25 @@ receiver_poll(struct Receiver *r)
 			int fd = r->active_sockets[i].fd;
 			void *buffer = deserializer_buffer(r->deserializers[i]);
 			size_t missing_bytes = deserializer_missing(r->deserializers[i]);
+			/* Incomplete messages always need a positive number of bytes! */
+			assert(missing_bytes > 0);
 			ssize_t num_bytes = read(fd, buffer, missing_bytes);
 			/* We drop connections on two situations:
 			 *  - EOF.
 			 *  - Errors during read. */
 			if (num_bytes == 0) {
-				log_info("Dropping n. %zu due to EOF.", i);
+				log_info("Dropping connection n. %zu due to EOF.", i);
 				r->active_sockets[i].fd = -1;
 			} else if (num_bytes < 0) {
-				log_warn("Dropping n. %zu due to socket error.", i);
+				log_warn("Dropping connection n. %zu due to socket error.", i);
 				r->active_sockets[i].fd = -1;
 			} else {
 				log_trace("Read %zd bytes from connection n. %zu.", num_bytes, i);
 				struct Buffer *buf = deserializer_detach(r->deserializers[i], num_bytes);
 				if (buf) {
-					log_info("NEW DETACH");
+					log_debug("Got a full message of %zu bytes from connection n. %zu.",
+					          buf->size_in_bytes,
+					          i);
 					hand_over_buf_to_worker(r, buf);
 				}
 			}

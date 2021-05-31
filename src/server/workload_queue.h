@@ -27,6 +27,10 @@ workload_queue_get(unsigned i);
 void
 workload_queue_add(struct Message *msg, unsigned i);
 
+/* Extracts a message from the queue number `i`. */
+struct Message *
+workload_queue_pull(unsigned i);
+
 /* Deletes all workload queues and frees all used memory. */
 void
 workload_queues_free(void);

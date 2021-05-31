@@ -38,13 +38,27 @@ workload_queue_get(unsigned i)
 	return &workload_queues[i];
 }
 
+struct Message *
+workload_queue_pull(unsigned i)
+{
+	struct WorkloadQueue *queue = workload_queue_get(i);
+	assert(queue);
+	pthread_mutex_lock(&queue->guard);
+	struct Message *msg = queue->next_incoming;
+	pthread_mutex_unlock(&queue->guard);
+	return msg;
+}
+
 void
 workload_queue_add(struct Message *msg, unsigned i)
 {
 	assert(i < count);
-	// pthread_mutex_lock(&queue->guard);
-	//// TODO
-	// pthread_mutex_unlock(&queue->guard);
+	struct WorkloadQueue *queue = workload_queue_get(i);
+	pthread_mutex_lock(&queue->guard);
+	queue->next_incoming = msg;
+	// FIXME
+	sem_post(&queue->sem);
+	pthread_mutex_unlock(&queue->guard);
 }
 
 void

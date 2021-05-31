@@ -20,9 +20,9 @@ struct Message
 };
 
 /* Creates a new `struct Receiver` that listens for incoming connections on
- * `socket_fd`. */
+ * `socket_fd`, with `num_workers` worker threads. */
 struct Receiver *
-receiver_create(int socket_fd);
+receiver_create(int socket_fd, unsigned num_workers);
 
 /* After disabling new connections via this function, `receiver_poll` will only
  * keep listening on existing connections. */

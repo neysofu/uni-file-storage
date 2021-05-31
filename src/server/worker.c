@@ -10,6 +10,11 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+struct Worker
+{
+	unsigned worker_id;
+};
+
 void
 worker_handle_read(void *buffer, size_t len_in_bytes)
 {
@@ -56,7 +61,7 @@ worker_handle_remove(void *buffer, size_t len_in_bytes)
 }
 
 void
-worker_parse_message(void *buffer, size_t len_in_bytes)
+worker_parse_message(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	/* Please note that workers receive messages stripped from the length-prefix
 	 * header. */
@@ -84,7 +89,15 @@ worker_entry_point(void *args)
 {
 	UNUSED(args);
 	unsigned worker_id = ts_counter();
+	struct Worker worker;
+	worker.worker_id = worker_id;
 	sem_t *sem = &workload_queue_get(worker_id)->sem;
-	sem_wait(sem);
+	while (1) {
+		sem_wait(sem);
+		log_debug("[Worker n. %u] New message incoming. Pulling...", worker_id + 1);
+		struct Message *msg = workload_queue_pull(worker_id);
+		log_debug("[Worker n. %u] Done.", worker_id + 1);
+		worker_parse_message(&worker, msg->fd, msg->buffer.raw, msg->buffer.size_in_bytes);
+	}
 	return NULL;
 }

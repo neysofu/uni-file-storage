@@ -127,7 +127,7 @@ write_u64_big_endian(int fd, uint64_t data)
 {
 	char bytes[8];
 	u64_to_big_endian(data, bytes);
-	return write(fd, bytes, 8);
+	return writen(fd, bytes, 8);
 }
 
 void
@@ -288,6 +288,8 @@ writeFile(const char *pathname, const char *dirname)
 	if (dirname) {
 		err |= writen(state.fd, dirname, strlen(dirname));
 	}
+	char response[8] = {'\0'};
+	readn(state.fd, response, 8);
 	return err;
 }
 

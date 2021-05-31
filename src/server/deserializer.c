@@ -8,14 +8,14 @@ u64_from_big_endian(void *bytes)
 {
 	uint8_t *data = bytes;
 	uint64_t n = 0;
-	n += data[0] << 56;
-	n += data[1] << 48;
-	n += data[2] << 40;
-	n += data[3] << 32;
-	n += data[4] << 24;
-	n += data[5] << 16;
-	n += data[6] << 8;
-	n += data[7] << 0;
+	n += (uint64_t)(data[0]) << 56;
+	n += (uint64_t)(data[1]) << 48;
+	n += (uint64_t)(data[2]) << 40;
+	n += (uint64_t)(data[3]) << 32;
+	n += (uint64_t)(data[4]) << 24;
+	n += (uint64_t)(data[5]) << 16;
+	n += (uint64_t)(data[6]) << 8;
+	n += (uint64_t)(data[7]) << 0;
 	return n;
 }
 
@@ -49,7 +49,7 @@ deserializer_detach(struct Deserializer *de, size_t new_bytes)
 		return NULL;
 	}
 	uint64_t length_prefix = u64_from_big_endian(de->buffer);
-	if (de->size_in_bytes == length_prefix) {
+	if (de->size_in_bytes - HEADER_SIZE_IN_BYTES == length_prefix) {
 		struct Buffer *buf = malloc(sizeof(struct Buffer));
 		if (!buf) {
 			return NULL;
@@ -70,7 +70,7 @@ deserializer_missing(const struct Deserializer *de)
 		return HEADER_SIZE_IN_BYTES - de->size_in_bytes;
 	} else {
 		uint64_t length_prefix = u64_from_big_endian(de->buffer);
-		return length_prefix - de->size_in_bytes - HEADER_SIZE_IN_BYTES;
+		return (length_prefix + HEADER_SIZE_IN_BYTES) - de->size_in_bytes;
 	}
 }
 

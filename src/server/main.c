@@ -88,11 +88,14 @@ inner_main(struct Config *config)
 	log_debug("Now spawning %d worker threads...", config->num_workers);
 	spawn_workers(config->num_workers);
 	log_debug("Done.");
-	struct Receiver *receiver = receiver_create(socket_fd);
+	struct Receiver *receiver = receiver_create(socket_fd, config->num_workers);
 	if (!receiver) {
 		config_free(config);
 		return EXIT_FAILURE;
 	}
+	/* Wait a bit to make absolutely sure that workers are ready to receive
+	 * work to do. */
+	wait_msec(250);
 	while (!detect_shutdown_soft() && !detect_shutdown_hard()) {
 		struct Message *message = receiver_poll(receiver);
 		for (size_t i = 0; i < 0; i++) {
