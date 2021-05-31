@@ -7,17 +7,35 @@
 static struct WorkloadQueue *workload_queues = NULL;
 static unsigned count = 0;
 
-void
+int
 workload_queues_init(unsigned n)
 {
 	workload_queues = malloc(sizeof(struct WorkloadQueue) * n);
+	/* Check allocation failure. */
+	if (!workload_queues) {
+		return -1;
+	}
+	int err = 0;
 	count = n;
 	for (size_t i = 0; i < count; i++) {
-		sem_init(&workload_queues[i].sem, 0, 0);
+		err |= sem_init(&workload_queues[i].sem, 0, 0);
 		workload_queues[i].guard;
 		workload_queues[i].next_incoming = NULL;
 		workload_queues[i].last_incoming = NULL;
 	}
+	if (err != 0) {
+		/* Free all memory on semaphore initialization failure. */
+		free(workload_queues);
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+struct WorkloadQueue *
+workload_queue_get(unsigned i)
+{
+	return &workload_queues[i];
 }
 
 void

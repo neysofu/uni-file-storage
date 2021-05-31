@@ -15,7 +15,7 @@ struct WorkloadQueue
 
 /* Initializes a global array of workload queues, as many as specified by
  * `count`. */
-void
+int
 workload_queues_init(unsigned count);
 
 /* Returns a pointer to the workload queue number `i`. Returns NULL in case `i`

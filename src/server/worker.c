@@ -84,6 +84,7 @@ worker_entry_point(void *args)
 {
 	UNUSED(args);
 	unsigned worker_id = ts_counter();
-	sem_wait(&workload_queue_get(worker_id)->sem);
+	sem_t *sem = &workload_queue_get(worker_id)->sem;
+	sem_wait(sem);
 	return NULL;
 }

@@ -146,5 +146,9 @@ main(int argc, char **argv)
 	log_debug("Configuration was deemed valid.");
 	/* Remove the server socket file, if it exists. We simply ignore any error. */
 	unlink(config->socket_filepath);
+	if (workload_queues_init(config->num_workers) != 0) {
+		log_fatal("System initialization failure. Abort.");
+		return EXIT_FAILURE;
+	}
 	return inner_main(config);
 }
