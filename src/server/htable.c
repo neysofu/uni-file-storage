@@ -1,6 +1,7 @@
 #include "htable.h"
 #include "xxHash/xxhash.h"
 #include <assert.h>
+#include <pthread.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +17,7 @@ struct HTableLlNode
 
 struct HTableBucket
 {
+	pthread_mutex_t guard;
 	struct HTableLlNode *head;
 	struct HTableLlNode *last;
 };

@@ -3,6 +3,10 @@
 
 #include <stdlib.h>
 
+/* A specialized, concurrent hash table for the file storage server. */
+struct HTable;
+
+/* File data. */
 struct File
 {
 	void *contents;
@@ -10,8 +14,7 @@ struct File
 	int flags;
 };
 
-struct HTable;
-
+/* The contents of an item within a `struct HTable`. */
 struct HTableItem
 {
 	char *key;
@@ -22,7 +25,7 @@ struct HTableItem
 struct HTable *
 htable_new(size_t buckets);
 
-/* Deletes `htable` and its contents from memory. */
+/* Deletes `htable` and all its contents from memory (files, flags, etc.). */
 void
 htable_free(struct HTable *htable);
 
