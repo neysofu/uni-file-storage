@@ -20,8 +20,8 @@ print_help(void)
 	puts("-r files");
 	puts("    Reads a list of files from the server.");
 	puts("-R[n=0]");
-	puts("    Reads a certain amount (or all, if N is unspecified or 0) files");
-	puts("    the server.");
+	puts("    Reads a certain amount (or all, if N is unspecified or 0) of files");
+	puts("    from the server.");
 	puts("-d dirname");
 	puts("    Specifies the directory where to write files that have been");
 	puts("    read.");

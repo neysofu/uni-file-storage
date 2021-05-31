@@ -3,7 +3,6 @@
 #include "cli.h"
 #include "help.h"
 #include "logc/src/log.h"
-#include "run_action.h"
 #include "serverapi.h"
 #include "utils.h"
 #include <assert.h>
@@ -16,7 +15,7 @@
 void
 print_client_err(enum ClientErr err)
 {
-	assert(err);
+	assert(err != CLIENT_ERR_OK);
 	puts("Command-line usage error.");
 	switch (err) {
 		case CLIENT_ERR_ALLOC:
@@ -44,10 +43,10 @@ inner_main(const struct CliArgs *cli_args)
 {
 	struct timespec empty = { 0 };
 	if (!cli_args->socket_name) {
-		log_fatal("Socket path not specified.");
+		log_fatal("Socket path not specified. Abort.");
+		cli_args_free(cli_args);
 		return EXIT_FAILURE;
 	}
-	setLogging(cli_args->enable_log);
 	log_info("Opening connection...");
 	openConnection(cli_args->socket_name, 0, empty);
 	log_info("Done.");
@@ -71,9 +70,11 @@ main(int argc, char **argv)
 		return EXIT_FAILURE;
 	} else if (cli_args->err) {
 		print_client_err(cli_args->err);
+		cli_args_free(cli_args);
 		return EXIT_FAILURE;
 	} else if (cli_args->help_message) {
 		print_help();
+		cli_args_free(cli_args);
 		return EXIT_SUCCESS;
 	}
 	/* Write logs to STDOUT as per specification. */

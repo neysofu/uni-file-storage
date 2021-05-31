@@ -3,8 +3,9 @@
 #include "cli.h"
 #include "err.h"
 #include "logc/src/log.h"
-#include "serverapi_actions.h"
+#include "serverapi_utils.h"
 #include <stdlib.h>
+#include <assert.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -13,6 +14,7 @@
 void
 cli_args_add_action(struct CliArgs *cli_args, struct Action action)
 {
+	assert(cli_args);
 	action.next = NULL;
 	struct Action *next = malloc(sizeof(struct Action));
 	if (!next) {
@@ -30,6 +32,7 @@ cli_args_add_action(struct CliArgs *cli_args, struct Action action)
 void
 cli_args_set_socket_name(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	if (cli_args->socket_name) {
 		cli_args->err = CLIENT_ERR_REPEATED_F;
 	} else {
@@ -40,16 +43,18 @@ cli_args_set_socket_name(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_write_dir(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	char *comma = strrchr(arg, ',');
 	char *equal_sign = strrchr(arg, '=');
 	struct Action action;
-	action.type = ACTION_WRITE_EVICTED;
-	action.arg_s = arg;
+	action.type = ACTION_WRITE_DIR;
+	action.arg_s1 = arg;
+	action.arg_s2 = NULL;
 	action.arg_i = 0;
 	action.next = NULL;
 	if (comma && equal_sign && equal_sign == comma + 2 && strncmp(comma + 1, "n", 1)) {
 		comma[0] = '\0';
-		action.arg_i = equal_sign + 1;
+		action.arg_i = atoi(equal_sign + 1);
 	}
 	cli_args_add_action(cli_args, action);
 }
@@ -57,24 +62,26 @@ cli_args_add_action_write_dir(struct CliArgs *cli_args, char *arg)
 void
 cli_args_set_evicted_dir(struct CliArgs *cli_args, char *arg)
 {
-	struct Action action;
-	action.type = ACTION_SET_EVICTED_DIR;
-	action.arg_s = arg;
-	action.arg_i = 0;
-	action.next = NULL;
-	cli_args_add_action(cli_args, action);
+	assert(cli_args);
+	if (!arg) {
+		cli_args->err = CLIENT_ERR_MISSING_ARG;
+		return;
+	}
+	cli_args->last->arg_s2 = arg;
 }
 
 void
 cli_args_add_action_write_files(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	if (!arg) {
 		cli_args->err = CLIENT_ERR_MISSING_ARG;
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_SEND;
-	action.arg_s = arg;
+	action.type = ACTION_WRITE_FILES;
+	action.arg_s1 = arg;
+	action.arg_s2 = NULL;
 	action.arg_i = 0;
 	action.next = NULL;
 	cli_args_add_action(cli_args, action);
@@ -83,13 +90,15 @@ cli_args_add_action_write_files(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_read(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	if (!arg) {
 		cli_args->err = CLIENT_ERR_MISSING_ARG;
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_READ;
-	action.arg_s = arg;
+	action.type = ACTION_READ_FILES;
+	action.arg_s1 = arg;
+	action.arg_s2 = NULL;
 	action.arg_i = 0;
 	action.next = NULL;
 	cli_args_add_action(cli_args, action);
@@ -98,9 +107,11 @@ cli_args_add_action_read(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_read_random(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	struct Action action;
-	action.type = ACTION_READ_RANDOM;
-	action.arg_s = arg;
+	action.type = ACTION_READ_RANDOM_FILES;
+	action.arg_s1 = arg;
+	action.arg_s2 = NULL;
 	action.arg_i = 0;
 	action.next = NULL;
 	cli_args_add_action(cli_args, action);
@@ -109,28 +120,26 @@ cli_args_add_action_read_random(struct CliArgs *cli_args, char *arg)
 void
 cli_args_set_read_dir(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	if (!arg) {
 		cli_args->err = CLIENT_ERR_MISSING_ARG;
 		return;
 	}
-	struct Action action;
-	action.type = ACTION_SET_READ_DIR;
-	action.arg_s = arg;
-	action.arg_i = 0;
-	action.next = NULL;
-	cli_args_add_action(cli_args, action);
+	cli_args->last->arg_s2 = arg;
 }
 
 void
 cli_args_add_action_wait(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	if (!arg) {
 		cli_args->err = CLIENT_ERR_MISSING_ARG;
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_WAIT;
-	action.arg_s = NULL;
+	action.type = ACTION_WAIT_MILLISECONDS;
+	action.arg_s1 = NULL;
+	action.arg_s2 = NULL;
 	action.arg_i = atoi(arg);
 	action.next = NULL;
 	cli_args_add_action(cli_args, action);
@@ -139,13 +148,15 @@ cli_args_add_action_wait(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_lock(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	if (!arg) {
 		cli_args->err = CLIENT_ERR_MISSING_ARG;
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_LOCK;
-	action.arg_s = arg;
+	action.type = ACTION_LOCK_FILES;
+	action.arg_s1 = arg;
+	action.arg_s2 = NULL;
 	action.arg_i = 0;
 	action.next = NULL;
 	cli_args_add_action(cli_args, action);
@@ -154,13 +165,15 @@ cli_args_add_action_lock(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_unlock(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	if (!arg) {
 		cli_args->err = CLIENT_ERR_MISSING_ARG;
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_UNLOCK;
-	action.arg_s = arg;
+	action.type = ACTION_UNLOCK_FILES;
+	action.arg_s1 = arg;
+	action.arg_s2 = NULL;
 	action.arg_i = 0;
 	action.next = NULL;
 	cli_args_add_action(cli_args, action);
@@ -169,13 +182,15 @@ cli_args_add_action_unlock(struct CliArgs *cli_args, char *arg)
 void
 cli_args_add_action_remove(struct CliArgs *cli_args, char *arg)
 {
+	assert(cli_args);
 	if (!arg) {
 		cli_args->err = CLIENT_ERR_MISSING_ARG;
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_REMOVE;
-	action.arg_s = arg;
+	action.type = ACTION_REMOVE_FILES;
+	action.arg_s1 = arg;
+	action.arg_s2 = NULL;
 	action.arg_i = 0;
 	action.next = NULL;
 	cli_args_add_action(cli_args, action);
@@ -184,6 +199,7 @@ cli_args_add_action_remove(struct CliArgs *cli_args, char *arg)
 void
 cli_args_enable_log(struct CliArgs *cli_args)
 {
+	assert(cli_args);
 	if (cli_args->enable_log) {
 		cli_args->err = CLIENT_ERR_REPEATED_P;
 	} else {
@@ -194,58 +210,11 @@ cli_args_enable_log(struct CliArgs *cli_args)
 void
 cli_args_enable_help_message(struct CliArgs *cli_args)
 {
+	assert(cli_args);
 	if (cli_args->help_message) {
 		cli_args->err = CLIENT_ERR_REPEATED_H;
 	} else {
 		cli_args->help_message = true;
-	}
-}
-
-void
-cli_args_parse_option(struct CliArgs *cli_args, const char option, char *arg)
-{
-	switch (option) {
-		case 'h':
-			cli_args_enable_help_message(cli_args);
-			break;
-		case 'f':
-			cli_args_set_socket_name(cli_args, arg);
-			break;
-		case 'w':
-			cli_args_add_action_write_dir(cli_args, arg);
-			break;
-		case 'W':
-			cli_args_add_action_write_files(cli_args, arg);
-			break;
-		case 'D':
-			cli_args_set_evicted_dir(cli_args, arg);
-			break;
-		case 'r':
-			cli_args_add_action_read(cli_args, arg);
-			break;
-		case 'R':
-			cli_args_add_action_read_random(cli_args, arg);
-			break;
-		case 'd':
-			cli_args_set_read_dir(cli_args, arg);
-			break;
-		case 't':
-			cli_args_add_action_wait(cli_args, arg);
-			break;
-		case 'l':
-			cli_args_add_action_lock(cli_args, arg);
-			break;
-		case 'u':
-			cli_args_add_action_unlock(cli_args, arg);
-			break;
-		case 'c':
-			cli_args_add_action_remove(cli_args, arg);
-			break;
-		case 'p':
-			cli_args_enable_log(cli_args);
-			break;
-		default:
-			cli_args->err = CLIENT_ERR_UNKNOWN_OPTION;
 	}
 }
 
@@ -273,11 +242,65 @@ cli_args_parse(int argc, char **argv)
 		return NULL;
 	}
 	char c = '\0';
+	char last_option = '\0';
 	while ((c = getopt(argc, argv, OPTSTRING)) != -1) {
 		log_debug("Parsing command-line option '%c' with value '%s'",
 		          c,
 		          optarg ? optarg : "[NONE]");
-		cli_args_parse_option(cli_args, c, optarg);
+		switch (c) {
+			case 'h':
+				cli_args_enable_help_message(cli_args);
+				break;
+			case 'f':
+				cli_args_set_socket_name(cli_args, optarg);
+				break;
+			case 'w':
+				cli_args_add_action_write_dir(cli_args, optarg);
+				break;
+			case 'W':
+				cli_args_add_action_write_files(cli_args, optarg);
+				break;
+			case 'D':
+				if (last_option == 'w' || last_option == 'W') {
+					cli_args_set_evicted_dir(cli_args, optarg);
+				} else {
+					cli_args->err = CLIENT_ERR_BAD_OPTION_CAP_D;
+					break;
+				}
+				break;
+			case 'r':
+				cli_args_add_action_read(cli_args, optarg);
+				break;
+			case 'R':
+				cli_args_add_action_read_random(cli_args, optarg);
+				break;
+			case 'd':
+				if (last_option == 'r' || last_option == 'R') {
+					cli_args_set_read_dir(cli_args, optarg);
+				} else {
+					cli_args->err = CLIENT_ERR_BAD_OPTION_D;
+					break;
+				}
+				break;
+			case 't':
+				cli_args_add_action_wait(cli_args, optarg);
+				break;
+			case 'l':
+				cli_args_add_action_lock(cli_args, optarg);
+				break;
+			case 'u':
+				cli_args_add_action_unlock(cli_args, optarg);
+				break;
+			case 'c':
+				cli_args_add_action_remove(cli_args, optarg);
+				break;
+			case 'p':
+				cli_args_enable_log(cli_args);
+				break;
+			default:
+				cli_args->err = CLIENT_ERR_UNKNOWN_OPTION;
+		}
+		last_option = c;
 		if (cli_args->err) {
 			log_error(
 			  "Failure during command-line parsing (err. code: %d). Stopping immediately.",
@@ -287,4 +310,21 @@ cli_args_parse(int argc, char **argv)
 	}
 	log_debug("Finished parsing command-line arguments.");
 	return cli_args;
+}
+
+void
+cli_args_free(struct CliArgs *cli_args)
+{
+	if (!cli_args) {
+		return;
+	}
+	free(cli_args->socket_name);
+	struct Action *action = cli_args->head;
+	while (action) {
+		// We don't free the string action argument because it comes from `argv`.
+		struct Action *to_free = action;
+		action = action->next;
+		free(to_free);
+	}
+	free(cli_args);
 }

@@ -1,70 +1,134 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "run_action.h"
+#include "cli.h"
 #include "logc/src/log.h"
 #include "serverapi.h"
-#include "serverapi_actions.h"
+#include "serverapi_utils.h"
 #include "utils.h"
 #include <assert.h>
+#include <dirent.h>
 #include <stdbool.h>
-#include <time.h>
 #include <string.h>
+#include <time.h>
 
 int
-run_action_lock_files(struct Action *action) {
-    char *path = strtok(action->arg_s, ",");
-    while (path) {
-        log_debug("Locking `%s`.", path);
-        lockFile(path);
-        path = strtok(NULL, ",");
-    }
-    return 0;
+run_action_lock_files(struct Action *action)
+{
+	char *path = strtok(action->arg_s1, ",");
+	while (path) {
+		log_info("Calling API function `lockFile`.");
+		log_debug("Target file: '%s'.", path);
+		int err = lockFile(path);
+		if (err < 0) {
+			log_error("API call failed.");
+			return err;
+		} else {
+			log_info("API call was successful.");
+		}
+		path = strtok(NULL, ",");
+	}
+	return 0;
 }
 
 int
-run_action_unlock_files(struct Action *action) {
-    char *path = strtok(action->arg_s, ",");
-    while (path) {
-        log_debug("Unlocking `%s`.", path);
-        unlockFile(path);
-        path = strtok(NULL, ",");
-    }
-    return 0;
+run_action_unlock_files(struct Action *action)
+{
+	char *path = strtok(action->arg_s1, ",");
+	while (path) {
+		log_info("Calling API function `unlockFile`.");
+		log_debug("Target file: '%s'.", path);
+		int err = unlockFile(path);
+		if (err < 0) {
+			log_error("API call failed.");
+			return err;
+		} else {
+			log_info("API call was successful.");
+		}
+		path = strtok(NULL, ",");
+	}
+	return 0;
 }
 
 int
-run_action_write(struct Action *action) {
-    char *path = strtok(action->arg_s, ",");
-    while (path) {
-        writeFile(path, NULL);
-        path = strtok(NULL, ",");
-    }
-    return 0;
+run_action_write_file(struct Action *action)
+{
+	char *path = strtok(action->arg_s1, ",");
+	while (path) {
+		log_info("Calling API function `writeFile`.");
+		log_debug("Target file: '%s'.", path);
+		if (false) {
+			log_debug("Destination directory: '%s'.", NULL);
+		} else {
+			log_debug("No destination directory was specified.");
+		}
+		int err = writeFile(path, NULL);
+		if (err < 0) {
+			log_error("API call failed.");
+			return err;
+		} else {
+			log_info("API call was successful.");
+		}
+		path = strtok(NULL, ",");
+	}
+	return 0;
+}
+
+int
+run_action_write_dir(struct Action *action)
+{
+	char *dirname = strtok(action->arg_s1, ",");
+	DIR *d;
+	struct dirent *dir;
+	d = opendir(dirname);
+	log_debug("Listing directory '%s'.", dirname);
+	if (d) {
+		while ((dir = readdir(d)) != NULL) {
+			char *dir_entry_name = dir->d_name;
+			int err = writeFile(dir_entry_name, NULL);
+		}
+		closedir(d);
+	}
+	return 0;
+}
+
+int
+run_action_remove_files(struct Action *action)
+{
+	char *path = strtok(action->arg_s1, ",");
+	while (path) {
+		log_info("Calling API function `removeFile`.");
+		log_debug("Target file: '%s'.", path);
+		int err = removeFile(path);
+		if (err < 0) {
+			log_error("API call failed.");
+			return err;
+		} else {
+			log_info("API call was successful.");
+		}
+		path = strtok(NULL, ",");
+	}
+	return 0;
 }
 
 int
 run_action(struct Action *action)
 {
 	switch (action->type) {
-		case ACTION_REMOVE:
-			break;
-		case ACTION_SET_EVICTED_DIR:
-			writeFile(action->arg_s, action->arg_s);
-			break;
-		case ACTION_SEND:
-			run_action_write(action);
-			break;
-		case ACTION_WAIT:
-            log_debug("Waiting %d milliseconds.", action->arg_i);
+		case ACTION_REMOVE_FILES:
+			return run_action_remove_files(action);
+		case ACTION_WRITE_FILES:
+			return run_action_write_file(action);
+		case ACTION_WRITE_DIR:
+			return run_action_write_dir(action);
+		case ACTION_WAIT_MILLISECONDS:
+			log_debug("Waiting %d milliseconds.", action->arg_i);
 			wait_msec(action->arg_i);
-			break;
-		case ACTION_LOCK:
-            log_debug("", action->arg_i);
-			lockFile(action->arg_s);
-			break;
-		case ACTION_UNLOCK:
-			unlockFile(action->arg_s);
-			break;
+			return 0;
+		case ACTION_LOCK_FILES:
+			return run_action_lock_files(action);
+		case ACTION_UNLOCK_FILES:
+			return run_action_unlock_files(action);
 		default:
 			assert(false);
 	}

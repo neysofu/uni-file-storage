@@ -22,21 +22,13 @@ struct ConnectionState
 	bool connection_is_open;
 	int fd;
 	char *socket_name;
-	bool log;
 };
 
 struct ConnectionState state = (struct ConnectionState){
 	.connection_is_open = false,
 	.fd = -1,
 	.socket_name = NULL,
-	.log = false,
 };
-
-void
-setLogging(bool enable)
-{
-	state.log = enable;
-}
 
 void
 log_no_connection(void)
@@ -271,12 +263,11 @@ int
 writeFile(const char *pathname, const char *dirname)
 {
 	assert(pathname);
-	log_debug("Called API function `writeFile`.");
-	log_debug("Target file: '%s'.", pathname);
+	size_t message_size_in_bytes = 0;
 	if (dirname) {
-		log_debug("Destination directory: '%s'.", dirname);
+		message_size_in_bytes = 1 + 8 + 1 + 8 + strlen(pathname) + strlen(dirname);
 	} else {
-		log_debug("No destination directory was specified.");
+		message_size_in_bytes = 1 + 8 + 1 + strlen(pathname);
 	}
 	if (!state.connection_is_open) {
 		log_no_connection();
@@ -284,6 +275,7 @@ writeFile(const char *pathname, const char *dirname)
 		return -1;
 	}
 	int err = 0;
+	err |= write_u64_big_endian(state.fd, message_size_in_bytes);
 	err |= write_op(state.fd, OP_WRITE_FILE);
 	err |= write_u64_big_endian(state.fd, strlen(pathname));
 	if (dirname) {
@@ -295,11 +287,6 @@ writeFile(const char *pathname, const char *dirname)
 	err |= writen(state.fd, pathname, strlen(pathname));
 	if (dirname) {
 		err |= writen(state.fd, dirname, strlen(dirname));
-	}
-	if (err < 0) {
-		log_error("API call failed.");
-	} else {
-		log_error("API call was successful.");
 	}
 	return err;
 }

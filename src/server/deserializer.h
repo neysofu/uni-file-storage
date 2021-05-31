@@ -1,7 +1,7 @@
 #ifndef SOL_SERVER_DESERIALIZER
 #define SOL_SERVER_DESERIALIZER
 
-#include "serverapi_actions.h"
+#include "serverapi_utils.h"
 #include <stdlib.h>
 
 /* A deserializer for protocol messages. Implemented as a state machine under the

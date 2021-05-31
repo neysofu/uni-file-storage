@@ -1,7 +1,7 @@
 #include "worker.h"
 #include "global_state.h"
 #include "logc/src/log.h"
-#include "serverapi_actions.h"
+#include "serverapi_utils.h"
 #include "ts_counter.h"
 #include "utils.h"
 #include "workload_queue.h"
@@ -20,7 +20,7 @@ worker_handle_read(void *buffer, size_t len_in_bytes)
 }
 
 void
-worker_handle_send(void *buffer, size_t len_in_bytes)
+worker_handle_write_files(void *buffer, size_t len_in_bytes)
 {
 	log_info("New API request `readFile`.");
 	if (len_in_bytes < 8) {
@@ -62,18 +62,16 @@ worker_parse_message(void *buffer, size_t len_in_bytes)
 		return;
 	}
 	switch (((char *)(buffer))[0]) {
-		case ACTION_READ:
+		case API_OP_READ_FILE:
 			worker_handle_read(buffer, len_in_bytes);
-		case ACTION_SEND:
-			worker_handle_send(buffer, len_in_bytes);
-		case ACTION_UNLOCK:
+		case API_OP_WRITE_FILE:
+			worker_handle_write_files(buffer, len_in_bytes);
+		case API_OP_UNLOCK_FILE:
 			worker_handle_unlock(buffer, len_in_bytes);
-		case ACTION_LOCK:
+		case API_OP_LOCK_FILE:
 			worker_handle_lock(buffer, len_in_bytes);
-		case ACTION_REMOVE:
+		case API_OP_REMOVE_FILE:
 			worker_handle_remove(buffer, len_in_bytes);
-		case ACTION_SET_READ_DIR:
-		case ACTION_SET_EVICTED_DIR:
 		default:
 			log_error("Unrecognized request from client.");
 	}

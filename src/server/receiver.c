@@ -159,6 +159,7 @@ receiver_poll(struct Receiver *r)
 			}
 			struct Buffer *buf = deserializer_detach(r->deserializers[i], num_bytes);
 			if (buf) {
+				log_info("NEW DETACH");
 				hand_over_buf_to_worker(r, buf);
 			}
 		}

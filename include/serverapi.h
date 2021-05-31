@@ -5,9 +5,6 @@
 #include <stddef.h>
 #include <time.h>
 
-void
-setLogging(bool enable);
-
 enum FileFlag
 {
 	O_CREATE = 1,

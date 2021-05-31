@@ -3,7 +3,7 @@
 #include "htable.h"
 #include "logc/src/log.h"
 #include "receiver.h"
-#include "serverapi_actions.h"
+#include "serverapi_utils.h"
 #include "shutdown.h"
 #include "ts_counter.h"
 #include "utils.h"
