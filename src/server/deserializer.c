@@ -56,7 +56,11 @@ deserializer_detach(struct Deserializer *de, size_t new_bytes)
 		}
 		buf->raw = de->buffer;
 		buf->size_in_bytes = de->size_in_bytes;
-		free(de);
+		de->size_in_bytes = 0;
+		de->buffer = malloc(sizeof(char) * HEADER_SIZE_IN_BYTES);
+		if (!de->buffer) {
+			// TODO
+		}
 		return buf;
 	} else {
 		return NULL;

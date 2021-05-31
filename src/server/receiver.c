@@ -115,14 +115,20 @@ receiver_cleanup(struct Receiver *r)
 }
 
 void
-hand_over_buf_to_worker(struct Receiver *r, struct Buffer *buf)
+hand_over_buf_to_worker(struct Receiver *r, struct Buffer *buf, int fd)
 {
 	unsigned thread_i = rand() % r->num_workers;
-	log_debug("Handing over message to worker n. %u/%u.", thread_i + 1, r->num_workers);
-	r->deserializers[thread_i] = deserializer_create();
+	log_debug("Handing over message to worker n. %u/%u.", thread_i, r->num_workers);
 	struct WorkloadQueue *queue = workload_queue_get(thread_i);
 	assert(queue);
-	workload_queue_add(buf, thread_i);
+	struct Message *msg = malloc(sizeof(struct Message));
+	if (!msg) {
+		return;
+	}
+	msg->buffer = *buf;
+	msg->fd = fd;
+	msg->next = NULL;
+	workload_queue_add(msg, thread_i);
 	sem_post(&queue->sem);
 }
 
@@ -170,7 +176,7 @@ receiver_poll(struct Receiver *r)
 					log_debug("Got a full message of %zu bytes from connection n. %zu.",
 					          buf->size_in_bytes,
 					          i);
-					hand_over_buf_to_worker(r, buf);
+					hand_over_buf_to_worker(r, buf, fd);
 				}
 			}
 		}

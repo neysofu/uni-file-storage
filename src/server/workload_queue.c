@@ -19,7 +19,7 @@ workload_queues_init(unsigned n)
 	count = n;
 	for (size_t i = 0; i < count; i++) {
 		err |= sem_init(&workload_queues[i].sem, 0, 0);
-		workload_queues[i].guard;
+		err |= pthread_mutex_init(&workload_queues[i].guard, NULL);
 		workload_queues[i].next_incoming = NULL;
 		workload_queues[i].last_incoming = NULL;
 	}

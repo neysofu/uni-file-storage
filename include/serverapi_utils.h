@@ -16,4 +16,9 @@ enum ApiOp
 	API_OP_REMOVE_FILE,
 };
 
+enum ResponseType {
+	RESPONSE_OK,
+	RESPONSE_ERR,
+};
+
 #endif
