@@ -36,7 +36,6 @@ int
 run_action_write(struct Action *action) {
     char *path = strtok(action->arg_s, ",");
     while (path) {
-        log_debug("Writing to server `%s`.", path);
         writeFile(path, NULL);
         path = strtok(NULL, ",");
     }

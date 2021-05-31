@@ -109,11 +109,11 @@ enum Operation
 	OP_REMOVE_FILE,
 };
 
-void
+int
 write_op(int fd, enum Operation op)
 {
 	char op_byte = op;
-	write(fd, &op_byte, 1);
+	return write(fd, &op_byte, 1);
 }
 
 static void
@@ -130,12 +130,12 @@ u64_to_big_endian(uint64_t data, char bytes[8])
 	bytes[7] = data;
 }
 
-void
+int
 write_u64_big_endian(int fd, uint64_t data)
 {
 	char bytes[8];
 	u64_to_big_endian(data, bytes);
-	write(fd, bytes, 8);
+	return write(fd, bytes, 8);
 }
 
 void
@@ -182,12 +182,12 @@ int
 openConnection(const char *sockname, int msec, const struct timespec abstime)
 {
 	assert(sockname);
-	log_debug("- API call `openConnection`.");
+	log_debug("Called API function `openConnection`.");
 	if (state.connection_is_open) {
 		return -1;
 	}
 	while (1) {
-		log_debug("  New connection attempt.");
+		log_debug("New connection attempt.");
 		int err = attempt_connection(sockname);
 		if (!err) {
 			break;
@@ -200,7 +200,7 @@ openConnection(const char *sockname, int msec, const struct timespec abstime)
 int
 closeConnection(const char *sockname)
 {
-	log_debug("- API call `closeConnection`.");
+	log_debug("Called API function `closeConnection`.");
 	if (!state.connection_is_open) {
 		errno = EPERM;
 		return -1;
@@ -222,9 +222,10 @@ closeConnection(const char *sockname)
 int
 openFile(const char *pathname, int flags)
 {
-	log_debug("- API call `openFile`.");
+	log_debug("Called API function `openFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
 	write_op_with_string(state.fd, OP_OPEN_FILE, pathname);
@@ -236,9 +237,10 @@ openFile(const char *pathname, int flags)
 int
 readFile(const char *pathname, void **buf, size_t *size)
 {
-	log_debug("- API call `readFile`.");
+	log_debug("Called API function `readFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
 	write_op_with_string(state.fd, OP_READ_FILE, pathname);
@@ -250,10 +252,11 @@ readFile(const char *pathname, void **buf, size_t *size)
 int
 readNFiles(int n, const char *dirname)
 {
-	log_debug("- API call `readNFiles`.");
+	log_debug("Called API function `readNFiles`.");
 	assert(n >= 0);
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
 	write_op(state.fd, OP_READ_N_FILES);
@@ -267,26 +270,47 @@ readNFiles(int n, const char *dirname)
 int
 writeFile(const char *pathname, const char *dirname)
 {
-	log_debug("- API call `writeFile`.");
+	assert(pathname);
+	log_debug("Called API function `writeFile`.");
+	log_debug("Target file: '%s'.", pathname);
+	if (dirname) {
+		log_debug("Destination directory: '%s'.", dirname);
+	} else {
+		log_debug("No destination directory was specified.");
+	}
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
-	write_op(state.fd, OP_WRITE_FILE);
-	write_string(state.fd, pathname);
-	write_string(state.fd, dirname);
-	puts("written");
-	char buffer[1] = { '\0' };
-	read(state.fd, buffer, 1);
-	return 0;
+	int err = 0;
+	err |= write_op(state.fd, OP_WRITE_FILE);
+	err |= write_u64_big_endian(state.fd, strlen(pathname));
+	if (dirname) {
+		err |= write(state.fd, "1", 1);
+		err |= write_u64_big_endian(state.fd, strlen(dirname));
+	} else {
+		err |= write(state.fd, "0", 1);
+	}
+	err |= writen(state.fd, pathname, strlen(pathname));
+	if (dirname) {
+		err |= writen(state.fd, dirname, strlen(dirname));
+	}
+	if (err < 0) {
+		log_error("API call failed.");
+	} else {
+		log_error("API call was successful.");
+	}
+	return err;
 }
 
 int
 appendToFile(const char *pathname, void *buf, size_t size, const char *dirname)
 {
-	log_debug("- API call `appendToFile`.");
+	log_debug("Called API function `appendToFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
 	write_op(state.fd, OP_APPEND_TO_FILE);
@@ -300,9 +324,10 @@ appendToFile(const char *pathname, void *buf, size_t size, const char *dirname)
 int
 lockFile(const char *pathname)
 {
-	log_debug("- API call `lockFile`.");
+	log_debug("Called API function `lockFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
 	write_op(state.fd, OP_LOCK_FILE);
@@ -315,9 +340,10 @@ lockFile(const char *pathname)
 int
 unlockFile(const char *pathname)
 {
-	log_debug("- API call `unlockFile`.");
+	log_debug("Called API function `unlockFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
 	write_op(state.fd, OP_UNLOCK_FILE);
@@ -330,9 +356,10 @@ unlockFile(const char *pathname)
 int
 closeFile(const char *pathname)
 {
-	log_debug("- API call `closeFile`.");
+	log_debug("Called API function `closeFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
 	write_op(state.fd, OP_CLOSE_FILE);
@@ -345,9 +372,10 @@ closeFile(const char *pathname)
 int
 removeFile(const char *pathname)
 {
-	log_debug("- API call `removeFile`.");
+	log_debug("Called API function `removeFile`.");
 	if (!state.connection_is_open) {
 		log_no_connection();
+		errno = ENOENT;
 		return -1;
 	}
 	write_op(state.fd, OP_REMOVE_FILE);
