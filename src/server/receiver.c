@@ -128,7 +128,7 @@ receiver_poll(struct Receiver *r)
 {
 	receiver_cleanup(r);
 	/* The first socket is not an active connection, remember. */
-	log_debug("New iteration in the polling loop (%zu connection(s)).",
+	log_debug("New iteration in the polling loop with %zu connection(s).",
 	          r->active_sockets_count - 1);
 	assert(r);
 	/* Block until something happens. */
@@ -150,17 +150,23 @@ receiver_poll(struct Receiver *r)
 			int fd = r->active_sockets[i].fd;
 			void *buffer = deserializer_buffer(r->deserializers[i]);
 			size_t missing_bytes = deserializer_missing(r->deserializers[i]);
-			size_t num_bytes = read(fd, buffer, missing_bytes);
-			/* Detect EOF. */
+			ssize_t num_bytes = read(fd, buffer, missing_bytes);
+			/* We drop connections on two situations:
+			 *  - EOF.
+			 *  - Errors during read. */
 			if (num_bytes == 0) {
-				log_info("Connection n. %zu was dropped.", i);
-				/* Set a flag. */
+				log_info("Dropping n. %zu due to EOF.", i);
 				r->active_sockets[i].fd = -1;
-			}
-			struct Buffer *buf = deserializer_detach(r->deserializers[i], num_bytes);
-			if (buf) {
-				log_info("NEW DETACH");
-				hand_over_buf_to_worker(r, buf);
+			} else if (num_bytes < 0) {
+				log_warn("Dropping n. %zu due to socket error.", i);
+				r->active_sockets[i].fd = -1;
+			} else {
+				log_trace("Read %zd bytes from connection n. %zu.", num_bytes, i);
+				struct Buffer *buf = deserializer_detach(r->deserializers[i], num_bytes);
+				if (buf) {
+					log_info("NEW DETACH");
+					hand_over_buf_to_worker(r, buf);
+				}
 			}
 		}
 		/* Clear all events. */

@@ -58,6 +58,8 @@ worker_handle_remove(void *buffer, size_t len_in_bytes)
 void
 worker_parse_message(void *buffer, size_t len_in_bytes)
 {
+	/* Please note that workers receive messages stripped from the length-prefix
+	 * header. */
 	if (len_in_bytes == 0) {
 		return;
 	}
