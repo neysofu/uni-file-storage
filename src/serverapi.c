@@ -67,6 +67,14 @@ file_contents(const char *relative_path, char abs_path[], void **buffer, size_t 
 }
 
 int
+on_io_err(void)
+{
+	log_error("Tried to read/write data, but there's been some I/O error.");
+	errno = EIO;
+	return -1;
+}
+
+int
 write_op(int fd, enum ApiOp op)
 {
 	char op_byte = op;
@@ -109,7 +117,8 @@ attempt_connection(const char *sockname)
  *  - logs a descriptive error message;
  *  - returns `-1` as an error code. */
 int
-err_closed_connection(void) {
+err_closed_connection(void)
+{
 	errno = ENOENT;
 	log_error("No active connection.");
 	return -1;
@@ -142,11 +151,11 @@ handle_response_with_files(int fd, const char *dirname)
 	char buffer_response_code[1] = { '\0' };
 	char buffer_num_files[8] = { '\0' };
 	err |= read(fd, buffer_response_code, 1);
-	if (err || buffer_response_code[0] == RESPONSE_ERR) {
+	if (err < 0 || buffer_response_code[0] == RESPONSE_ERR) {
 		return -1;
 	}
 	err |= readn(fd, buffer_num_files, 8);
-	if (err) {
+	if (err < 0) {
 		return -1;
 	}
 	size_t num_files = big_endian_to_u64(buffer_num_files);
@@ -154,7 +163,7 @@ handle_response_with_files(int fd, const char *dirname)
 	for (uint64_t i = 0; i < num_files; i++) {
 		char buffer_lengths[16] = { '\0' };
 		err |= readn(state.fd, buffer_lengths, 16);
-		if (err) {
+		if (err < 0) {
 			return -1;
 		}
 		size_t len_path = big_endian_to_u64(buffer_lengths);
@@ -163,15 +172,13 @@ handle_response_with_files(int fd, const char *dirname)
 		err |= readn(state.fd, buffer, len_path + len_contents);
 		if (!err) {
 			free(buffer);
-			errno = EIO;
-			return -1;
+			return on_io_err();
 		}
 		err |= write_file_to_dir(
 		  dirname, buffer, len_path, (char *)buffer + len_path, len_contents);
-		if (err) {
+		if (err < 0) {
 			free(buffer);
-			errno = EIO;
-			return -1;
+			return on_io_err();
 		}
 		free(buffer);
 	}
@@ -189,9 +196,8 @@ make_simple_request(enum ApiOp op, const char *pathname)
 	err |= write_u64(state.fd, 1 + strlen(pathname));
 	err |= write_op(state.fd, op);
 	err |= writen(state.fd, (void *)pathname, strlen(pathname));
-	if (err) {
-		errno = EIO;
-		return -1;
+	if (err < 0) {
+		return on_io_err();
 	}
 	char buffer[1] = { '\0' };
 	read(state.fd, buffer, 1);
@@ -219,13 +225,11 @@ make_request_with_two_args(enum ApiOp op,
 	err |= write_u64(state.fd, arg2_size);
 	err |= writen(state.fd, arg1, arg1_size);
 	err |= writen(state.fd, arg2, arg2_size);
-	if (err) {
-		log_error("Tried to, but there's been some I/O error.");
-		errno = EIO;
-		return -1;
+	if (err < 0) {
+		return on_io_err();
 	}
 	log_trace("Done.");
-	return err;
+	return 0;
 }
 
 /******* API IMPLEMENTATIONS */
@@ -293,8 +297,7 @@ openFile(const char *p, int flags)
 	err |= write_op(state.fd, API_OP_OPEN_FILE);
 	err |= writen(state.fd, (void *)pathname, strlen(pathname));
 	if (err) {
-		errno = EIO;
-		return -1;
+		return on_io_err();
 	}
 	char buffer[1] = { '\0' };
 	read(state.fd, buffer, 1);
@@ -313,8 +316,7 @@ readFile(const char *pathname, void **buf, size_t *size)
 	err |= write_op(state.fd, API_OP_READ_FILE);
 	err |= writen(state.fd, (void *)pathname, strlen(pathname));
 	if (err) {
-		errno = EIO;
-		return -1;
+		return on_io_err();
 	}
 	char buffer[1] = { '\0' };
 	read(state.fd, buffer, 1);
@@ -333,8 +335,8 @@ readNFiles(int n, const char *dirname)
 	int err = 0;
 	err |= write_op(state.fd, API_OP_READ_N_FILES);
 	err |= write_u64(state.fd, n);
-	if (err) {
-		return -1;
+	if (err < 0) {
+		return on_io_err();
 	}
 	return handle_response_with_files(state.fd, dirname);
 }

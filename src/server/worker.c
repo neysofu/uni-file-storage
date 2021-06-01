@@ -27,24 +27,99 @@ struct Worker
 };
 
 void
+log_io_err(const struct Worker *worker)
+{
+	glog_error("[Worker n.%u] Bad I/O during request handling. Ignoring.", worker->id);
+}
+
+void
 worker_handle_read(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_info("[Worker n.%u] New API request `readFile`.", worker->id);
-	struct File *file = htable_fetch_file(htable, buffer);
-	char response[1 + 8] = { RESPONSE_OK };
+	char *path = buf_to_str(buffer, len_in_bytes);
+	struct File *file = htable_fetch_file(htable, path);
+	uint8_t response[9] = { RESPONSE_OK };
 	u64_to_big_endian(file->length_in_bytes, &response[1]);
-	writen(fd, response, 9);
-	writen(fd, file->contents, file->length_in_bytes);
-	htable_release(htable, buffer);
+	int err = 0;
+	err |= writen(fd, response, 9);
+	err |= writen(fd, file->contents, file->length_in_bytes);
+	if (err < 0) {
+		log_io_err(worker);
+	}
+	htable_release(htable, path);
+	free(path);
 }
 
 void
 worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_debug("[Worker n.%u] New API request `writeFile`.", worker->id);
-	//char response[1] = { RESPONSE_OK };
-	//int err = writen(fd, response, 1);
-	//UNUSED(err);
+	if (len_in_bytes < 8 + 8) {
+		glog_error("[Worker n.%u] Bad message format.", worker->id);
+		return;
+	}
+	uint64_t arg1_size = big_endian_to_u64(buffer);
+	uint64_t arg2_size = big_endian_to_u64((uint8_t *)buffer + 8);
+	if (len_in_bytes != 8 + 8 + arg1_size + arg2_size) {
+		glog_error("[Worker n.%u] Bad message format.", worker->id);
+		return;
+	}
+	char *path = buf_to_str((uint8_t *)(buffer) + 16, arg1_size);
+	struct File *evicted = NULL;
+	unsigned evicted_count = 0;
+	htable_write_file_contents(htable,
+	                           path,
+	                           (uint8_t *)buffer + 16 + arg1_size,
+	                           arg2_size,
+	                           &evicted,
+	                           &evicted_count);
+	glog_debug("[Worker n.%u] Last operation evicted %u files.", worker->id, evicted_count);
+	int err = 0;
+	uint8_t buf_response_code[1] = { RESPONSE_OK };
+	uint8_t buf[8] = { 0 };
+	u64_to_big_endian(evicted_count, buf);
+	err |= writen(fd, buf_response_code, 1);
+	err |= writen(fd, buf, 8);
+	if (err < 0) {
+		free(path);
+		log_io_err(worker);
+		return;
+	}
+	for (unsigned i = 0; i < evicted_count; i++) {
+		uint8_t buf_arg1_size[8];
+		uint8_t buf_arg2_size[8];
+		u64_to_big_endian(strlen(evicted[i].key), buf_arg1_size);
+		u64_to_big_endian(evicted[i].length_in_bytes, buf_arg2_size);
+		err |= writen(fd, buf_arg1_size, 8);
+		err |= writen(fd, buf_arg2_size, 8);
+		err |= writen(fd, evicted[i].key, strlen(evicted[i].key));
+		err |= writen(fd, evicted[i].contents, evicted[i].length_in_bytes);
+		if (err < 0) {
+			free(path);
+			log_io_err(worker);
+			return;
+		}
+	}
+	free(path);
+}
+
+void
+worker_handle_open_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+{
+	glog_debug("[Worker n.%u] New API request `openFile`.", worker->id);
+	char *path = buf_to_str(buffer, len_in_bytes);
+	char response[1];
+	int result = htable_open_file(htable, path);
+	if (result < 0) {
+		response[0] = RESPONSE_ERR;
+	} else {
+		response[0] = RESPONSE_OK;
+	}
+	int err = write(fd, response, 1);
+	if (err < 0) {
+		log_io_err(worker);
+	}
+	free(path);
 }
 
 void
@@ -52,11 +127,18 @@ worker_handle_lock(struct Worker *worker, int fd, void *buffer, size_t len_in_by
 {
 	glog_debug("[Worker n.%u] New API request `lockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
-	htable_lock_file(htable, path);
-	char response[1] = { RESPONSE_OK };
+	char response[1];
+	int result = htable_lock_file(htable, path);
+	if (result < 0) {
+		response[0] = RESPONSE_ERR;
+	} else {
+		response[0] = RESPONSE_OK;
+	}
 	int err = write(fd, response, 1);
+	if (err < 0) {
+		log_io_err(worker);
+	}
 	free(path);
-	UNUSED(err);
 }
 
 void
@@ -72,8 +154,10 @@ worker_handle_unlock(struct Worker *worker, int fd, void *buffer, size_t len_in_
 		response[0] = RESPONSE_OK;
 	}
 	int err = write(fd, response, 1);
+	if (err < 0) {
+		log_io_err(worker);
+	}
 	free(path);
-	UNUSED(err);
 }
 
 void
@@ -82,15 +166,17 @@ worker_handle_remove(struct Worker *worker, int fd, void *buffer, size_t len_in_
 	glog_debug("[Worker n.%u] New API request `removeFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
-	int result = htable_remove_file(htable, path);
+	int result = htable_unlock_file(htable, path);
 	if (result < 0) {
 		response[0] = RESPONSE_ERR;
 	} else {
 		response[0] = RESPONSE_OK;
 	}
 	int err = write(fd, response, 1);
+	if (err < 0) {
+		log_io_err(worker);
+	}
 	free(path);
-	UNUSED(err);
 }
 
 void
@@ -110,6 +196,9 @@ worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in
 	switch (op) {
 		case API_OP_READ_FILE:
 			worker_handle_read(worker, fd, buffer, len_in_bytes);
+			break;
+		case API_OP_OPEN_FILE:
+			worker_handle_open_file(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_WRITE_FILE:
 			worker_handle_write_file(worker, fd, buffer, len_in_bytes);
