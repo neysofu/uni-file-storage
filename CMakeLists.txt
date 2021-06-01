@@ -21,7 +21,6 @@ set(
   -Wredundant-decls \
   -Wold-style-definition \
   -Wunreachable-code \
-  -Wunused-macros"
 )
 
 set(default_build_type "Debug")

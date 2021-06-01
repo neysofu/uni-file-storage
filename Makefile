@@ -17,7 +17,6 @@ CCFLAGS    += \
 	-Wredundant-decls \
 	-Wold-style-definition \
 	-Wunreachable-code \
-	-Wunused-macros
 
 all: server client serverapi
 
@@ -40,7 +39,11 @@ client:
 		src/client/cli.c \
 		src/client/cli.h \
 		src/client/err.h \
+		src/client/help.c \
+		src/client/help.h \
 		src/client/main.c \
+		src/client/run_action.h \
+		src/client/run_action.c \
 		src/serverapi.c \
 		src/utils.c \
 		lib/logc/src/log.c
@@ -55,6 +58,8 @@ server:
 		src/server/config.h \
 		src/server/deserializer.h \
 		src/server/deserializer.c \
+		src/server/global_state.h \
+		src/server/global_state.c \
 		src/server/htable.c \
 		src/server/htable.h \
 		src/server/main.c \
@@ -62,6 +67,14 @@ server:
 		src/server/receiver.h \
 		src/server/report.c \
 		src/server/report.h \
+		src/server/shutdown.h \
+		src/server/shutdown.c \
+		src/server/ts_counter.h \
+		src/server/ts_counter.c \
+		src/server/worker.h \
+		src/server/worker.c \
+		src/server/workload_queue.h \
+		src/server/workload_queue.c \
 		src/serverapi.c \
 		src/utils.c \
 		lib/logc/src/log.c \
@@ -73,14 +86,18 @@ server:
 
 serverapi:
 	$(CC) $(CCFLAGS) -c \
+		-o logc.o \
+		-I lib \
+		lib/logc/src/log.c
+	$(CC) $(CCFLAGS) -c \
 		-o utils.o \
-		-I include \
+		-I include -I lib \
 		src/utils.c
 	$(CC) $(CCFLAGS) -c \
 		-o serverapi.o \
-		-I include \
+		-I include -I lib \
 		src/serverapi.c
-	@ld -r -o serverapi.o serverapi.o utils.o
+	@ld -r -o serverapi.o serverapi.o utils.o logc.o
 	@rm -f utils.o
 	@echo "-- Done building the server API library."
 .PHONY: serverapi
