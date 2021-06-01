@@ -81,6 +81,7 @@ write_op(int fd, enum ApiOp op)
 	return write(fd, &op_byte, 1);
 }
 
+/* Writes a 64 bit unsigned number to `fd` as big endian. */
 int
 write_u64(int fd, uint64_t data)
 {
@@ -185,6 +186,12 @@ handle_response_with_files(int fd, const char *dirname)
 	return 0;
 }
 
+/* A simple request is made up by:
+ * - 8 byte header (length prefix).
+ * - 1 byte operation code.
+ * - N remaining bytes for a single variable-length argument.
+ * 
+ * The response is just one single byte with a response code. */
 int
 make_simple_request(enum ApiOp op, const char *pathname)
 {
@@ -200,10 +207,22 @@ make_simple_request(enum ApiOp op, const char *pathname)
 		return on_io_err();
 	}
 	char buffer[1] = { '\0' };
-	read(state.fd, buffer, 1);
+	err |= read(state.fd, buffer, 1);
+	if (err < 0) {
+		return on_io_err();
+	}
 	return 0;
 }
 
+/* A request type with support for two variable-length arguments:
+ * - 8 byte header (length prefix).
+ * - 1 byte operation code.
+ * - 8 bytes, length of 1st argument.
+ * - 8 bytes, length of 2nd argument.
+ * - N bytes for 1st argument.
+ * - M bytes for 2nd argument.
+ * 
+ * The response is operation-specific. */
 int
 make_request_with_two_args(enum ApiOp op,
                            const void *arg1,
@@ -211,11 +230,11 @@ make_request_with_two_args(enum ApiOp op,
                            const void *arg2,
                            size_t arg2_size)
 {
-	log_trace("Sending the first few bytes of the request...");
 	state.last_operation = op;
 	if (!state.connection_is_open) {
 		return err_closed_connection();
 	}
+	log_trace("Sending file contents to server...");
 	int err = 0;
 	/* Request: */
 	size_t message_size_in_bytes = 1 + 8 + 8 + arg1_size + arg2_size;
@@ -282,44 +301,24 @@ closeConnection(const char *sockname)
 }
 
 int
-openFile(const char *p, int flags)
-{
-	state.last_operation = API_OP_OPEN_FILE;
-	char pathname[PATH_MAX];
-	if (!realpath(p, pathname)) {
-		return -1;
-	}
-	if (!state.connection_is_open) {
-		return err_closed_connection();
-	}
-	int err = 0;
-	err |= write_u64(state.fd, 1 + strlen(pathname));
-	err |= write_op(state.fd, API_OP_OPEN_FILE);
-	err |= writen(state.fd, (void *)pathname, strlen(pathname));
-	if (err) {
-		return on_io_err();
-	}
-	char buffer[1] = { '\0' };
-	read(state.fd, buffer, 1);
-	return 0;
-}
-
-int
 readFile(const char *pathname, void **buf, size_t *size)
 {
-	state.last_operation = API_OP_READ_FILE;
-	if (!state.connection_is_open) {
-		return err_closed_connection();
+	int err = make_simple_request(API_OP_READ_FILE, pathname);
+	if (err < 0) {
+		return -1;
 	}
-	int err = 0;
-	err |= write_u64(state.fd, 1 + strlen(pathname));
-	err |= write_op(state.fd, API_OP_READ_FILE);
-	err |= writen(state.fd, (void *)pathname, strlen(pathname));
-	if (err) {
-		return on_io_err();
+	/* After the "simple" request, `readFile` also must read the file contents. */
+	uint8_t buffer_len[8] = {0};
+	err |= readn(state.fd, buffer_len, 8);
+	*size = big_endian_to_u64(buffer_len);
+	if (err < 0) {
+		return -1;
 	}
-	char buffer[1] = { '\0' };
-	read(state.fd, buffer, 1);
+	*buf = xmalloc(*size);
+	err |= readn(state.fd, *buf, *size);
+	if (err < 0) {
+		return -1;
+	}
 	return 0;
 }
 
@@ -333,6 +332,7 @@ readNFiles(int n, const char *dirname)
 		return err_closed_connection();
 	}
 	int err = 0;
+	err |= write_u64(state.fd, 1 + 8);
 	err |= write_op(state.fd, API_OP_READ_N_FILES);
 	err |= write_u64(state.fd, n);
 	if (err < 0) {
@@ -340,6 +340,40 @@ readNFiles(int n, const char *dirname)
 	}
 	return handle_response_with_files(state.fd, dirname);
 }
+
+int
+openFile(const char *pathname, int flags)
+{
+	return make_simple_request(API_OP_OPEN_FILE | flags, pathname);
+}
+
+int
+lockFile(const char *pathname)
+{
+	return make_simple_request(API_OP_LOCK_FILE, pathname);
+}
+
+int
+unlockFile(const char *pathname)
+{
+	return make_simple_request(API_OP_UNLOCK_FILE, pathname);
+}
+
+int
+closeFile(const char *pathname)
+{
+	return make_simple_request(API_OP_CLOSE_FILE, pathname);
+}
+
+int
+removeFile(const char *pathname)
+{
+	return make_simple_request(API_OP_REMOVE_FILE, pathname);
+}
+
+/******* API WRITE OPERATIONS
+ * These are by far the most complicated, because they must take evictions into
+ * account. */
 
 int
 writeFile(const char *pathname, const char *dirname)
@@ -384,28 +418,4 @@ appendToFile(const char *pathname, void *buffer, size_t buffer_size, const char 
 		return -1;
 	}
 	return handle_response_with_files(state.fd, dirname);
-}
-
-int
-lockFile(const char *pathname)
-{
-	return make_simple_request(API_OP_LOCK_FILE, pathname);
-}
-
-int
-unlockFile(const char *pathname)
-{
-	return make_simple_request(API_OP_UNLOCK_FILE, pathname);
-}
-
-int
-closeFile(const char *pathname)
-{
-	return make_simple_request(API_OP_CLOSE_FILE, pathname);
-}
-
-int
-removeFile(const char *pathname)
-{
-	return make_simple_request(API_OP_REMOVE_FILE, pathname);
 }
