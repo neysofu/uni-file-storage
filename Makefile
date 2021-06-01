@@ -94,11 +94,13 @@ serverapi:
 		-I include -I lib \
 		src/utils.c
 	$(CC) $(CCFLAGS) -c \
-		-o serverapi.o \
+		-o api.o \
 		-I include -I lib \
 		src/serverapi.c
-	@ld -r -o serverapi.o serverapi.o utils.o logc.o
+	@ld -r -o serverapi.o api.o utils.o logc.o
 	@rm -f utils.o
+	@rm -f api.o
+	@rm -f logc.o
 	@echo "-- Done building the server API library."
 .PHONY: serverapi
 
