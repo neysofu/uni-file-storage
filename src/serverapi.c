@@ -31,11 +31,11 @@ struct ConnectionState
 	int last_operation;
 };
 
-struct ConnectionState state = (struct ConnectionState){
-	.connection_is_open = false,
-	.fd = -1,
-	.socket_name = NULL,
-	.last_operation = 0xff, //  Non-existent last operation.
+struct ConnectionState state = {
+	false,
+	-1,
+	NULL,
+	0xff,
 };
 
 /******* UTILITY FUNCTIONS */
