@@ -20,7 +20,7 @@ set(
   -Wuninitialized \
   -Wredundant-decls \
   -Wold-style-definition \
-  -Wunreachable-code \
+  -Wunreachable-code"
 )
 
 set(default_build_type "Debug")
