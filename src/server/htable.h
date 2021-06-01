@@ -30,7 +30,7 @@ struct HTableVisitor;
  * NULL on allocation failure or other system errors that make the operation
  * impossible. */
 struct HTable *
-htable_new(size_t buckets, enum CacheReplacementPolicy policy);
+htable_create(size_t buckets, enum CacheReplacementPolicy policy);
 
 /* Deletes `htable` and all its contents from memory (files, paths, flags, etc.). */
 void

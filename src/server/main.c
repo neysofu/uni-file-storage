@@ -123,7 +123,7 @@ inner_main(struct Config *config)
 int
 main(int argc, char **argv)
 {
-	htable = htable_new(100, POLICY_BUCKET_BASED);
+	htable = htable_create(100, POLICY_BUCKET_BASED);
 	log_debug("Starting server. Initializing some internal resources.");
 	/* Seed the PRNG (pseudorandom number generator). */
 	srand(time(NULL));

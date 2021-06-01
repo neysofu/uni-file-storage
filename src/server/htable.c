@@ -35,26 +35,26 @@ struct HTable
 };
 
 struct HTable *
-htable_new(size_t buckets, enum CacheReplacementPolicy policy)
+htable_create(size_t buckets, enum CacheReplacementPolicy policy)
 {
 	assert(buckets > 0);
 	struct HTable *htable = malloc(sizeof(struct HTable));
 	if (!htable) {
 		return NULL;
 	}
-	// FIXME: max limits
 	htable->policy = policy;
 	int err = pthread_mutex_init(&htable->stats_guard, NULL);
 	if (err) {
 		free(htable);
 		return NULL;
 	}
+	// FIXME: max limits
 	htable->items_count = 0;
 	htable->max_items_count = 0;
 	htable->total_space_in_bytes = 0;
 	htable->max_space_in_bytes = 0;
 	htable->buckets_count = buckets;
-	htable->buckets = malloc(sizeof(struct HTableLlNode) * buckets);
+	htable->buckets = malloc(sizeof(struct HTableBucket) * buckets);
 	if (!htable->buckets) {
 		free(htable);
 		return NULL;
