@@ -1,7 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "utils.h"
+#include "logc/src/log.h"
 #include <errno.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -15,6 +18,15 @@ wait_msec(int msec)
 	do {
 		result = nanosleep(&interval, &interval);
 	} while (result);
+}
+
+char *
+buf_to_str(void *buf, size_t len_in_bytes)
+{
+	char *s = xmalloc(len_in_bytes + 1);
+	memcpy(s, buf, len_in_bytes);
+	s[len_in_bytes - 1] = '\0';
+	return s;
 }
 
 /** Evita letture parziali
@@ -50,7 +62,7 @@ readn(long fd, void *buf, size_t size)
  *   \retval  1   se la scrittura termina con successo
  */
 int
-writen(long fd, void *buf, size_t size)
+writen(long fd, const void *buf, size_t size)
 {
 	size_t left = size;
 	int r;
@@ -70,24 +82,23 @@ writen(long fd, void *buf, size_t size)
 }
 
 uint64_t
-big_endian_to_u64(char bytes[8])
+big_endian_to_u64(uint8_t bytes[8])
 {
 	uint64_t n = 0;
-	n += (uint64_t)(bytes[0]) << 56;
-	n += (uint64_t)(bytes[1]) << 48;
-	n += (uint64_t)(bytes[2]) << 40;
-	n += (uint64_t)(bytes[3]) << 32;
-	n += (uint64_t)(bytes[4]) << 24;
-	n += (uint64_t)(bytes[5]) << 16;
-	n += (uint64_t)(bytes[6]) << 8;
-	n += (uint64_t)(bytes[7]);
+	n |= (uint64_t)(bytes[0]) << 56;
+	n |= (uint64_t)(bytes[1]) << 48;
+	n |= (uint64_t)(bytes[2]) << 40;
+	n |= (uint64_t)(bytes[3]) << 32;
+	n |= (uint64_t)(bytes[4]) << 24;
+	n |= (uint64_t)(bytes[5]) << 16;
+	n |= (uint64_t)(bytes[6]) << 8;
+	n |= (uint64_t)(bytes[7]);
 	return n;
 }
 
 void
-u64_to_big_endian(uint64_t data, char bytes[8])
+u64_to_big_endian(uint64_t data, uint8_t bytes[8])
 {
-
 	bytes[0] = data >> 56;
 	bytes[1] = data >> 48;
 	bytes[2] = data >> 40;
@@ -96,4 +107,28 @@ u64_to_big_endian(uint64_t data, char bytes[8])
 	bytes[5] = data >> 16;
 	bytes[6] = data >> 8;
 	bytes[7] = data;
+}
+
+void *
+xmalloc(size_t size)
+{
+	void *buf = malloc(size);
+	if (!buf) {
+		log_fatal("Allocation failure. This error is non-recoverable. Abort.");
+		exit(EXIT_FAILURE);
+	}
+	return buf;
+}
+
+/* Infallible wrapper for `realloc`. Immediately exits on allocation failure,
+ * otherwise identical to `realloc`. */
+void *
+xrealloc(void *buf, size_t size)
+{
+	void *new = realloc(buf, size);
+	if (!new) {
+		log_fatal("Allocation failure. This error is non-recoverable. Abort.");
+		exit(EXIT_FAILURE);
+	}
+	return new;
 }

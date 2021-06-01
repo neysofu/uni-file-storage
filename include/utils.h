@@ -18,6 +18,9 @@
 void
 wait_msec(int msec);
 
+char *
+buf_to_str(void *buf, size_t len_in_bytes);
+
 /** Evita letture parziali
  *
  *   \retval -1   errore (errno settato)
@@ -34,12 +37,22 @@ readn(long fd, void *buf, size_t size);
  *   \retval  1   se la scrittura termina con successo
  */
 int
-writen(long fd, void *buf, size_t size);
+writen(long fd, const void *buf, size_t size);
 
 uint64_t
-big_endian_to_u64(char bytes[8]);
+big_endian_to_u64(uint8_t bytes[8]);
 
 void
-u64_to_big_endian(uint64_t data, char bytes[8]);
+u64_to_big_endian(uint64_t data, uint8_t bytes[8]);
+
+/* Infallible wrapper for `malloc`. Immediately exits on allocation failure,
+ * otherwise identical to `malloc`. */
+void *
+xmalloc(size_t size);
+
+/* Infallible wrapper for `realloc`. Immediately exits on allocation failure,
+ * otherwise identical to `realloc`. */
+void *
+xrealloc(void *buf, size_t size);
 
 #endif

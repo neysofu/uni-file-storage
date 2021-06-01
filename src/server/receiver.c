@@ -1,13 +1,18 @@
 #include "receiver.h"
 #include "deserializer.h"
-#include "logc/src/log.h"
+#include "global_state.h"
+#include "utils.h"
 #include "workload_queue.h"
 #include <assert.h>
+#include <errno.h>
 #include <poll.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+/* It's important to define a timeout so that we can catch shutdown signals. */
+#define TIMEOUT_MILLISECONDS 500
 
 struct Receiver
 {
@@ -22,35 +27,17 @@ struct Receiver
 struct Receiver *
 receiver_create(int socket_descriptor, unsigned num_workers)
 {
-	struct Receiver *r = malloc(sizeof(struct Receiver));
-	if (!r) {
-		return NULL;
-	}
+	struct Receiver *r = xmalloc(sizeof(struct Receiver));
 	r->max_fd = socket_descriptor;
 	r->active_sockets_count = 1;
 	r->num_workers = num_workers;
 	r->accept_new_connections = true;
-	r->active_sockets = malloc(sizeof(struct pollfd));
-	if (!r->active_sockets) {
-		free(r);
-		return NULL;
-	}
+	r->active_sockets = xmalloc(sizeof(struct pollfd));
 	r->active_sockets[0].events = POLLIN;
 	r->active_sockets[0].fd = socket_descriptor;
 	r->active_sockets[0].revents = 0;
-	r->deserializers = malloc(sizeof(struct Deserializer *));
-	if (!r->deserializers) {
-		free(r->active_sockets);
-		free(r);
-		return NULL;
-	}
+	r->deserializers = xmalloc(sizeof(struct Deserializer *));
 	r->deserializers[0] = deserializer_create();
-	if (!r->deserializers[0]) {
-		free(r->deserializers);
-		free(r->active_sockets);
-		free(r);
-		return NULL;
-	}
 	return r;
 }
 
@@ -61,6 +48,8 @@ receiver_disable_new_connections(struct Receiver *r)
 	r->accept_new_connections = false;
 }
 
+/* Returns `true` if and only if a new readable event is detected on the main
+ * socket. */
 bool
 receiver_has_new_connection(const struct Receiver *r)
 {
@@ -72,21 +61,21 @@ void
 receiver_add_new_connection(struct Receiver *r)
 {
 	assert(r);
-	log_info("Adding a new connection to the server's pool.");
+	glog_info("Adding a new connection to the server's pool.");
 	int fd = accept(r->active_sockets[0].fd, NULL, NULL);
 	/* Faulty new connection. Let's keep going and don't stop the whole server. */
 	if (fd < 0) {
-		log_info("Ignoring faulty connection.");
+		glog_info("Ignoring faulty connection.");
 		return;
 	}
 	r->active_sockets_count++;
 	r->active_sockets =
-	  realloc(r->active_sockets, sizeof(struct pollfd) * r->active_sockets_count);
+	  xrealloc(r->active_sockets, sizeof(struct pollfd) * r->active_sockets_count);
 	r->active_sockets[r->active_sockets_count - 1].fd = fd;
 	r->active_sockets[r->active_sockets_count - 1].events = POLLIN;
 	r->active_sockets[r->active_sockets_count - 1].revents = 0;
 	r->deserializers =
-	  realloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
+	  xrealloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
 	r->deserializers[r->active_sockets_count - 1] = deserializer_create();
 	/* Clear state. */
 	read(fd, NULL, 0);
@@ -107,25 +96,23 @@ receiver_cleanup(struct Receiver *r)
 		}
 	}
 	struct pollfd *new_active_sockets =
-	  realloc(r->active_sockets, sizeof(struct pollfd) * r->active_sockets_count);
+	  xrealloc(r->active_sockets, sizeof(struct pollfd) * r->active_sockets_count);
 	struct Deserializer **new_deserializers =
-	  realloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
+	  xrealloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
 	r->active_sockets = new_active_sockets;
 	r->deserializers = new_deserializers;
 }
 
 void
-hand_over_buf_to_worker(struct Receiver *r, struct Buffer *buf, int fd)
+hand_over_buf_to_worker(struct Receiver *r, void *buffer, size_t size, int fd)
 {
 	unsigned thread_i = rand() % r->num_workers;
-	log_debug("Handing over message to worker n. %u/%u.", thread_i, r->num_workers);
+	glog_debug("Handing over message to worker n. %u.", thread_i, r->num_workers);
 	struct WorkloadQueue *queue = workload_queue_get(thread_i);
 	assert(queue);
-	struct Message *msg = malloc(sizeof(struct Message));
-	if (!msg) {
-		return;
-	}
-	msg->buffer = *buf;
+	struct Message *msg = xmalloc(sizeof(struct Message));
+	msg->buffer.raw = buffer;
+	msg->buffer.size_in_bytes = size;
 	msg->fd = fd;
 	msg->next = NULL;
 	workload_queue_add(msg, thread_i);
@@ -135,14 +122,19 @@ hand_over_buf_to_worker(struct Receiver *r, struct Buffer *buf, int fd)
 struct Message *
 receiver_poll(struct Receiver *r)
 {
-	receiver_cleanup(r);
-	/* The first socket is not an active connection, remember. */
-	log_debug("New iteration in the polling loop with %zu connection(s).",
-	          r->active_sockets_count - 1);
 	assert(r);
+	/* Remove all dead connections before polling. */
+	receiver_cleanup(r);
+	/* The first socket is not a client-to-server connection, remember! It's the
+	 * main socket, which accepts new incoming connections. */
+	glog_debug("New iteration in the polling loop with %zu connection(s).",
+	           r->active_sockets_count - 1);
 	/* Block until something happens. */
-	int num_reads = poll(r->active_sockets, r->active_sockets_count, -1);
+	int num_reads = poll(r->active_sockets, r->active_sockets_count, TIMEOUT_MILLISECONDS);
 	if (num_reads < 0) {
+		errno = EIO;
+		return NULL;
+	} else if (num_reads == 0) {
 		return NULL;
 	}
 	if (receiver_has_new_connection(r)) {
@@ -154,6 +146,7 @@ receiver_poll(struct Receiver *r)
 	 * socket connection and we're not interested in that. */
 	for (size_t i = 1; i < r->active_sockets_count; i++) {
 		if ((r->active_sockets[i].revents & POLLIN) > 0) {
+			glog_trace("Polled a relevant event on connection n. %zu.", i);
 			int fd = r->active_sockets[i].fd;
 			void *buffer = deserializer_buffer(r->deserializers[i]);
 			size_t missing_bytes = deserializer_missing(r->deserializers[i]);
@@ -164,19 +157,20 @@ receiver_poll(struct Receiver *r)
 			 *  - EOF.
 			 *  - Errors during read. */
 			if (num_bytes == 0) {
-				log_info("Dropping connection n. %zu due to EOF.", i);
+				glog_info("Dropping connection n. %zu due to EOF.", i);
 				r->active_sockets[i].fd = -1;
 			} else if (num_bytes < 0) {
-				log_warn("Dropping connection n. %zu due to socket error.", i);
+				glog_warn("Dropping connection n. %zu due to socket error.", i);
 				r->active_sockets[i].fd = -1;
 			} else {
-				log_trace("Read %zd bytes from connection n. %zu.", num_bytes, i);
+				glog_trace("Read %zd bytes from connection n. %zu.", num_bytes, i);
 				struct Buffer *buf = deserializer_detach(r->deserializers[i], num_bytes);
 				if (buf) {
-					log_debug("Got a full message of %zu bytes from connection n. %zu.",
-					          buf->size_in_bytes,
-					          i);
-					hand_over_buf_to_worker(r, buf, fd);
+					glog_debug("Got a full message of %zu bytes from connection n. %zu.",
+					           buf->size_in_bytes,
+					           i);
+					hand_over_buf_to_worker(r, buf->raw, buf->size_in_bytes, fd);
+					free(buf);
 				}
 			}
 		}
@@ -204,9 +198,9 @@ int
 receiver_add(struct Receiver *r, int fd)
 {
 	struct pollfd *new_active_sockets =
-	  realloc(r->active_sockets, sizeof(struct pollfd) * r->active_sockets_count);
+	  xrealloc(r->active_sockets, sizeof(struct pollfd) * r->active_sockets_count);
 	struct Deserializer **new_deserializers =
-	  realloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
+	  xrealloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
 	struct Deserializer *deserializer = deserializer_create();
 	if (!new_active_sockets || !new_deserializers || !deserializer) {
 		free(new_active_sockets);

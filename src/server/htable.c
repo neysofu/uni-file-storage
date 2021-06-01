@@ -1,4 +1,5 @@
 #include "htable.h"
+#include "utils.h"
 #include "xxHash/xxhash.h"
 #include <assert.h>
 #include <pthread.h>
@@ -38,10 +39,7 @@ struct HTable *
 htable_create(size_t buckets, enum CacheReplacementPolicy policy)
 {
 	assert(buckets > 0);
-	struct HTable *htable = malloc(sizeof(struct HTable));
-	if (!htable) {
-		return NULL;
-	}
+	struct HTable *htable = xmalloc(sizeof(struct HTable));
 	htable->policy = policy;
 	int err = pthread_mutex_init(&htable->stats_guard, NULL);
 	if (err) {
@@ -54,11 +52,7 @@ htable_create(size_t buckets, enum CacheReplacementPolicy policy)
 	htable->total_space_in_bytes = 0;
 	htable->max_space_in_bytes = 0;
 	htable->buckets_count = buckets;
-	htable->buckets = malloc(sizeof(struct HTableBucket) * buckets);
-	if (!htable->buckets) {
-		free(htable);
-		return NULL;
-	}
+	htable->buckets = xmalloc(sizeof(struct HTableBucket) * buckets);
 	for (size_t i = 0; i < buckets; i++) {
 		htable->buckets[i].head = NULL;
 		htable->buckets[i].last = NULL;
@@ -226,8 +220,7 @@ htable_write_file_contents(struct HTable *htable,
 	}
 	file->length_in_bytes = size_in_bytes;
 	free(file->contents);
-	file->contents = malloc(size_in_bytes);
-	// TODO check malloc
+	file->contents = xmalloc(size_in_bytes);
 	memcpy(file->contents, contents, size_in_bytes);
 	file->length_in_bytes = size_in_bytes;
 	int err = htable_release(htable, key);
@@ -250,8 +243,7 @@ htable_append_to_file_contents(struct HTable *htable,
 		return -1;
 	}
 	file->length_in_bytes += size_in_bytes;
-	void *new_buffer = realloc(file->contents, file->length_in_bytes);
-	// TODO malloc check
+	void *new_buffer = xrealloc(file->contents, file->length_in_bytes);
 	file->contents = new_buffer;
 	memcpy((char *)(new_buffer) + file->length_in_bytes - size_in_bytes,
 	       contents,

@@ -4,6 +4,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+struct Subscriber {
+    int fd;
+    struct Subscriber *next;
+};
+
 // TODO: implement these
 enum CacheReplacementPolicy {
 	POLICY_BUCKET_BASED,
@@ -22,13 +27,13 @@ struct File
 	int fd_owner;
 	bool is_open;
 	bool is_locked;
+    struct Subscriber *subs;
 };
 
 struct HTableVisitor;
 
 /* Creates an empty `struct HTable` with a fixed number of `buckets`. Returns
- * NULL on allocation failure or other system errors that make the operation
- * impossible. */
+ * NULL on system errors that make the operation impossible. */
 struct HTable *
 htable_create(size_t buckets, enum CacheReplacementPolicy policy);
 

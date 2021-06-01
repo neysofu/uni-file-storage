@@ -20,7 +20,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#define CONNECTION_BACKLOG_SIZE 8
+#define CONNECTION_BACKglog_SIZE 8
 
 void
 print_command_line_usage_info(void)
@@ -50,25 +50,25 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 	int err = 0;
 	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
-		log_fatal("`socket` syscall failed.");
+		glog_fatal("`socket` syscall failed.");
 		return -1;
 	}
-	log_debug("`socket` syscall done.");
+	glog_debug("`socket` syscall done.");
 	struct sockaddr_un addr;
 	addr.sun_family = AF_UNIX;
 	strcpy(addr.sun_path, socket_filepath);
 	err = bind(fd, (struct sockaddr *)&addr, SUN_LEN(&addr));
 	if (err < 0) {
-		log_fatal("`bind` syscall failed.");
+		glog_fatal("`bind` syscall failed.");
 		return -1;
 	}
-	log_debug("`bind` syscall done.");
-	err = listen(fd, CONNECTION_BACKLOG_SIZE);
+	glog_debug("`bind` syscall done.");
+	err = listen(fd, CONNECTION_BACKglog_SIZE);
 	if (err < 0) {
-		log_fatal("`listen` syscall failed.");
+		glog_fatal("`listen` syscall failed.");
 		return -1;
 	}
-	log_debug("`listen` syscall done.");
+	glog_debug("`listen` syscall done.");
 	*socket_fd = fd;
 	return 0;
 }
@@ -79,20 +79,16 @@ inner_main(struct Config *config)
 	global_config = config;
 	int socket_fd = 0;
 	int err = 0;
-	log_debug("Now listening for incoming connections.");
+	glog_debug("Now listening for incoming connections.");
 	err = listen_for_connections(config->socket_filepath, &socket_fd);
 	if (err < 0) {
-		log_fatal("Couldn't listen for incoming connections. Abort.");
+		glog_fatal("Couldn't listen for incoming connections. Abort.");
 		return -1;
 	}
-	log_debug("Now spawning %d worker threads...", config->num_workers);
+	glog_debug("Now spawning %d worker threads...", config->num_workers);
 	spawn_workers(config->num_workers);
-	log_debug("Done.");
+	glog_debug("Done.");
 	struct Receiver *receiver = receiver_create(socket_fd, config->num_workers);
-	if (!receiver) {
-		config_free(config);
-		return EXIT_FAILURE;
-	}
 	/* Wait a bit to make absolutely sure that workers are ready to receive
 	 * work to do. */
 	wait_msec(250);
@@ -105,7 +101,7 @@ inner_main(struct Config *config)
 		}
 	}
 	if (detect_shutdown_soft()) {
-		log_warn("Soft shutdown signal detected! Stopped listening to new connections.");
+		glog_warn("Soft shutdown signal detected! Stopped listening to new connections.");
 		receiver_disable_new_connections(receiver);
 		while (!detect_shutdown_hard()) {
 			struct Message *message = receiver_poll(receiver);
@@ -124,14 +120,14 @@ int
 main(int argc, char **argv)
 {
 	htable = htable_create(100, POLICY_BUCKET_BASED);
-	log_debug("Starting server. Initializing some internal resources.");
+	glog_debug("Starting server. Initializing some internal resources.");
 	/* Seed the PRNG (pseudorandom number generator). */
 	srand(time(NULL));
 	/* Set signal handlers. */
 	signal(SIGHUP, soft_signal_handler);
 	signal(SIGINT, hard_signal_handler);
 	signal(SIGQUIT, hard_signal_handler);
-	log_debug("Initialization was successful. Now parsing command-line args.");
+	glog_debug("Initialization was successful. Now parsing command-line args.");
 	if (argc != 2) {
 		print_command_line_usage_info();
 		puts("Goodbye.");
@@ -140,18 +136,15 @@ main(int argc, char **argv)
 		print_command_line_usage_info();
 		return EXIT_SUCCESS;
 	}
-	log_debug("Reading configuration file '%s'.", argv[1]);
+	glog_debug("Reading configuration file '%s'.", argv[1]);
 	struct Config *config = config_parse_file(argv[1]);
 	if (!config || config->err) {
 		printf("Couldn't read the given configuration file. Abort.\n");
 		return EXIT_FAILURE;
 	}
-	log_debug("Configuration was deemed valid.");
+	glog_debug("Configuration was deemed valid.");
 	/* Remove the server socket file, if it exists. We simply ignore any error. */
 	unlink(config->socket_filepath);
-	if (workload_queues_init(config->num_workers) != 0) {
-		log_fatal("System initialization failure. Abort.");
-		return EXIT_FAILURE;
-	}
+	workload_queues_init(config->num_workers);
 	return inner_main(config);
 }

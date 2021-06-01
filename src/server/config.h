@@ -8,13 +8,12 @@ struct Config
 	unsigned max_storage_in_bytes;
 	unsigned num_workers;
 	char *socket_filepath;
-	char *log_filepath;
+	char *glog_filepath;
 	int err;
 };
 
 /* Allocates a `struct Config` on the heap and it fills it in with values read
- * from the TOML file found at `abs_path`. It returns NULL on allocation
- * failure. */
+ * from the TOML file found at `abs_path`. */
 struct Config *
 config_parse_file(char abs_path[]);
 

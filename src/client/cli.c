@@ -4,8 +4,9 @@
 #include "err.h"
 #include "logc/src/log.h"
 #include "serverapi_utils.h"
-#include <stdlib.h>
+#include "utils.h"
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -16,10 +17,7 @@ cli_args_add_action(struct CliArgs *cli_args, struct Action action)
 {
 	assert(cli_args);
 	action.next = NULL;
-	struct Action *next = malloc(sizeof(struct Action));
-	if (!next) {
-		cli_args->err = CLIENT_ERR_ALLOC;
-	}
+	struct Action *next = xmalloc(sizeof(struct Action));
 	*next = action;
 	if (cli_args->last) {
 		cli_args->last->next = next;
@@ -221,10 +219,7 @@ cli_args_enable_help_message(struct CliArgs *cli_args)
 struct CliArgs *
 cli_args_default(void)
 {
-	struct CliArgs *cli_args = malloc(sizeof(struct CliArgs));
-	if (!cli_args) {
-		return NULL;
-	}
+	struct CliArgs *cli_args = xmalloc(sizeof(struct CliArgs));
 	cli_args->err = CLIENT_ERR_OK;
 	cli_args->socket_name = NULL;
 	cli_args->enable_log = false;
@@ -318,7 +313,6 @@ cli_args_free(struct CliArgs *cli_args)
 	if (!cli_args) {
 		return;
 	}
-	free(cli_args->socket_name);
 	struct Action *action = cli_args->head;
 	while (action) {
 		// We don't free the string action argument because it comes from `argv`.

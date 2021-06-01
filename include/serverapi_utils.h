@@ -5,6 +5,8 @@
  * `openConnection` and `closeConnection`. */
 enum ApiOp
 {
+	API_OP_OPEN_CONNECTION,
+	API_OP_CLOSE_CONNECTION,
 	API_OP_OPEN_FILE,
 	API_OP_READ_FILE,
 	API_OP_READ_N_FILES,

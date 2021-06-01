@@ -48,14 +48,25 @@ inner_main(const struct CliArgs *cli_args)
 		return EXIT_FAILURE;
 	}
 	log_info("Opening connection...");
-	openConnection(cli_args->socket_name, 0, empty);
+	int err = 0;
+	err |= openConnection(cli_args->socket_name, 0, empty);
+	if (err) {
+		log_fatal("Couldn't establish a connection with the server. Abort.");
+		cli_args_free(cli_args);
+		return EXIT_FAILURE;
+	}
 	log_info("Done.");
 	for (struct Action *action = cli_args->head; action; action = action->next) {
 		run_action(action);
 	}
 	log_info("Closing connection...");
-	closeConnection(cli_args->socket_name);
-	log_info("Done.");
+	err |= closeConnection(cli_args->socket_name);
+	if (err) {
+		log_fatal("An error occured during connection dropping. Abort.");
+		cli_args_free(cli_args);
+		return EXIT_FAILURE;
+	}
+	log_info("Done. Goodbye.");
 	return EXIT_SUCCESS;
 }
 

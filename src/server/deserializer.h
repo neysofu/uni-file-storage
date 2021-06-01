@@ -14,7 +14,7 @@ struct Buffer
 	void *raw;
 };
 
-/* Creates a new `struct Deserializer`. It returns NULL on allocation failure. */
+/* Creates a new `struct Deserializer` and returns a pointer to it. */
 struct Deserializer *
 deserializer_create(void);
 
