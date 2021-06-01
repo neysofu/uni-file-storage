@@ -119,7 +119,7 @@ hand_over_buf_to_worker(struct Receiver *r, void *buffer, size_t size, int fd)
 	sem_post(&queue->sem);
 }
 
-struct Message *
+int
 receiver_poll(struct Receiver *r)
 {
 	assert(r);
@@ -133,9 +133,9 @@ receiver_poll(struct Receiver *r)
 	int num_reads = poll(r->active_sockets, r->active_sockets_count, TIMEOUT_MILLISECONDS);
 	if (num_reads < 0) {
 		errno = EIO;
-		return NULL;
+		return -1;
 	} else if (num_reads == 0) {
-		return NULL;
+		return 0;
 	}
 	if (receiver_has_new_connection(r)) {
 		num_reads--;
@@ -177,7 +177,7 @@ receiver_poll(struct Receiver *r)
 		/* Clear all events. */
 		r->active_sockets[i].revents = 0;
 	}
-	return head;
+	return 0;
 }
 
 void

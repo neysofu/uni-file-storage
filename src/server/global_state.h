@@ -6,6 +6,7 @@
 #include "logc/src/log.h"
 #include <pthread.h>
 
+/* Stands for "Guarded Log" (thread-safe logging). */
 #define glog_trace(...) glog_guarded(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
 #define glog_debug(...) glog_guarded(LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
 #define glog_info(...) glog_guarded(LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)

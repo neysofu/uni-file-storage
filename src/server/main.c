@@ -92,24 +92,14 @@ inner_main(struct Config *config)
 	/* Wait a bit to make absolutely sure that workers are ready to receive
 	 * work to do. */
 	wait_msec(250);
-	while (!detect_shutdown_soft() && !detect_shutdown_hard()) {
-		struct Message *message = receiver_poll(receiver);
-		for (size_t i = 0; i < 0; i++) {
-			unsigned thread_id = rand() % config->num_workers;
-			workload_queue_add(message, thread_id);
-			message = message->next;
+	while (!detect_shutdown_hard()) {
+		if (detect_shutdown_soft()) {
+			receiver_disable_new_connections(receiver);
 		}
-	}
-	if (detect_shutdown_soft()) {
-		glog_warn("Soft shutdown signal detected! Stopped listening to new connections.");
-		receiver_disable_new_connections(receiver);
-		while (!detect_shutdown_hard()) {
-			struct Message *message = receiver_poll(receiver);
-			for (size_t i = 0; i < 0; i++) {
-				unsigned thread_id = rand() % config->num_workers;
-				workload_queue_add(message, thread_id);
-				message = message->next;
-			}
+		err = receiver_poll(receiver);
+		if (err < 0) {
+			glog_error("Bad I/O during poll. Exiting.");
+			break;
 		}
 	}
 	receiver_free(receiver);

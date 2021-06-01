@@ -1,18 +1,23 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "worker.h"
 #include "global_state.h"
 #include "htable.h"
 #include "logc/src/log.h"
 #include "serverapi_utils.h"
+#include "shutdown.h"
 #include "ts_counter.h"
 #include "utils.h"
 #include "workload_queue.h"
 #include <assert.h>
+#include <errno.h>
 #include <semaphore.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 /* Worker ID tracker. */
@@ -131,8 +136,14 @@ worker_entry_point(void *args)
 	struct Worker worker;
 	worker.id = id;
 	sem_t *sem = &workload_queue_get(id)->sem;
-	while (1) {
-		sem_wait(sem);
+	while (!detect_shutdown_hard()) {
+		struct timespec deadline;
+		clock_gettime(CLOCK_REALTIME, &deadline);
+		deadline.tv_sec += 1;
+		sem_timedwait(sem, &deadline);
+		if (errno == ETIMEDOUT) {
+			continue;
+		}
 		glog_debug("[Worker n. %u] New message incoming. Pulling...", id);
 		struct Message *msg = workload_queue_pull(id);
 		glog_debug("[Worker n. %u] Done.", id);

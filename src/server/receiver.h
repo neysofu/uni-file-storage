@@ -36,7 +36,7 @@ receiver_disable_new_connections(struct Receiver *receiver);
  *
  * New connection attempts are automatically accepted. It returns 0 on success
  * and -1 on failure. */
-struct Message *
+int
 receiver_poll(struct Receiver *receiver);
 
 /* Frees all memory and system resources used by `receiver`. */
