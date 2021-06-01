@@ -1,9 +1,9 @@
 [submodule "lib/tomlc99"]
 	path = lib/tomlc99
-	url = git@github.com:cktan/tomlc99.git
+	url = https://github.com/cktan/tomlc99.git
 [submodule "lib/xxHash"]
 	path = lib/xxHash
-	url = git@github.com:Cyan4973/xxHash.git
+	url = https://github.com/Cyan4973/xxHash.git
 [submodule "lib/logc"]
 	path = lib/logc
-	url = git@github.com:rxi/log.c.git
+	url = https://github.com/rxi/log.c.git
