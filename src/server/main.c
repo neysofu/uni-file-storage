@@ -105,9 +105,6 @@ inner_main(struct Config *config)
 	spawn_workers(config->num_workers);
 	glog_debug("Done.");
 	struct Receiver *receiver = receiver_create(socket_fd, config->num_workers);
-	/* Wait a bit to make absolutely sure that workers are ready to receive
-	 * work to do. */
-	wait_msec(250);
 	while (!detect_shutdown_hard()) {
 		if (detect_shutdown_soft()) {
 			receiver_disable_new_connections(receiver);

@@ -3,12 +3,11 @@
 
 #include "receiver.h"
 #include <pthread.h>
-#include <semaphore.h>
 
 struct WorkloadQueue
 {
-	sem_t sem;
-	pthread_mutex_t guard;
+	pthread_cond_t cond;
+	pthread_mutex_t mutex;
 	struct Message *next_incoming;
 	struct Message *last_incoming;
 };
@@ -18,16 +17,11 @@ struct WorkloadQueue
 void
 workload_queues_init(unsigned count);
 
-/* Returns a pointer to the workload queue number `i`. Returns NULL in case `i`
- * is invalid. */
-struct WorkloadQueue *
-workload_queue_get(unsigned i);
-
 /* Appends `msg` to the workload queue number `i`. */
 void
 workload_queue_add(struct Message *msg, unsigned i);
 
-/* Extracts a message from the queue number `i`. */
+/* Extracts a message from the queue number `i` (waits until one is available). */
 struct Message *
 workload_queue_pull(unsigned i);
 

@@ -133,18 +133,19 @@ void *
 worker_entry_point(void *args)
 {
 	UNUSED(args);
+	/* Wait a bit so that everything is ready. For more serious, production-ready
+	 * software, this shuould be replaced with a synchronization mechanism, but
+	 * it's overkill for this. */
+	wait_msec(250);
 	unsigned id = ts_counter();
 	struct Worker worker;
 	worker.id = id;
-	sem_t *sem = &workload_queue_get(id)->sem;
 	while (true) {
-		int err = sem_wait(sem);
-		if (err != 0) {
-			glog_error("[Worker n.%u] Semaphore issues detected (possibly deadlock).", id);
-			pthread_exit(NULL);
-		}
-		glog_trace("[Worker n.%u] New message incoming. Pulling...", id);
 		struct Message *msg = workload_queue_pull(id);
+		glog_trace("[Worker n.%u] New message incoming. Pulling...", id);
+		if (!msg) {
+			continue;
+		}
 		glog_trace("[Worker n.%u] Done.", id);
 		worker_handle_message(&worker, msg->fd, msg->buffer.raw, msg->buffer.size_in_bytes);
 	}

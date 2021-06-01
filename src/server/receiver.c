@@ -112,15 +112,12 @@ hand_over_buf_to_worker(struct Receiver *r,
 {
 	unsigned thread_i = rand() % r->num_workers;
 	glog_debug("Handing over connection n.%u to worker n.%u.", conn_id, thread_i);
-	struct WorkloadQueue *queue = workload_queue_get(thread_i);
-	assert(queue);
 	struct Message *msg = xmalloc(sizeof(struct Message));
 	msg->buffer.raw = buffer;
 	msg->buffer.size_in_bytes = size;
 	msg->fd = fd;
 	msg->next = NULL;
 	workload_queue_add(msg, thread_i);
-	sem_post(&queue->sem);
 }
 
 int
