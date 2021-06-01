@@ -83,7 +83,7 @@ htable_free(struct HTable *htable)
 }
 
 struct HTableLlNode *
-htable_fetch_node(struct HTable *htable, const char *key)
+htable_fetch_node(struct HTable *htable, const char *key, struct HTableBucket **b)
 {
 	assert(htable);
 	assert(key);
@@ -91,6 +91,7 @@ htable_fetch_node(struct HTable *htable, const char *key)
 	uint64_t hash = XXH64(key, strlen(key), XXHASH_SEED);
 	size_t bucket_i = hash % htable->buckets_count;
 	struct HTableBucket *bucket = &htable->buckets[bucket_i];
+	*b = bucket;
 	err = pthread_mutex_lock(&bucket->guard);
 	if (err) {
 		return NULL;
@@ -108,7 +109,8 @@ htable_fetch_node(struct HTable *htable, const char *key)
 struct File *
 htable_fetch_file(struct HTable *htable, const char *key)
 {
-	struct HTableLlNode *node = htable_fetch_node(htable, key);
+	struct HTableBucket *bucket = NULL;
+	struct HTableLlNode *node = htable_fetch_node(htable, key, &bucket);
 	if (!node) {
 		return NULL;
 	}
@@ -157,6 +159,46 @@ htable_open_file(struct HTable *htable, const char *key)
 	return htable_release(htable, key);
 }
 
+struct File *
+htable_evict_one_file_locked(struct HTable *htable)
+{
+	size_t attempts = 3;
+	while (attempts > 0) {
+		size_t i = rand() % htable->buckets_count;
+		struct HTableBucket *bucket = &htable->buckets[i];
+		struct HTableLlNode *last = bucket->last;
+		if (!bucket->last) {
+			attempts--;
+			continue;
+		}
+		bucket->last = last->prev;
+		return last;
+	}
+	return NULL;
+}
+
+int
+htable_evict_files_locked(struct HTable *htable,
+                          struct File **evicted,
+                          unsigned *evicted_count)
+{
+	*evicted = NULL;
+	*evicted_count = 0;
+	while (htable->items_count > htable->max_items_count ||
+	       htable->total_space_in_bytes > htable->max_space_in_bytes) {
+		evicted_count++;
+		*evicted = xrealloc(*evicted, sizeof(struct File *) * *evicted_count);
+		struct File **file_ptr = &(*evicted)[*evicted_count - 1];
+		*file_ptr = htable_evict_one_file_locked(htable);
+		if (*file_ptr) {
+			htable->items_count--;
+			htable->total_space_in_bytes -= (*file_ptr)->length_in_bytes;
+		} else {
+			return 0;
+		}
+	}
+}
+
 /* Runs the cache replacement policy algorithm on `htable` after some operation
  * that might trigger evictions. `new_file` is `true` iff a new file has just
  * been created, `new_space_in_bytes` is the new amount of space in bytes that
@@ -171,11 +213,11 @@ htable_evict_files(struct HTable *htable,
 {
 	int err = 0;
 	err |= pthread_mutex_lock(&htable->stats_guard);
+	htable->total_space_in_bytes += new_space_in_bytes;
 	if (new_file) {
 		htable->items_count++;
 	}
-	htable->total_space_in_bytes += new_space_in_bytes;
-	// TODO: evict files...
+	htable_evict_files_locked(htable, evicted, evicted_count);
 	err |= pthread_mutex_unlock(&htable->stats_guard);
 	if (err) {
 		return -1;
@@ -187,7 +229,8 @@ htable_evict_files(struct HTable *htable,
 int
 htable_remove_file(struct HTable *htable, const char *key)
 {
-	struct HTableLlNode *node = htable_fetch_node(htable, key);
+	struct HTableBucket *bucket = NULL;
+	struct HTableLlNode *node = htable_fetch_node(htable, key, &bucket);
 	if (!node) {
 		return -1;
 	}
@@ -195,9 +238,13 @@ htable_remove_file(struct HTable *htable, const char *key)
 	 * list. */
 	if (node->prev) {
 		node->prev->next = node->next;
+	} else {
+		bucket->head = node->next;
 	}
 	if (node->next) {
 		node->next->prev = node->prev;
+	} else {
+		bucket->last = node->prev;
 	}
 	/* Free stuff. */
 	free(node->item.key);
@@ -253,24 +300,4 @@ htable_append_to_file_contents(struct HTable *htable,
 		return -1;
 	}
 	return htable_evict_files(htable, false, size_in_bytes, evicted, evicted_count);
-}
-
-int
-htable_remove(struct HTable *htable, const char *key)
-{
-	uint64_t hash = XXH64(key, strlen(key), XXHASH_SEED);
-	size_t bucket_i = hash % htable->buckets_count;
-	struct HTableBucket *bucket = &htable->buckets[bucket_i];
-	struct HTableLlNode *node = bucket->head;
-	struct HTableLlNode *prev_node = NULL;
-	while (node) {
-		if (node->item.key == key) {
-			break;
-		}
-		prev_node = node;
-		node = node->next;
-	}
-	htable->items_count--;
-	prev_node->next = node->next;
-	return 0;
 }
