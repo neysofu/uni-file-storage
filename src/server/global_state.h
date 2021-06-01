@@ -3,10 +3,9 @@
 
 #include "config.h"
 #include "htable.h"
-#include <stdlib.h>
 
-static struct Config *global_config = NULL;
+extern struct Config *global_config;
 
-static struct HTable *htable = NULL;
+extern struct HTable *htable;
 
 #endif
