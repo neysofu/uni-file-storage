@@ -8,7 +8,7 @@ struct Config
 	unsigned max_storage_in_bytes;
 	unsigned num_workers;
 	char *socket_filepath;
-	char *glog_filepath;
+	char *log_filepath;
 	int err;
 };
 

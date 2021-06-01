@@ -76,6 +76,19 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 int
 inner_main(struct Config *config)
 {
+	FILE *f_log = NULL;
+	if (config->log_filepath) {
+		glog_info("Opening log file '%s'....", config->log_filepath);
+		f_log = fopen(config->log_filepath, "wa");
+	} else {
+		glog_info("Logging only on STDERR.");
+	}
+	if (f_log) {
+		log_add_fp(f_log, LOG_TRACE);
+		glog_info("Done. Log file ready.");
+	} else if (config->log_filepath) {
+		glog_warn("Couldn't open the log file. Ignoring.");
+	}
 	global_config = config;
 	int socket_fd = 0;
 	int err = 0;
@@ -83,6 +96,9 @@ inner_main(struct Config *config)
 	err = listen_for_connections(config->socket_filepath, &socket_fd);
 	if (err < 0) {
 		glog_fatal("Couldn't listen for incoming connections. Abort.");
+		if (f_log) {
+			fclose(f_log);
+		}
 		return -1;
 	}
 	glog_debug("Now spawning %d worker threads...", config->num_workers);
@@ -99,10 +115,17 @@ inner_main(struct Config *config)
 		err = receiver_poll(receiver);
 		if (err < 0) {
 			glog_error("Bad I/O during poll. Exiting.");
-			break;
+			if (f_log) {
+				fclose(f_log);
+			}
+			receiver_free(receiver);
+			return EXIT_FAILURE;
 		}
 	}
 	receiver_free(receiver);
+	if (f_log) {
+		fclose(f_log);
+	}
 	return 0;
 }
 

@@ -1,4 +1,5 @@
 #include "workload_queue.h"
+#include "global_state.h"
 #include "receiver.h"
 #include "utils.h"
 #include <assert.h>
@@ -32,6 +33,13 @@ workload_queue_get(unsigned i)
 	return &workload_queues[i];
 }
 
+void
+on_mutex_err(void)
+{
+	glog_fatal("Poisoned mutex on workload queue. This is a non-recoverable error.");
+	exit(EXIT_FAILURE);
+}
+
 struct Message *
 workload_queue_pull(unsigned i)
 {
@@ -39,11 +47,18 @@ workload_queue_pull(unsigned i)
 	assert(queue);
 	int err = 0;
 	err |= pthread_mutex_lock(&queue->guard);
+	if (err) {
+		on_mutex_err();
+	}
 	struct Message *msg = queue->next_incoming;
-	queue->next_incoming = msg->next;
-	msg->next = NULL;
+	if (msg) {
+		queue->next_incoming = msg->next;
+		msg->next = NULL;
+	}
 	err |= pthread_mutex_unlock(&queue->guard);
-	assert(err == 0);
+	if (err) {
+		on_mutex_err();
+	}
 	return msg;
 }
 

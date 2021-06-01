@@ -41,16 +41,16 @@ worker_handle_read(struct Worker *worker, int fd, void *buffer, size_t len_in_by
 void
 worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
-	glog_info("[Worker n.%u] New API request `writeFile`.", worker->id);
-	char response[1] = { RESPONSE_OK };
-	int err = writen(fd, response, 1);
-	UNUSED(err);
+	glog_debug("[Worker n.%u] New API request `writeFile`.", worker->id);
+	//char response[1] = { RESPONSE_OK };
+	//int err = writen(fd, response, 1);
+	//UNUSED(err);
 }
 
 void
 worker_handle_lock(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
-	glog_info("[Worker n.%u] New API request `lockFile`.", worker->id);
+	glog_debug("[Worker n.%u] New API request `lockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	htable_lock_file(htable, path);
 	char response[1] = { RESPONSE_OK };
@@ -62,7 +62,7 @@ worker_handle_lock(struct Worker *worker, int fd, void *buffer, size_t len_in_by
 void
 worker_handle_unlock(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
-	glog_info("[Worker n.%u] New API request `unlockFile`.", worker->id);
+	glog_debug("[Worker n.%u] New API request `unlockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
 	int result = htable_unlock_file(htable, path);
@@ -79,7 +79,7 @@ worker_handle_unlock(struct Worker *worker, int fd, void *buffer, size_t len_in_
 void
 worker_handle_remove(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
-	glog_info("[Worker n.%u] New API request `removeFile`.", worker->id);
+	glog_debug("[Worker n.%u] New API request `removeFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
 	int result = htable_remove_file(htable, path);
@@ -101,7 +101,7 @@ worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in
 	if (len_in_bytes == 8) {
 		return;
 	}
-	glog_debug(
+	glog_trace(
 	  "[Worker n.%u] The latest message is %zu bytes long.", worker->id, len_in_bytes);
 	/* Remove header details from the buffer. */
 	char op = ((char *)(buffer))[8];
@@ -126,6 +126,7 @@ worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in
 		default:
 			glog_error("Unrecognized request from client.");
 	}
+	glog_trace("[Worker n.%u] Finished handling request.", worker->id);
 }
 
 void *
@@ -136,17 +137,15 @@ worker_entry_point(void *args)
 	struct Worker worker;
 	worker.id = id;
 	sem_t *sem = &workload_queue_get(id)->sem;
-	while (!detect_shutdown_hard()) {
-		struct timespec deadline;
-		clock_gettime(CLOCK_REALTIME, &deadline);
-		deadline.tv_sec += 1;
-		sem_timedwait(sem, &deadline);
-		if (errno == ETIMEDOUT) {
-			continue;
+	while (true) {
+		int err = sem_wait(sem);
+		if (err != 0) {
+			glog_error("[Worker n.%u] Semaphore issues detected (possibly deadlock).", id);
+			pthread_exit(NULL);
 		}
-		glog_debug("[Worker n.%u] New message incoming. Pulling...", id);
+		glog_trace("[Worker n.%u] New message incoming. Pulling...", id);
 		struct Message *msg = workload_queue_pull(id);
-		glog_debug("[Worker n.%u] Done.", id);
+		glog_trace("[Worker n.%u] Done.", id);
 		worker_handle_message(&worker, msg->fd, msg->buffer.raw, msg->buffer.size_in_bytes);
 	}
 	return NULL;

@@ -32,9 +32,9 @@ config_parse_file(char abs_path[])
 	toml_datum_t param_max_storage = toml_int_in(toml_table, "max-storage");
 	toml_datum_t param_num_workers = toml_int_in(toml_table, "num-workers");
 	toml_datum_t param_socket_filepath = toml_string_in(toml_table, "socket-filepath");
-	toml_datum_t param_glog_filepath = toml_string_in(toml_table, "log-filepath");
+	toml_datum_t param_log_filepath = toml_string_in(toml_table, "log-filepath");
 	if (!param_max_files.ok || !param_max_storage.ok || !param_num_workers.ok ||
-	    !param_socket_filepath.ok || !param_glog_filepath.ok) {
+	    !param_socket_filepath.ok || !param_log_filepath.ok) {
 		glog_fatal("Malformed TOML attributes in configuration file.");
 		goto err;
 	}
@@ -42,7 +42,7 @@ config_parse_file(char abs_path[])
 	config->max_storage_in_bytes = param_max_storage.u.i;
 	config->num_workers = param_num_workers.u.i;
 	config->socket_filepath = param_socket_filepath.u.s;
-	config->glog_filepath = param_glog_filepath.u.s;
+	config->log_filepath = param_log_filepath.u.s;
 	config->err = 0;
 	toml_free(toml);
 	fclose(f);
@@ -62,6 +62,6 @@ config_free(struct Config *config)
 		return;
 	}
 	free(config->socket_filepath);
-	free(config->glog_filepath);
+	free(config->log_filepath);
 	free(config);
 }
