@@ -301,3 +301,63 @@ htable_append_to_file_contents(struct HTable *htable,
 	}
 	return htable_evict_files(htable, false, size_in_bytes, evicted, evicted_count);
 }
+
+struct HTableVisitor
+{
+	struct HTable *htable;
+	unsigned max_visits;
+	unsigned visits;
+	size_t bucket_i;
+	struct HTableLlNode *last_visited;
+};
+
+struct HTableVisitor *
+htable_visit(struct HTable *htable, unsigned max_visits)
+{
+	/* Immediately allocate enough memory on the heap. */
+	struct HTableVisitor *visitor = xmalloc(sizeof(struct HTableVisitor *));
+	visitor->htable = htable;
+	visitor->max_visits = max_visits;
+	visitor->visits = 0;
+	visitor->bucket_i = 0;
+	visitor->last_visited = NULL;
+	struct HTableBucket *bucket = &htable->buckets[0];
+	int err = 0;
+	/* Lock the first bucket. */
+	err |= pthread_mutex_lock(&bucket->guard);
+	if (err < 0) {
+		return NULL;
+	}
+	return visitor;
+}
+
+struct File *
+htable_visitor_next(struct HTableVisitor *visitor)
+{
+	assert(visitor);
+	/* Check if we have visited enough items already. */
+	if (visitor->visits >= visitor->max_visits && visitor->max_visits != 0) {
+		/* The visit is complete. */
+		return NULL;
+	}
+	struct HTable *htable = visitor->htable;
+	struct HTableBucket *bucket = &htable->buckets[visitor->bucket_i];
+	struct HTableLlNode *next_in_bucket = visitor->last_visited->next;
+	/* The current bucket doesn't have any more items, so let's unlock this one
+	 * and lock the next one, until we find one with at least one item. */
+	while (!next_in_bucket) {
+		int err = pthread_mutex_unlock(&bucket->guard);
+		visitor->bucket_i++;
+		if (visitor->bucket_i == htable->buckets_count) {
+			/* No more buckets! */
+			return NULL;
+		}
+		bucket++;
+		err |= pthread_mutex_lock(&bucket->guard);
+		if (err < 0) {
+			return NULL;
+		}
+		next_in_bucket = bucket->head;
+	}
+	visitor->last_visited = next_in_bucket;
+}

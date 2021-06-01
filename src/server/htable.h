@@ -30,8 +30,6 @@ struct File
     struct Subscriber *subs;
 };
 
-struct HTableVisitor;
-
 /* Creates an empty `struct HTable` with a fixed number of `buckets`. Returns
  * NULL on system errors that make the operation impossible. */
 struct HTable *
@@ -88,10 +86,12 @@ htable_open_file(struct HTable *htable, const char *key);
 int
 htable_remove_file(struct HTable *htable, const char *key);
 
-struct HTableVisitor *
-htable_visit(const struct HTable *htable, unsigned max_visits);
+struct HTableVisitor;
 
-const struct File *
-htable_visitor_next(const struct HTableVisitor *visitor);
+struct HTableVisitor *
+htable_visit(struct HTable *htable, unsigned max_visits);
+
+struct File *
+htable_visitor_next(struct HTableVisitor *visitor);
 
 #endif

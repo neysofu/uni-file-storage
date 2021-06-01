@@ -86,7 +86,7 @@ int
 write_u64(int fd, uint64_t data)
 {
 	char bytes[8];
-	u64_to_big_endian(data, bytes);
+	u64_to_big_endian(data, (uint8_t *)bytes);
 	return writen(fd, bytes, 8);
 }
 
@@ -149,8 +149,8 @@ handle_response_with_files(int fd, const char *dirname)
 {
 	int err = 0;
 	/* Read header. */
-	char buffer_response_code[1] = { '\0' };
-	char buffer_num_files[8] = { '\0' };
+	uint8_t buffer_response_code[1] = { '\0' };
+	uint8_t buffer_num_files[8] = { '\0' };
 	err |= read(fd, buffer_response_code, 1);
 	if (err < 0 || buffer_response_code[0] == RESPONSE_ERR) {
 		return -1;
@@ -162,7 +162,7 @@ handle_response_with_files(int fd, const char *dirname)
 	size_t num_files = big_endian_to_u64(buffer_num_files);
 	/* Read actual file contents. */
 	for (uint64_t i = 0; i < num_files; i++) {
-		char buffer_lengths[16] = { '\0' };
+		uint8_t buffer_lengths[16] = { '\0' };
 		err |= readn(state.fd, buffer_lengths, 16);
 		if (err < 0) {
 			return -1;
@@ -190,7 +190,7 @@ handle_response_with_files(int fd, const char *dirname)
  * - 8 byte header (length prefix).
  * - 1 byte operation code.
  * - N remaining bytes for a single variable-length argument.
- * 
+ *
  * The response is just one single byte with a response code. */
 int
 make_simple_request(enum ApiOp op, const char *pathname)
@@ -221,7 +221,7 @@ make_simple_request(enum ApiOp op, const char *pathname)
  * - 8 bytes, length of 2nd argument.
  * - N bytes for 1st argument.
  * - M bytes for 2nd argument.
- * 
+ *
  * The response is operation-specific. */
 int
 make_request_with_two_args(enum ApiOp op,
@@ -308,7 +308,7 @@ readFile(const char *pathname, void **buf, size_t *size)
 		return -1;
 	}
 	/* After the "simple" request, `readFile` also must read the file contents. */
-	uint8_t buffer_len[8] = {0};
+	uint8_t buffer_len[8] = { 0 };
 	err |= readn(state.fd, buffer_len, 8);
 	*size = big_endian_to_u64(buffer_len);
 	if (err < 0) {
@@ -378,11 +378,6 @@ removeFile(const char *pathname)
 int
 writeFile(const char *pathname, const char *dirname)
 {
-	state.last_operation = API_OP_WRITE_FILE;
-	assert(pathname);
-	if (!state.connection_is_open) {
-		return err_closed_connection();
-	}
 	char abs_path[PATH_MAX];
 	void *buffer = NULL;
 	size_t buffer_size = 0;
@@ -390,9 +385,9 @@ writeFile(const char *pathname, const char *dirname)
 	if (err) {
 		return -1;
 	}
-	err = make_request_with_two_args(
+	err |= make_request_with_two_args(
 	  API_OP_WRITE_FILE, abs_path, strlen(abs_path), buffer, buffer_size);
-	if (err) {
+	if (err < 0) {
 		return -1;
 	}
 	return handle_response_with_files(state.fd, dirname);
@@ -401,12 +396,6 @@ writeFile(const char *pathname, const char *dirname)
 int
 appendToFile(const char *pathname, void *buffer, size_t buffer_size, const char *dirname)
 {
-	state.last_operation = API_OP_APPEND_TO_FILE;
-	assert(pathname);
-	assert(buffer);
-	if (!state.connection_is_open) {
-		return err_closed_connection();
-	}
 	char abs_path[PATH_MAX];
 	char *s = realpath(pathname, abs_path);
 	if (!s) {

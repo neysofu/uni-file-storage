@@ -33,7 +33,7 @@ log_io_err(const struct Worker *worker)
 }
 
 void
-worker_handle_read(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_info("[Worker n.%u] New API request `readFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
@@ -48,6 +48,19 @@ worker_handle_read(struct Worker *worker, int fd, void *buffer, size_t len_in_by
 	}
 	htable_release(htable, path);
 	free(path);
+}
+
+void
+worker_handle_read_n_files(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+{
+	glog_info("[Worker n.%u] New API request `readNFiles`.", worker->id);
+	if (len_in_bytes != 8) {
+		glog_error("[Worker n.%u] Bad message format.", worker->id);
+		return;
+	}
+	/* The whole requets fits into 8 bytes, i.e. N. */
+	uint64_t n = big_endian_to_u64(buffer);
+	// TODO
 }
 
 void
@@ -123,7 +136,7 @@ worker_handle_open_file(struct Worker *worker, int fd, void *buffer, size_t len_
 }
 
 void
-worker_handle_lock(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+worker_handle_lock_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_debug("[Worker n.%u] New API request `lockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
@@ -142,7 +155,7 @@ worker_handle_lock(struct Worker *worker, int fd, void *buffer, size_t len_in_by
 }
 
 void
-worker_handle_unlock(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+worker_handle_unlock_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_debug("[Worker n.%u] New API request `unlockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
@@ -161,7 +174,7 @@ worker_handle_unlock(struct Worker *worker, int fd, void *buffer, size_t len_in_
 }
 
 void
-worker_handle_remove(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+worker_handle_remove_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_debug("[Worker n.%u] New API request `removeFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
@@ -195,7 +208,10 @@ worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in
 	len_in_bytes = len_in_bytes - 9;
 	switch (op) {
 		case API_OP_READ_FILE:
-			worker_handle_read(worker, fd, buffer, len_in_bytes);
+			worker_handle_read_file(worker, fd, buffer, len_in_bytes);
+			break;
+		case API_OP_READ_N_FILES:
+			worker_handle_read_n_files(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_OPEN_FILE:
 			worker_handle_open_file(worker, fd, buffer, len_in_bytes);
@@ -204,16 +220,16 @@ worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in
 			worker_handle_write_file(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_UNLOCK_FILE:
-			worker_handle_unlock(worker, fd, buffer, len_in_bytes);
+			worker_handle_unlock_file(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_LOCK_FILE:
-			worker_handle_lock(worker, fd, buffer, len_in_bytes);
+			worker_handle_lock_file(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_REMOVE_FILE:
-			worker_handle_remove(worker, fd, buffer, len_in_bytes);
+			worker_handle_remove_file(worker, fd, buffer, len_in_bytes);
 			break;
 		default:
-			glog_error("Unrecognized request from client.");
+			glog_error("[Worker n.%u] Unrecognized request from client.", worker->id);
 	}
 	glog_trace("[Worker n.%u] Finished handling request.", worker->id);
 }
