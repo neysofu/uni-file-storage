@@ -104,10 +104,14 @@ receiver_cleanup(struct Receiver *r)
 }
 
 void
-hand_over_buf_to_worker(struct Receiver *r, void *buffer, size_t size, int fd)
+hand_over_buf_to_worker(struct Receiver *r,
+                        void *buffer,
+                        size_t size,
+                        unsigned conn_id,
+                        int fd)
 {
 	unsigned thread_i = rand() % r->num_workers;
-	glog_debug("Handing over message to worker n. %u.", thread_i, r->num_workers);
+	glog_debug("Handing over connection n.%u to worker n.%u.", conn_id, thread_i);
 	struct WorkloadQueue *queue = workload_queue_get(thread_i);
 	assert(queue);
 	struct Message *msg = xmalloc(sizeof(struct Message));
@@ -141,12 +145,11 @@ receiver_poll(struct Receiver *r)
 		num_reads--;
 		receiver_add_new_connection(r);
 	}
-	struct Message *head = NULL;
 	/* We start counting from 1 because the first element contains the root
 	 * socket connection and we're not interested in that. */
 	for (size_t i = 1; i < r->active_sockets_count; i++) {
 		if ((r->active_sockets[i].revents & POLLIN) > 0) {
-			glog_trace("Polled a relevant event on connection n. %zu.", i);
+			glog_trace("Polled a relevant event on connection n.%zu.", i);
 			int fd = r->active_sockets[i].fd;
 			void *buffer = deserializer_buffer(r->deserializers[i]);
 			size_t missing_bytes = deserializer_missing(r->deserializers[i]);
@@ -157,19 +160,19 @@ receiver_poll(struct Receiver *r)
 			 *  - EOF.
 			 *  - Errors during read. */
 			if (num_bytes == 0) {
-				glog_info("Dropping connection n. %zu due to EOF.", i);
+				glog_info("Dropping connection n.%zu due to EOF.", i);
 				r->active_sockets[i].fd = -1;
 			} else if (num_bytes < 0) {
-				glog_warn("Dropping connection n. %zu due to socket error.", i);
+				glog_warn("Dropping connection n.%zu due to socket error.", i);
 				r->active_sockets[i].fd = -1;
 			} else {
-				glog_trace("Read %zd bytes from connection n. %zu.", num_bytes, i);
+				glog_trace("Read %zd bytes from connection n.%zu.", num_bytes, i);
 				struct Buffer *buf = deserializer_detach(r->deserializers[i], num_bytes);
 				if (buf) {
-					glog_debug("Got a full message of %zu bytes from connection n. %zu.",
+					glog_debug("Got a full message of %zu bytes from connection n.%zu.",
 					           buf->size_in_bytes,
 					           i);
-					hand_over_buf_to_worker(r, buf->raw, buf->size_in_bytes, fd);
+					hand_over_buf_to_worker(r, buf->raw, buf->size_in_bytes, i, fd);
 					free(buf);
 				}
 			}
