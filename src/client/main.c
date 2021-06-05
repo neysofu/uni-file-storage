@@ -33,6 +33,12 @@ print_client_err(enum ClientErr err)
 		case CLIENT_ERR_UNKNOWN_OPTION:
 			puts("Unknown command line options.");
 			break;
+		case CLIENT_ERR_BAD_OPTION_CAP_D:
+			puts("-D can only be used after either -w or -W.");
+			break;
+		case CLIENT_ERR_BAD_OPTION_D:
+			puts("-d can only be used after either -r or -R.");
+			break;
 		default:
 			puts("No further information is available.");
 	}
