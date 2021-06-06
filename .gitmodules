@@ -7,3 +7,6 @@
 [submodule "lib/logc"]
 	path = lib/logc
 	url = https://github.com/rxi/log.c.git
+[submodule "lib/lz4"]
+	path = lib/lz4
+	url = git@github.com:lz4/lz4.git
