@@ -1,18 +1,14 @@
 #ifndef SOL_SERVER_HTABLE
 #define SOL_SERVER_HTABLE
 
+#include "config.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
-struct Subscriber {
-    int fd;
-    struct Subscriber *next;
-};
-
-// TODO: implement these
-enum CacheReplacementPolicy {
-	POLICY_BUCKET_BASED,
-	POLICY_FIFO,
+struct Subscriber
+{
+	int fd;
+	struct Subscriber *next;
 };
 
 /* A specialized, concurrent hash table for the file storage server. */
@@ -27,13 +23,14 @@ struct File
 	int fd_owner;
 	bool is_open;
 	bool is_locked;
-    struct Subscriber *subs;
+	struct Subscriber *subs;
 };
 
-/* Creates an empty `struct HTable` with a fixed number of `buckets`. Returns
- * NULL on system errors that make the operation impossible. */
+/* Creates an empty `struct HTable` with a fixed number of `buckets` and settings
+ * as mandated by `config`. Returns NULL on system errors that make the
+ * operation impossible. */
 struct HTable *
-htable_create(size_t buckets, enum CacheReplacementPolicy policy);
+htable_create(size_t buckets, const struct Config *config);
 
 /* Deletes `htable` and all its contents from memory (files, paths, flags, etc.). */
 void

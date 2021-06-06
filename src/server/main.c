@@ -76,6 +76,7 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 int
 inner_main(struct Config *config)
 {
+	glog_info("Starting server.");
 	FILE *f_log = NULL;
 	if (config->log_filepath) {
 		glog_info("Opening log file '%s'....", config->log_filepath);
@@ -89,7 +90,6 @@ inner_main(struct Config *config)
 	} else if (config->log_filepath) {
 		glog_warn("Couldn't open the log file. Ignoring.");
 	}
-	global_config = config;
 	int socket_fd = 0;
 	int err = 0;
 	glog_debug("Now listening for incoming connections.");
@@ -101,9 +101,9 @@ inner_main(struct Config *config)
 		}
 		return -1;
 	}
-	glog_debug("Now spawning %d worker threads...", config->num_workers);
+	glog_info("Now spawning %d worker threads...", config->num_workers);
 	spawn_workers(config->num_workers);
-	glog_debug("Done.");
+	glog_info("Done.");
 	struct Receiver *receiver = receiver_create(socket_fd, config->num_workers);
 	while (!detect_shutdown_hard()) {
 		if (detect_shutdown_soft()) {
@@ -111,7 +111,7 @@ inner_main(struct Config *config)
 		}
 		err = receiver_poll(receiver);
 		if (err < 0) {
-			glog_error("Bad I/O during poll. Exiting.");
+			glog_fatal("Bad I/O during poll. Exiting.");
 			if (f_log) {
 				fclose(f_log);
 			}
@@ -129,8 +129,7 @@ inner_main(struct Config *config)
 int
 main(int argc, char **argv)
 {
-	htable = htable_create(100, POLICY_BUCKET_BASED);
-	glog_debug("Starting server. Initializing some internal resources.");
+	glog_debug("Initializing some internal resources.");
 	/* Seed the PRNG (pseudorandom number generator). */
 	srand(time(NULL));
 	/* Set signal handlers. */
@@ -153,8 +152,10 @@ main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	glog_debug("Configuration was deemed valid.");
+	global_config = config;
 	/* Remove the server socket file, if it exists. We simply ignore any error. */
 	unlink(config->socket_filepath);
 	workload_queues_init(config->num_workers);
+	htable = htable_create(10, config);
 	return inner_main(config);
 }

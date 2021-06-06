@@ -1,4 +1,5 @@
 #include "htable.h"
+#include "config.h"
 #include "utils.h"
 #include "xxHash/xxhash.h"
 #include <assert.h>
@@ -25,32 +26,33 @@ struct HTableBucket
 
 struct HTable
 {
+	/* Settings. */
 	enum CacheReplacementPolicy policy;
-	pthread_mutex_t stats_guard;
-	size_t items_count;
 	size_t max_items_count;
-	size_t buckets_count;
-	size_t total_space_in_bytes;
 	size_t max_space_in_bytes;
+	/* Internal data. */
+	pthread_mutex_t stats_guard;
+	size_t total_space_in_bytes;
+	size_t items_count;
+	size_t buckets_count;
 	struct HTableBucket *buckets;
 };
 
 struct HTable *
-htable_create(size_t buckets, enum CacheReplacementPolicy policy)
+htable_create(size_t buckets, const struct Config *config)
 {
 	assert(buckets > 0);
 	struct HTable *htable = xmalloc(sizeof(struct HTable));
-	htable->policy = policy;
+	htable->policy = config->cache_policy;
 	int err = pthread_mutex_init(&htable->stats_guard, NULL);
 	if (err) {
 		free(htable);
 		return NULL;
 	}
-	// FIXME: max limits
 	htable->items_count = 0;
-	htable->max_items_count = 0;
+	htable->max_items_count = config->max_files;
 	htable->total_space_in_bytes = 0;
-	htable->max_space_in_bytes = 0;
+	htable->max_space_in_bytes = config->max_storage_in_bytes;
 	htable->buckets_count = buckets;
 	htable->buckets = xmalloc(sizeof(struct HTableBucket) * buckets);
 	for (size_t i = 0; i < buckets; i++) {
