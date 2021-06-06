@@ -3,6 +3,11 @@
 
 #include "cli.h"
 
+/* Executes an RPC (Remote Procedure Call) to the file storage server. The
+ * details of the RPC operation, as well as arguments and other details, are
+ * specified in `action`.
+ *
+ * Returns 0 on success, -1 on failure, and sets `errno` appropriately. */
 int
 run_action(struct Action *action);
 

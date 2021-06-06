@@ -233,9 +233,6 @@ struct CliArgs *
 cli_args_parse(int argc, char **argv)
 {
 	struct CliArgs *cli_args = cli_args_default();
-	if (!cli_args) {
-		return NULL;
-	}
 	char c = '\0';
 	char last_option = '\0';
 	while ((c = getopt(argc, argv, OPTSTRING)) != -1) {
