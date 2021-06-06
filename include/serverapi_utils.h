@@ -1,8 +1,7 @@
 #ifndef SOL_SERVERAPI_UTILS
 #define SOL_SERVERAPI_UTILS
 
-/* Unique identifiers for all operations available over the public API, besides
- * `openConnection` and `closeConnection`. */
+/* Unique identifiers for all operations available over the public API. */
 enum ApiOp
 {
 	API_OP_OPEN_CONNECTION,
@@ -25,7 +24,8 @@ enum ApiOp
  * - N. of evicted files (if relevant): 8 bytes.
  * - Evicted files' details...
  */
-enum ResponseType {
+enum ResponseType
+{
 	RESPONSE_OK,
 	RESPONSE_ERR,
 };

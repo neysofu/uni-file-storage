@@ -8,6 +8,7 @@
 #include "utils.h"
 #include <assert.h>
 #include <dirent.h>
+#include <libgen.h>
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
@@ -97,7 +98,6 @@ run_action_remove_files(struct Action *action)
 {
 	char *path = strtok(action->arg_s1, ",");
 	while (path) {
-		log_info("Calling API function `removeFile`.");
 		log_debug("Target file: '%s'.", path);
 		int err = removeFile(path);
 		if (err < 0) {
@@ -112,15 +112,49 @@ run_action_remove_files(struct Action *action)
 }
 
 int
+run_action_read_files(struct Action *action)
+{
+	/* Open directory. */
+	char *dirname = action->arg_s2;
+	DIR *d;
+	struct dirent *dir;
+	d = opendir(dirname);
+	/* Iterate through files. */
+	char *pathname = strtok(action->arg_s1, ",");
+	while (pathname) {
+		char *filename = basename(pathname);
+		FILE *location = fopen(filename, "wb");
+		void *buffer = NULL;
+		size_t buffer_size = 0;
+		int err = readFile(pathname, &buffer, &buffer_size);
+		fwrite(buffer, buffer_size, 1, location);
+		if (err) {
+			return err;
+		}
+		pathname = strtok(NULL, ",");
+		fclose(location);
+	}
+	return 0;
+}
+
+int
+run_action_read_random_files(struct Action *action)
+{
+	return readNFiles(action->arg_i, action->arg_s1);
+}
+
+int
 run_action(struct Action *action)
 {
 	switch (action->type) {
-		case ACTION_REMOVE_FILES:
-			return run_action_remove_files(action);
 		case ACTION_WRITE_FILES:
 			return run_action_write_file(action);
 		case ACTION_WRITE_DIR:
 			return run_action_write_dir(action);
+		case ACTION_READ_FILES:
+			return run_action_read_files(action);
+		case ACTION_READ_RANDOM_FILES:
+			return run_action_read_random_files(action);
 		case ACTION_WAIT_MILLISECONDS:
 			log_debug("Waiting %d milliseconds.", action->arg_i);
 			wait_msec(action->arg_i);
@@ -129,6 +163,8 @@ run_action(struct Action *action)
 			return run_action_lock_files(action);
 		case ACTION_UNLOCK_FILES:
 			return run_action_unlock_files(action);
+		case ACTION_REMOVE_FILES:
+			return run_action_remove_files(action);
 		default:
 			assert(false);
 	}

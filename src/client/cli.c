@@ -294,9 +294,6 @@ cli_args_parse(int argc, char **argv)
 		}
 		last_option = c;
 		if (cli_args->err) {
-			log_error(
-			  "Failure during command-line parsing (err. code: %d). Stopping immediately.",
-			  cli_args->err);
 			break;
 		}
 	}

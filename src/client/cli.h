@@ -6,15 +6,24 @@
 
 /* Identifiers for all actions, i.e. sequences of API calls as specified by a
  * single command-line option. */
-enum ActionType {
-    ACTION_WRITE_DIR,
-    ACTION_WRITE_FILES,
-    ACTION_READ_FILES,
-    ACTION_READ_RANDOM_FILES,
-    ACTION_WAIT_MILLISECONDS,
-    ACTION_LOCK_FILES,
-    ACTION_UNLOCK_FILES,
-    ACTION_REMOVE_FILES,
+enum ActionType
+{
+	/* '-W' option. */
+	ACTION_WRITE_DIR,
+	/* '-w' option. */
+	ACTION_WRITE_FILES,
+	/* '-r' option. */
+	ACTION_READ_FILES,
+	/* '-R' option. */
+	ACTION_READ_RANDOM_FILES,
+	/* '-t' option. Technically not an API call. */
+	ACTION_WAIT_MILLISECONDS,
+	/* '-l' option. */
+	ACTION_LOCK_FILES,
+	/* '-u' option. */
+	ACTION_UNLOCK_FILES,
+	/* '-c' option. */
+	ACTION_REMOVE_FILES,
 };
 
 /* A recipe for a sequence of API calls. */
