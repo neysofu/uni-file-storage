@@ -43,6 +43,7 @@ config_parse_file(char abs_path[])
 	config->num_workers = param_num_workers.u.i;
 	config->socket_filepath = param_socket_filepath.u.s;
 	config->log_filepath = param_log_filepath.u.s;
+	config->log_f = fopen(config->socket_filepath, "a");
 	config->err = 0;
 	toml_free(toml);
 	fclose(f);
@@ -60,6 +61,9 @@ config_free(struct Config *config)
 {
 	if (!config) {
 		return;
+	}
+	if (config->log_f) {
+		fclose(config->log_f);
 	}
 	free(config->socket_filepath);
 	free(config->log_filepath);

@@ -122,7 +122,7 @@ worker_handle_open_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	glog_debug("[Worker n.%u] New API request `openFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
-	int result = htable_open_file(htable, path);
+	int result = htable_open_file(htable, path, fd);
 	if (result < 0) {
 		response[0] = RESPONSE_ERR;
 	} else {

@@ -152,6 +152,10 @@ main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	glog_debug("Configuration was deemed valid.");
+	/* Remember to write logs to the preconfigured log file, if present. */
+	if (config->log_f) {
+		log_add_fp(config->log_f, LOG_TRACE);
+	}
 	global_config = config;
 	/* Remove the server socket file, if it exists. We simply ignore any error. */
 	unlink(config->socket_filepath);

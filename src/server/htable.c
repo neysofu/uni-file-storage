@@ -104,7 +104,7 @@ bucket_ptr(struct HTable *htable, const char *key)
  * its associated item, if present. Returns NULL for unsuccesful searches. The
  * bucket must be unlockd after this call. */
 struct HTableItem *
-htable_fetch_node(struct HTable *htable, const char *key)
+htable_fetch_item(struct HTable *htable, const char *key)
 {
 	assert(htable);
 	assert(key);
@@ -114,12 +114,12 @@ htable_fetch_node(struct HTable *htable, const char *key)
 	if (err) {
 		return NULL;
 	}
-	struct HTableItem *node = bucket->head;
-	while (node) {
-		if (node->file.key == key) {
-			return node;
+	struct HTableItem *item = bucket->head;
+	while (item) {
+		if (item->file.key == key) {
+			return item;
 		}
-		node = node->next;
+		item = item->next;
 	}
 	return NULL;
 }
@@ -127,7 +127,7 @@ htable_fetch_node(struct HTable *htable, const char *key)
 struct File *
 htable_fetch_file(struct HTable *htable, const char *key)
 {
-	struct HTableItem *node = htable_fetch_node(htable, key);
+	struct HTableItem *node = htable_fetch_item(htable, key);
 	if (!node) {
 		return NULL;
 	}
@@ -149,7 +149,13 @@ htable_lock_file(struct HTable *htable, const char *key, int fd)
 	if (!file) {
 		return -1;
 	}
+	/* The file is already locked, can't really do much else. */
+	if (file->is_locked) {
+		htable_release(htable, key);
+		return -1;
+	}
 	file->is_locked = true;
+	file->fd_owner = fd;
 	return htable_release(htable, key);
 }
 
@@ -294,11 +300,15 @@ htable_evict_files(struct HTable *htable,
 }
 
 int
-htable_remove_file(struct HTable *htable, const char *key)
+htable_remove_file(struct HTable *htable, const char *key, int fd)
 {
-	struct HTableBucket *bucket = NULL;
-	struct HTableItem *node = htable_fetch_node(htable, key);
+	struct HTableItem *node = htable_fetch_item(htable, key);
+	struct HTableBucket *bucket = bucket_ptr(htable, key);
 	if (!node) {
+		return -1;
+	}
+	if (node->file.is_locked && node->file.fd_owner != fd) {
+		htable_release(htable, key);
 		return -1;
 	}
 	/* Chain together the previous and next nodes within the bucket's linked
