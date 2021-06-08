@@ -1,5 +1,6 @@
 #include "htable.h"
 #include "config.h"
+#include "fifo_cache.h"
 #include "utils.h"
 #include "xxHash/xxhash.h"
 #include <assert.h>
@@ -10,24 +11,24 @@
 
 #define XXHASH_SEED 0
 
-struct HTableLlNode
+struct HTableItem
 {
-	struct File item;
-	struct HTableLlNode *next;
-	struct HTableLlNode *prev;
+	struct File file;
+	struct HTableItem *next;
+	struct HTableItem *prev;
 };
 
 struct HTableBucket
 {
 	pthread_mutex_t guard;
-	struct HTableLlNode *head;
-	struct HTableLlNode *last;
+	struct HTableItem *head;
+	struct HTableItem *last;
 };
 
 struct HTable
 {
+	struct FifoCache *fcache;
 	/* Settings. */
-	enum CacheReplacementPolicy policy;
 	size_t max_items_count;
 	size_t max_space_in_bytes;
 	/* Internal data. */
@@ -43,16 +44,21 @@ htable_create(size_t buckets, const struct Config *config)
 {
 	assert(buckets > 0);
 	struct HTable *htable = xmalloc(sizeof(struct HTable));
-	htable->policy = config->cache_policy;
-	int err = pthread_mutex_init(&htable->stats_guard, NULL);
-	if (err) {
+	htable->fcache = fifo_cache_create(config->max_files, config->max_storage_in_bytes);
+	if (!htable->fcache) {
 		free(htable);
 		return NULL;
 	}
-	htable->items_count = 0;
+	int err = pthread_mutex_init(&htable->stats_guard, NULL);
+	if (err) {
+		free(htable);
+		free(htable->fcache);
+		return NULL;
+	}
 	htable->max_items_count = config->max_files;
-	htable->total_space_in_bytes = 0;
 	htable->max_space_in_bytes = config->max_storage_in_bytes;
+	htable->items_count = 0;
+	htable->total_space_in_bytes = 0;
 	htable->buckets_count = buckets;
 	htable->buckets = xmalloc(sizeof(struct HTableBucket) * buckets);
 	for (size_t i = 0; i < buckets; i++) {
@@ -76,31 +82,41 @@ htable_free(struct HTable *htable)
 	}
 	for (size_t i = 0; i < htable->buckets_count; i++) {
 		/* Ignore any errors: everything will be out of scope very soon, we don't
-		 * care. */
+		 * really care. */
 		pthread_mutex_destroy(&htable->buckets[i].guard);
 		// TODO: free other stuff
 	}
+	fifo_cache_free(htable->fcache);
 	free(htable->buckets);
 	free(htable);
 }
 
-struct HTableLlNode *
-htable_fetch_node(struct HTable *htable, const char *key, struct HTableBucket **b)
+/* Returns a pointer to the bucket within `htable` that contains `key`, if
+ * present at all. */
+static struct HTableBucket *
+bucket_ptr(struct HTable *htable, const char *key)
+{
+	uint64_t hash = XXH64(key, strlen(key), XXHASH_SEED);
+	return &htable->buckets[hash % htable->buckets_count];
+}
+
+/* Locks the bucket within `htable` that contains `key` and returns a pointer to
+ * its associated item, if present. Returns NULL for unsuccesful searches. The
+ * bucket must be unlockd after this call. */
+struct HTableItem *
+htable_fetch_node(struct HTable *htable, const char *key)
 {
 	assert(htable);
 	assert(key);
 	int err = 0;
-	uint64_t hash = XXH64(key, strlen(key), XXHASH_SEED);
-	size_t bucket_i = hash % htable->buckets_count;
-	struct HTableBucket *bucket = &htable->buckets[bucket_i];
-	*b = bucket;
+	struct HTableBucket *bucket = bucket_ptr(htable, key);
 	err = pthread_mutex_lock(&bucket->guard);
 	if (err) {
 		return NULL;
 	}
-	struct HTableLlNode *node = bucket->head;
+	struct HTableItem *node = bucket->head;
 	while (node) {
-		if (node->item.key == key) {
+		if (node->file.key == key) {
 			return node;
 		}
 		node = node->next;
@@ -111,25 +127,23 @@ htable_fetch_node(struct HTable *htable, const char *key, struct HTableBucket **
 struct File *
 htable_fetch_file(struct HTable *htable, const char *key)
 {
-	struct HTableBucket *bucket = NULL;
-	struct HTableLlNode *node = htable_fetch_node(htable, key, &bucket);
+	struct HTableItem *node = htable_fetch_node(htable, key);
 	if (!node) {
 		return NULL;
 	}
-	return &node->item;
+	return &node->file;
 }
 
+/* Frees the bucket within `htable` that contains `key`. */
 int
 htable_release(struct HTable *htable, const char *key)
 {
-	uint64_t hash = XXH64(key, strlen(key), XXHASH_SEED);
-	size_t bucket_i = hash % htable->buckets_count;
-	struct HTableBucket *bucket = &htable->buckets[bucket_i];
+	struct HTableBucket *bucket = bucket_ptr(htable, key);
 	return pthread_mutex_unlock(&bucket->guard);
 }
 
 int
-htable_lock_file(struct HTable *htable, const char *key)
+htable_lock_file(struct HTable *htable, const char *key, int fd)
 {
 	struct File *file = htable_fetch_file(htable, key);
 	if (!file) {
@@ -140,25 +154,76 @@ htable_lock_file(struct HTable *htable, const char *key)
 }
 
 int
-htable_unlock_file(struct HTable *htable, const char *key)
+htable_unlock_file(struct HTable *htable, const char *key, int fd)
 {
 	struct File *file = htable_fetch_file(htable, key);
 	if (!file) {
 		return -1;
 	}
-	file->is_locked = false;
-	return htable_release(htable, key);
+	if (file->is_locked && file->fd_owner == fd) {
+		file->is_locked = false;
+		return htable_release(htable, key);
+	} else {
+		htable_release(htable, key);
+		return -1;
+	}
 }
 
 int
-htable_open_file(struct HTable *htable, const char *key)
+htable_create_file(struct HTable *htable, const char *key, bool lock, int fd)
+{
+	struct File *file = htable_fetch_file(htable, key);
+	if (file) {
+		htable_release(htable, key);
+		return -1;
+	}
+	struct HTableBucket *bucket = bucket_ptr(htable, key);
+	struct HTableItem *item = xmalloc(sizeof(struct HTableItem));
+	item->file.contents = NULL;
+	item->file.length_in_bytes = 0;
+	item->file.is_locked = lock;
+	item->file.is_open = true;
+	item->file.fd_owner = fd;
+	item->file.key = xmalloc(strlen(key) + 1);
+	strcpy(item->file.key, key);
+	item->next = NULL;
+	item->prev = bucket->last;
+	bucket->last = item;
+	file->is_open = true;
+	htable_release(htable, key);
+	return 0;
+}
+
+int
+htable_open_file(struct HTable *htable, const char *key, int fd)
 {
 	struct File *file = htable_fetch_file(htable, key);
 	if (!file) {
 		return -1;
 	}
-	file->is_open = true;
-	return htable_release(htable, key);
+	if (!file->is_open && (!file->is_locked || file->fd_owner == fd)) {
+		file->is_open = true;
+		return htable_release(htable, key);
+	} else {
+		htable_release(htable, key);
+		return -1;
+	}
+}
+
+int
+htable_close_file(struct HTable *htable, const char *key, int fd)
+{
+	struct File *file = htable_fetch_file(htable, key);
+	if (!file) {
+		return -1;
+	}
+	if (file->is_open && (!file->is_locked || file->fd_owner == fd)) {
+		file->is_open = false;
+		return htable_release(htable, key);
+	} else {
+		htable_release(htable, key);
+		return -1;
+	}
 }
 
 struct File *
@@ -168,7 +233,7 @@ htable_evict_one_file_locked(struct HTable *htable)
 	while (attempts > 0) {
 		size_t i = rand() % htable->buckets_count;
 		struct HTableBucket *bucket = &htable->buckets[i];
-		struct HTableLlNode *last = bucket->last;
+		struct HTableItem *last = bucket->last;
 		if (!bucket->last) {
 			attempts--;
 			continue;
@@ -232,7 +297,7 @@ int
 htable_remove_file(struct HTable *htable, const char *key)
 {
 	struct HTableBucket *bucket = NULL;
-	struct HTableLlNode *node = htable_fetch_node(htable, key, &bucket);
+	struct HTableItem *node = htable_fetch_node(htable, key);
 	if (!node) {
 		return -1;
 	}
@@ -249,8 +314,8 @@ htable_remove_file(struct HTable *htable, const char *key)
 		bucket->last = node->prev;
 	}
 	/* Free stuff. */
-	free(node->item.key);
-	free(node->item.contents);
+	free(node->file.key);
+	free(node->file.contents);
 	free(node);
 	return htable_release(htable, key);
 }
@@ -310,7 +375,7 @@ struct HTableVisitor
 	unsigned max_visits;
 	unsigned visits;
 	size_t bucket_i;
-	struct HTableLlNode *last_visited;
+	struct HTableItem *last_visited;
 };
 
 struct HTableVisitor *
@@ -344,7 +409,7 @@ htable_visitor_next(struct HTableVisitor *visitor)
 	}
 	struct HTable *htable = visitor->htable;
 	struct HTableBucket *bucket = &htable->buckets[visitor->bucket_i];
-	struct HTableLlNode *next_in_bucket = visitor->last_visited->next;
+	struct HTableItem *next_in_bucket = visitor->last_visited->next;
 	/* The current bucket doesn't have any more items, so let's unlock this one
 	 * and lock the next one, until we find one with at least one item. */
 	while (!next_in_bucket) {

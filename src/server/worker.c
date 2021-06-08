@@ -141,7 +141,7 @@ worker_handle_lock_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	glog_debug("[Worker n.%u] New API request `lockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
-	int result = htable_lock_file(htable, path);
+	int result = htable_lock_file(htable, path, fd);
 	if (result < 0) {
 		response[0] = RESPONSE_ERR;
 	} else {
@@ -160,7 +160,7 @@ worker_handle_unlock_file(struct Worker *worker, int fd, void *buffer, size_t le
 	glog_debug("[Worker n.%u] New API request `unlockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
-	int result = htable_unlock_file(htable, path);
+	int result = htable_unlock_file(htable, path, fd);
 	if (result < 0) {
 		response[0] = RESPONSE_ERR;
 	} else {
@@ -179,7 +179,7 @@ worker_handle_remove_file(struct Worker *worker, int fd, void *buffer, size_t le
 	glog_debug("[Worker n.%u] New API request `removeFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
-	int result = htable_unlock_file(htable, path);
+	int result = htable_unlock_file(htable, path, fd);
 	if (result < 0) {
 		response[0] = RESPONSE_ERR;
 	} else {

@@ -66,12 +66,12 @@ htable_release(struct HTable *htable, const char *key);
 /* Locks the file with path `key` within `htable` and returns 0 if the operation
  * was successful, -1 otherwise. */
 int
-htable_lock_file(struct HTable *htable, const char *key);
+htable_lock_file(struct HTable *htable, const char *key, int fd);
 
 /* Unlocks the file with path `key` within `htable` and returns 0 if the operation
  * was successful, -1 otherwise. */
 int
-htable_unlock_file(struct HTable *htable, const char *key);
+htable_unlock_file(struct HTable *htable, const char *key, int fd);
 
 /* Opens the file with path `key` within `htable` and returns 0 if the operation
  * was successful, -1 otherwise. */
