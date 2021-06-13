@@ -47,9 +47,10 @@ print_client_err(enum ClientErr err)
 void
 establish_connection(struct CliArgs *cli_args)
 {
-	struct timespec empty = { 0 };
 	log_info("Opening connection...");
-	int err = openConnection(cli_args->socket_name, 0, empty);
+	struct timespec empty = { 0 };
+	int err = openConnection(
+	  cli_args->socket_name, cli_args->msec_between_connection_attempts, empty);
 	if (err) {
 		log_fatal("Couldn't establish a connection with the server. Abort.");
 		cli_args_free(cli_args);

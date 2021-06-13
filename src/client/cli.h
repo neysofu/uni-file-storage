@@ -39,6 +39,7 @@ struct Action
 struct CliArgs
 {
 	enum ClientErr err;
+	unsigned msec_between_connection_attempts;
 	char *socket_name;
 	bool help_message;
 	bool enable_log;

@@ -216,6 +216,13 @@ cli_args_enable_help_message(struct CliArgs *cli_args)
 	}
 }
 
+void
+cli_args_set_msec_between_connection_attempts(struct CliArgs *cli_args, char *arg)
+{
+	assert(cli_args);
+	cli_args->msec_between_connection_attempts = atoi(arg);
+}
+
 struct CliArgs *
 cli_args_default(void)
 {
@@ -224,6 +231,7 @@ cli_args_default(void)
 	cli_args->socket_name = NULL;
 	cli_args->enable_log = false;
 	cli_args->help_message = false;
+	cli_args->msec_between_connection_attempts = 300;
 	cli_args->head = NULL;
 	cli_args->last = NULL;
 	return cli_args;
@@ -240,6 +248,9 @@ cli_args_parse(int argc, char **argv)
 		          c,
 		          optarg ? optarg : "[NONE]");
 		switch (c) {
+			case 'T':
+				cli_args_set_msec_between_connection_attempts(cli_args, optarg);
+				break;
 			case 'h':
 				cli_args_enable_help_message(cli_args);
 				break;

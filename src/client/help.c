@@ -35,4 +35,7 @@ print_help(void)
 	puts("    Removes some files from the server.");
 	puts("-p");
 	puts("    Enables logging to standard output.");
+	puts("-Z");
+	puts("    Sets the time in milliseconds between connection attempts to the");
+	puts("    file storage server. 300 (msec) by default.");
 }
