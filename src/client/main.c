@@ -79,6 +79,7 @@ close_connection(struct CliArgs *cli_args)
 int
 inner_main(struct CliArgs *cli_args)
 {
+	log_info("The client is up and running.");
 	establish_connection(cli_args);
 	for (struct Action *action = cli_args->head; action; action = action->next) {
 		run_action(action);
@@ -99,7 +100,12 @@ main(int argc, char **argv)
 		print_client_err(cli_args->err);
 		cli_args_free(cli_args);
 		return EXIT_FAILURE;
-	} else if (!cli_args->socket_name) {
+	}
+	if (cli_args->enable_log) {
+		/* Write logs to STDOUT as per specification. */
+		log_add_fp(stdout, LOG_TRACE);
+	}
+	if (!cli_args->socket_name) {
 		log_fatal("Socket path not specified. Abort.");
 		cli_args_free(cli_args);
 		return EXIT_FAILURE;
@@ -108,10 +114,6 @@ main(int argc, char **argv)
 		cli_args_free(cli_args);
 		return EXIT_SUCCESS;
 	} else {
-		/* Write logs to STDOUT as per specification. */
-		if (cli_args->enable_log) {
-			log_add_fp(stdout, LOG_TRACE);
-		}
 		return inner_main(cli_args);
 	}
 }
