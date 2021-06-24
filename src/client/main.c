@@ -15,7 +15,10 @@
 void
 print_client_err(enum ClientErr err)
 {
-	assert(err != CLIENT_ERR_OK);
+	if (err == CLIENT_ERR_OK) {
+		/* No error at all. */
+		return;
+	}
 	puts("Command-line usage error.");
 	switch (err) {
 		case CLIENT_ERR_ALLOC:
@@ -47,6 +50,7 @@ print_client_err(enum ClientErr err)
 void
 establish_connection(struct CliArgs *cli_args)
 {
+	assert(cli_args);
 	log_info("Opening connection...");
 	struct timespec empty = { 0 };
 	int err = openConnection(
