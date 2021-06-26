@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-valgrind --leak-check=full ./server test/test1-config.toml
-SERVER_PID=$!
-
-echo "Server PID is $SERVER_PID."
-
-kill -s SIGHUP $SERVER_PID
+# Prints the help message.
+./client -h
+# Stores all files found in `test/data`.
+./client -p -f /tmp/LSOfiletorage.sk -Z 200 -w test/data/text
+# Read back all files.
+./client -p -f /tmp/LSOfiletorage.sk -Z 200 -R -d test/data
 
 exit 0

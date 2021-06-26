@@ -2,6 +2,7 @@
 
 client
 server
+server.valgrind
 !client/
 !server/
 

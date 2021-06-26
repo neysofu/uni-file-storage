@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define OPTSTRING "hf:w:n:W:D:r:Rd:t:l:u:c:p"
+#define OPTSTRING "hf:w:n:W:D:r:Rd:t:l:u:c:pZ:"
 
 void
 cli_args_add_action(struct CliArgs *cli_args, struct Action action)
@@ -108,10 +108,17 @@ cli_args_add_action_read_random(struct CliArgs *cli_args, char *arg)
 	assert(cli_args);
 	struct Action action;
 	action.type = ACTION_READ_RANDOM_FILES;
-	action.arg_s1 = arg;
+	action.arg_s1 = NULL;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;
 	action.next = NULL;
+	if (arg) {
+		if (strncmp(arg, "n=", 2) == 0) {
+			action.arg_i = atoi(arg + 2);
+		} else {
+			cli_args->err = CLIENT_ERR_BAD_OPTION_CAP_R;
+		}
+	}
 	cli_args_add_action(cli_args, action);
 }
 
@@ -248,7 +255,7 @@ cli_args_parse(int argc, char **argv)
 		          c,
 		          optarg ? optarg : "[NONE]");
 		switch (c) {
-			case 'T':
+			case 'Z':
 				cli_args_set_msec_between_connection_attempts(cli_args, optarg);
 				break;
 			case 'h':
