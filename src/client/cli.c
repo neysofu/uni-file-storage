@@ -1,7 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "cli.h"
-#include "err.h"
 #include "logc/src/log.h"
 #include "serverapi_utils.h"
 #include "utils.h"

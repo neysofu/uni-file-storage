@@ -39,9 +39,6 @@ client:
 		-I include -I lib -I src -I src/client \
 		src/client/cli.c \
 		src/client/cli.h \
-		src/client/err.h \
-		src/client/help.c \
-		src/client/help.h \
 		src/client/main.c \
 		src/client/run_action.h \
 		src/client/run_action.c \

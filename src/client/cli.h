@@ -1,7 +1,6 @@
 #ifndef SOL_CLIENT_CLI
 #define SOL_CLIENT_CLI
 
-#include "err.h"
 #include <stdbool.h>
 
 /* Identifiers for all actions, i.e. sequences of API calls as specified by a
@@ -24,6 +23,21 @@ enum ActionType
 	ACTION_UNLOCK_FILES,
 	/* '-c' option. */
 	ACTION_REMOVE_FILES,
+};
+
+/* Sum type for all possible error causes during a client's execution. */
+enum ClientErr
+{
+	CLIENT_ERR_OK = 0,
+	CLIENT_ERR_ALLOC,
+	CLIENT_ERR_BAD_OPTION_CAP_D,
+	CLIENT_ERR_BAD_OPTION_CAP_R,
+	CLIENT_ERR_BAD_OPTION_D,
+	CLIENT_ERR_UNKNOWN_OPTION,
+	CLIENT_ERR_REPEATED_P,
+	CLIENT_ERR_REPEATED_H,
+	CLIENT_ERR_REPEATED_F,
+	CLIENT_ERR_MISSING_ARG,
 };
 
 /* A recipe for a sequence of API calls. */
