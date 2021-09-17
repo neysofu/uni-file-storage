@@ -81,13 +81,13 @@ print_summary(void)
 	unsigned long num_evictions = htable_num_evictions(htable);
 	printf("Num. of evictions: %lu\n", num_evictions);
 
-	printf("Current contents of the file storage server:\n");
+	printf("Current contents of the file storage server: %lu\n", htable_num_items(htable));
 
 	struct HTableVisitor *visitor = htable_visit(htable, 0);
 	struct File *current_file = htable_visitor_next(visitor);
 	unsigned long i = 1;
 	while (current_file) {
-		printf("- %lu: %s", i, current_file->key, current_file->length_in_bytes);
+		printf("- %lu: %s %lu", i, current_file->key, current_file->length_in_bytes);
 		current_file = htable_visitor_next(visitor);
 		i++;
 	}
@@ -132,7 +132,7 @@ inner_main(struct Config *config)
 		}
 		err = receiver_poll(receiver);
 		if (err < 0) {
-			glog_fatal("Bad I/O during poll.");
+			glog_warn("Bad I/O during poll.");
 			break;
 		}
 	}

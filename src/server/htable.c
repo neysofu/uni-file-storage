@@ -98,6 +98,12 @@ htable_free(struct HTable *htable)
 }
 
 unsigned long
+htable_num_items(const struct HTable *htable)
+{
+	return htable->items_count;
+}
+
+unsigned long
 htable_max_files_stored(const struct HTable *htable)
 {
 	return htable->historical_max_items_count;
@@ -444,24 +450,35 @@ htable_visitor_next(struct HTableVisitor *visitor)
 	}
 	struct HTable *htable = visitor->htable;
 	struct HTableBucket *bucket = &htable->buckets[visitor->bucket_i];
-	struct HTableItem *next_in_bucket = visitor->last_visited->next;
+	struct HTableItem *next_in_bucket = bucket->head;
+	if (visitor->last_visited) {
+		next_in_bucket = visitor->last_visited->next;
+	}
 	/* The current bucket doesn't have any more items, so let's unlock this one
 	 * and lock the next one, until we find one with at least one item. */
 	while (!next_in_bucket) {
 		int err = pthread_mutex_unlock(&bucket->guard);
+		if (err < 0) {
+			return NULL;
+		}
 		visitor->bucket_i++;
 		if (visitor->bucket_i == htable->buckets_count) {
 			/* No more buckets! */
 			return NULL;
 		}
 		bucket++;
-		err |= pthread_mutex_lock(&bucket->guard);
+		err = pthread_mutex_lock(&bucket->guard);
 		if (err < 0) {
 			return NULL;
 		}
 		next_in_bucket = bucket->head;
 	}
 	visitor->last_visited = next_in_bucket;
+	if (visitor->last_visited) {
+		return &visitor->last_visited->file;
+	} else {
+		return NULL;
+	}
 }
 
 void

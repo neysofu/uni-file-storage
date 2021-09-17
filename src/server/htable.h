@@ -36,6 +36,10 @@ htable_create(size_t buckets, const struct Config *config);
 void
 htable_free(struct HTable *htable);
 
+/* Returns the amount of files currently stored by `htable`. */
+unsigned long
+htable_num_items(const struct HTable *htable);
+
 /* Returns the maximum amount of files ever stored by `htable`. */
 unsigned long
 htable_max_files_stored(const struct HTable *htable);
