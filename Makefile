@@ -109,13 +109,13 @@ serverapi:
 .PHONY: serverapi
 
 test1: server client
-	@valgrind --leak-check=full ./server test/test1-config.toml >> server.out 2>&1 &
+	@valgrind --leak-check=full ./server test/test1.toml >> server.out 2>&1 &
 	@./test/test1.sh
 	@pidof valgrind.bin | xargs kill -SIGHUP
 .PHONY: test1
 
 test2: server client
-	@./server test/test2-config.toml >> server.out 2>&1 &
+	@./server test/test2.toml >> server.out 2>&1 &
 	@./test/test2.sh
 	@pidof ./server | xargs kill -SIGHUP
 .PHONY: test2

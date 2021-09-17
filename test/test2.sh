@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Hide output! We only care about clients.
-./server test/test2-config.toml > /dev/null 2>&1 &
+./server test/test2.toml > /dev/null 2>&1 &
 SERVER_PID=$!
 
 echo "Server PID is $SERVER_PID."
