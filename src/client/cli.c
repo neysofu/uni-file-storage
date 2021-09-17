@@ -44,7 +44,7 @@ cli_args_add_action_write_dir(struct CliArgs *cli_args, char *arg)
 	char *comma = strrchr(arg, ',');
 	char *equal_sign = strrchr(arg, '=');
 	struct Action action;
-	action.type = ACTION_WRITE_DIR;
+	action.type = 'W';
 	action.arg_s1 = arg;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;
@@ -76,7 +76,7 @@ cli_args_add_action_write_files(struct CliArgs *cli_args, char *arg)
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_WRITE_FILES;
+	action.type = 'w';
 	action.arg_s1 = arg;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;
@@ -93,7 +93,7 @@ cli_args_add_action_read(struct CliArgs *cli_args, char *arg)
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_READ_FILES;
+	action.type = 'r';
 	action.arg_s1 = arg;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;
@@ -106,7 +106,7 @@ cli_args_add_action_read_random(struct CliArgs *cli_args, char *arg)
 {
 	assert(cli_args);
 	struct Action action;
-	action.type = ACTION_READ_RANDOM_FILES;
+	action.type = 'R';
 	action.arg_s1 = NULL;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;
@@ -141,7 +141,7 @@ cli_args_add_action_wait(struct CliArgs *cli_args, char *arg)
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_WAIT_MILLISECONDS;
+	action.type = 't';
 	action.arg_s1 = NULL;
 	action.arg_s2 = NULL;
 	action.arg_i = atoi(arg);
@@ -158,7 +158,7 @@ cli_args_add_action_lock(struct CliArgs *cli_args, char *arg)
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_LOCK_FILES;
+	action.type = 'l';
 	action.arg_s1 = arg;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;
@@ -175,7 +175,7 @@ cli_args_add_action_unlock(struct CliArgs *cli_args, char *arg)
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_UNLOCK_FILES;
+	action.type = 'u';
 	action.arg_s1 = arg;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;
@@ -192,7 +192,7 @@ cli_args_add_action_remove(struct CliArgs *cli_args, char *arg)
 		return;
 	}
 	struct Action action;
-	action.type = ACTION_REMOVE_FILES;
+	action.type = 'c';
 	action.arg_s1 = arg;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;
@@ -201,13 +201,17 @@ cli_args_add_action_remove(struct CliArgs *cli_args, char *arg)
 }
 
 void
-cli_args_enable_log(struct CliArgs *cli_args)
+cli_args_enable_log(struct CliArgs *cli_args, char *arg)
 {
 	assert(cli_args);
-	if (cli_args->enable_log) {
-		cli_args->err = CLIENT_ERR_REPEATED_P;
+	if (!arg || strcmp(arg, "info") == 0) {
+		cli_args->log_level = LOG_INFO;
+	} else if (strcmp(arg, "debug") == 0) {
+		cli_args->log_level = LOG_DEBUG;
+	} else if (strcmp(arg, "trace") == 0) {
+		cli_args->log_level = LOG_TRACE;
 	} else {
-		cli_args->enable_log = true;
+		cli_args->err = CLIENT_ERR_BAD_OPTION_P;
 	}
 }
 
@@ -235,7 +239,8 @@ cli_args_default(void)
 	struct CliArgs *cli_args = xmalloc(sizeof(struct CliArgs));
 	cli_args->err = CLIENT_ERR_OK;
 	cli_args->socket_name = NULL;
-	cli_args->enable_log = false;
+	/* Disable logs by default. */
+	cli_args->log_level = 1000;
 	cli_args->help_message = false;
 	cli_args->msec_between_connection_attempts = 300;
 	cli_args->head = NULL;
@@ -304,7 +309,7 @@ cli_args_parse(int argc, char **argv)
 				cli_args_add_action_remove(cli_args, optarg);
 				break;
 			case 'p':
-				cli_args_enable_log(cli_args);
+				cli_args_enable_log(cli_args, optarg);
 				break;
 			default:
 				cli_args->err = CLIENT_ERR_UNKNOWN_OPTION;

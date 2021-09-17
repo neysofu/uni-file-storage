@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+
 /* For `d_type` macros. */
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
@@ -19,37 +20,19 @@
 #include <unistd.h>
 
 int
-run_action_lock_files(struct Action *action)
+run_generic_action_over_files(struct Action *action,
+                              int (*api_f)(const char *pathname),
+                              const char *api_f_name)
 {
 	char *path = strtok(action->arg_s1, ",");
 	while (path) {
-		log_info("Calling API function `lockFile`.");
+		log_info("Calling API function `%s`.", api_f_name);
 		log_debug("Target file: '%s'.", path);
-		int err = lockFile(path);
+		int err = api_f(path);
 		if (err < 0) {
 			log_error("API call failed.");
-			return err;
 		} else {
-			log_info("API call was successful.");
-		}
-		path = strtok(NULL, ",");
-	}
-	return 0;
-}
-
-int
-run_action_unlock_files(struct Action *action)
-{
-	char *path = strtok(action->arg_s1, ",");
-	while (path) {
-		log_info("Calling API function `unlockFile`.");
-		log_debug("Target file: '%s'.", path);
-		int err = unlockFile(path);
-		if (err < 0) {
-			log_error("API call failed.");
-			return err;
-		} else {
-			log_info("API call was successful.");
+			log_trace("API call was successful.");
 		}
 		path = strtok(NULL, ",");
 	}
@@ -149,82 +132,87 @@ run_action_write_dir(struct Action *action)
 }
 
 int
-run_action_remove_files(struct Action *action)
-{
-	char *path = strtok(action->arg_s1, ",");
-	while (path) {
-		log_debug("Target file: '%s'.", path);
-		int err = removeFile(path);
-		if (err < 0) {
-			log_error("API call failed.");
-			return err;
-		} else {
-			log_info("API call was successful.");
-		}
-		path = strtok(NULL, ",");
-	}
-	return 0;
-}
-
-int
 run_action_read_files(struct Action *action)
 {
-	/* Open directory. */
-	char *dirname = action->arg_s2;
-	DIR *d;
-	struct dirent *dir;
-	d = opendir(dirname);
+	char *dir_name = NULL;
+	DIR *d = NULL;
+	/* Open the destination directory. */
+	if (action->arg_s2) {
+		dir_name = action->arg_s2;
+		d = opendir(dir_name);
+	}
 	/* Iterate through files. */
-	char *pathname = strtok(action->arg_s1, ",");
-	while (pathname) {
-		char *filename = basename(pathname);
-		FILE *location = fopen(filename, "wb");
+	char *rel_filepath = strtok(action->arg_s1, ",");
+	while (rel_filepath) {
+		char *filepath = realpath(rel_filepath, NULL);
+		if (!filepath) {
+			log_error("`realpath` failed");
+			break;
+		}
+		FILE *f = fopen(filepath, "wb");
 		void *buffer = NULL;
 		size_t buffer_size = 0;
-		int err = readFile(pathname, &buffer, &buffer_size);
-		fwrite(buffer, buffer_size, 1, location);
+		int err = readFile(filepath, &buffer, &buffer_size);
 		if (err) {
 			return err;
 		}
-		pathname = strtok(NULL, ",");
-		fclose(location);
+		fwrite(buffer, buffer_size, 1, f);
+		rel_filepath = strtok(NULL, ",");
+		free(filepath);
+		fclose(f);
 	}
-	closedir(d);
+	if (d) {
+		closedir(d);
+	}
 	return 0;
 }
 
 int
 run_action_read_random_files(struct Action *action)
 {
+	log_info("Calling API function `readNFiles`.");
 	const int n = action->arg_i;
-	const char *destination_dir = action->arg_s2;
-	return readNFiles(n, destination_dir);
+	char *destination_dir = NULL;
+	if (action->arg_s2) {
+		destination_dir = realpath(action->arg_s2, NULL);
+		if (!destination_dir) {
+			log_error("`realpath` failed");
+			return -1;
+		}
+		log_debug("Destination directory: '%s'.", destination_dir);
+	} else {
+		log_debug("No destination directory was specified.");
+	}
+	log_debug("The N parameter is set to %d.", n);
+	int result = readNFiles(n, destination_dir);
+	free(destination_dir);
+	return result;
 }
 
 int
 run_action(struct Action *action)
 {
 	switch (action->type) {
-		case ACTION_WRITE_FILES:
+		case 'w':
 			return run_action_write_file(action);
-		case ACTION_WRITE_DIR:
+		case 'W':
 			return run_action_write_dir(action);
-		case ACTION_READ_FILES:
+		case 'r':
 			return run_action_read_files(action);
-		case ACTION_READ_RANDOM_FILES:
+		case 'R':
 			return run_action_read_random_files(action);
-		case ACTION_WAIT_MILLISECONDS:
+		case 't':
 			log_debug("Waiting %d milliseconds.", action->arg_i);
 			wait_msec(action->arg_i);
 			return 0;
-		case ACTION_LOCK_FILES:
-			return run_action_lock_files(action);
-		case ACTION_UNLOCK_FILES:
-			return run_action_unlock_files(action);
-		case ACTION_REMOVE_FILES:
-			return run_action_remove_files(action);
+		case 'l':
+			return run_generic_action_over_files(action, lockFile, "lockFile");
+		case 'u':
+			return run_generic_action_over_files(action, unlockFile, "unlockFile");
+		case 'c':
+			return run_generic_action_over_files(action, removeFile, "removeFile");
 		default:
-			log_fatal("Unrecognized client action code. This is a bug.");
+			log_fatal("Unrecognized client action symbol. This is a bug.");
 			assert(false);
 	}
 	return 0;

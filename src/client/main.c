@@ -80,8 +80,11 @@ print_client_err(enum ClientErr err)
 		case CLIENT_ERR_BAD_OPTION_D:
 			puts("-d can only be used after either -r or -R.");
 			break;
+		case CLIENT_ERR_BAD_OPTION_P:
+			puts("Invalid value for -p.");
+			break;
 		default:
-			puts("No further information is available.");
+			break;
 	}
 }
 
@@ -98,10 +101,8 @@ main(int argc, char **argv)
 		cli_args_free(cli_args);
 		return EXIT_FAILURE;
 	}
-	if (cli_args->enable_log) {
-		/* Enable writing logs to STDOUT as per specification. */
-		log_add_fp(stdout, LOG_TRACE);
-	}
+	/* Enable writing logs to STDOUT as per specification. */
+	log_add_fp(stdout, cli_args->log_level);
 	/* CLI arguments MUST specify a socket. Otherwise, it's impossible to connect
 	 * to the file storage server. */
 	if (!cli_args->socket_name) {
@@ -117,8 +118,8 @@ main(int argc, char **argv)
 	int err = 0;
 	log_info("The client is up and running. Opening connection...");
 	err = openConnection(cli_args->socket_name,
-	                         cli_args->msec_between_connection_attempts,
-	                         (struct timespec){ 0 });
+	                     cli_args->msec_between_connection_attempts,
+	                     (struct timespec){ 0 });
 	if (err) {
 		log_fatal("Couldn't establish a connection with the server. Abort.");
 		cli_args_free(cli_args);

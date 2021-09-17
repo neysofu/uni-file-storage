@@ -3,28 +3,6 @@
 
 #include <stdbool.h>
 
-/* Identifiers for all actions, i.e. sequences of API calls as specified by a
- * single command-line option. */
-enum ActionType
-{
-	/* '-W' option. */
-	ACTION_WRITE_DIR,
-	/* '-w' option. */
-	ACTION_WRITE_FILES,
-	/* '-r' option. */
-	ACTION_READ_FILES,
-	/* '-R' option. */
-	ACTION_READ_RANDOM_FILES,
-	/* '-t' option. Technically not an API call. */
-	ACTION_WAIT_MILLISECONDS,
-	/* '-l' option. */
-	ACTION_LOCK_FILES,
-	/* '-u' option. */
-	ACTION_UNLOCK_FILES,
-	/* '-c' option. */
-	ACTION_REMOVE_FILES,
-};
-
 /* Sum type for all possible error causes during a client's execution. */
 enum ClientErr
 {
@@ -33,6 +11,7 @@ enum ClientErr
 	CLIENT_ERR_BAD_OPTION_CAP_D,
 	CLIENT_ERR_BAD_OPTION_CAP_R,
 	CLIENT_ERR_BAD_OPTION_D,
+	CLIENT_ERR_BAD_OPTION_P,
 	CLIENT_ERR_UNKNOWN_OPTION,
 	CLIENT_ERR_REPEATED_P,
 	CLIENT_ERR_REPEATED_H,
@@ -43,20 +22,25 @@ enum ClientErr
 /* A recipe for a sequence of API calls. */
 struct Action
 {
-	enum ActionType type;
+	/* The character that identifies the CLI flag associated with this action. */
+	char type;
+	/* The first string argument, if present. */
 	char *arg_s1;
+	/* The second string argument, if present. */
 	char *arg_s2;
+	/* The numeric argument, is present. */
 	int arg_i;
 	struct Action *next;
 };
 
+/* A storage model for CLI flags with metadata in a linked list. */
 struct CliArgs
 {
 	enum ClientErr err;
 	unsigned msec_between_connection_attempts;
 	char *socket_name;
 	bool help_message;
-	bool enable_log;
+	int log_level;
 	struct Action *head;
 	struct Action *last;
 };

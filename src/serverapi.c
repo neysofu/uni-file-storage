@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -325,13 +326,17 @@ readFile(const char *pathname, void **buf, size_t *size)
 int
 readNFiles(int n, const char *dirname)
 {
-	state.last_operation = API_OP_READ_N_FILES;
-	assert(n >= 0);
 	assert(dirname);
+	state.last_operation = API_OP_READ_N_FILES;
+	if (n < 0) {
+		errno = EINVAL;
+		return -1;
+	}
 	if (!state.connection_is_open) {
 		return err_closed_connection();
 	}
 	int err = 0;
+	/* We'll write 9 bytes: 1 operation code and 8 argument bytes. */
 	err |= write_u64(state.fd, 1 + 8);
 	err |= write_op(state.fd, API_OP_READ_N_FILES);
 	err |= write_u64(state.fd, n);
