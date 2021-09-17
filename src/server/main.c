@@ -71,6 +71,29 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 	return 0;
 }
 
+void
+print_summary(void)
+{
+	unsigned long max_files_stored = htable_max_files_stored(htable);
+	printf("Max. files stored: %lu\n", max_files_stored);
+	unsigned long max_space_in_bytes = htable_max_size(htable);
+	printf("Max. space in bytes: %lu\n", max_space_in_bytes);
+	unsigned long num_evictions = htable_num_evictions(htable);
+	printf("Num. of evictions: %lu\n", num_evictions);
+
+	printf("Current contents of the file storage server:\n");
+
+	struct HTableVisitor *visitor = htable_visit(htable, 0);
+	struct File *current_file = htable_visitor_next(visitor);
+	unsigned long i = 1;
+	while (current_file) {
+		printf("- %lu: %s", i, current_file->key, current_file->length_in_bytes);
+		current_file = htable_visitor_next(visitor);
+		i++;
+	}
+	htable_visitor_free(visitor);
+}
+
 int
 inner_main(struct Config *config)
 {
@@ -109,14 +132,11 @@ inner_main(struct Config *config)
 		}
 		err = receiver_poll(receiver);
 		if (err < 0) {
-			glog_fatal("Bad I/O during poll. Exiting.");
-			if (f_log) {
-				fclose(f_log);
-			}
-			receiver_free(receiver);
-			return EXIT_FAILURE;
+			glog_fatal("Bad I/O during poll.");
+			break;
 		}
 	}
+	print_summary();
 	receiver_free(receiver);
 	if (f_log) {
 		fclose(f_log);

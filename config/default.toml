@@ -1,4 +1,8 @@
 # A good set of defaults for testing during development.
+# For more information on the TOML format, see [1].
+#
+# 1: https://github.com/toml-lang/toml
+
 [server]
 max-files = 100
 max-storage = 80

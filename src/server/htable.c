@@ -37,6 +37,9 @@ struct HTable
 	size_t items_count;
 	size_t buckets_count;
 	struct HTableBucket *buckets;
+	long unsigned historical_max_items_count;
+	long unsigned historical_max_space_in_bytes;
+	long unsigned historical_num_evictions;
 };
 
 struct HTable *
@@ -71,6 +74,9 @@ htable_create(size_t buckets, const struct Config *config)
 			return NULL;
 		}
 	}
+	htable->historical_max_items_count = 0;
+	htable->historical_max_space_in_bytes = 0;
+	htable->historical_num_evictions = 0;
 	return htable;
 }
 
@@ -89,6 +95,24 @@ htable_free(struct HTable *htable)
 	fifo_cache_free(htable->fcache);
 	free(htable->buckets);
 	free(htable);
+}
+
+unsigned long
+htable_max_files_stored(const struct HTable *htable)
+{
+	return htable->historical_max_items_count;
+}
+
+long unsigned
+htable_max_size(const struct HTable *htable)
+{
+	return htable->historical_max_space_in_bytes;
+}
+
+long unsigned
+htable_num_evictions(const struct HTable *htable)
+{
+	return htable->historical_num_evictions;
 }
 
 /* Returns a pointer to the bucket within `htable` that contains `key`, if
@@ -437,4 +461,10 @@ htable_visitor_next(struct HTableVisitor *visitor)
 		next_in_bucket = bucket->head;
 	}
 	visitor->last_visited = next_in_bucket;
+}
+
+void
+htable_visitor_free(struct HTableVisitor *visitor)
+{
+	free(visitor);
 }

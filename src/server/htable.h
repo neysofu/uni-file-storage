@@ -36,6 +36,18 @@ htable_create(size_t buckets, const struct Config *config);
 void
 htable_free(struct HTable *htable);
 
+/* Returns the maximum amount of files ever stored by `htable`. */
+unsigned long
+htable_max_files_stored(const struct HTable *htable);
+
+/* Returns the total number of file evictions ever performed by `htable`. */
+long unsigned
+htable_num_evictions(const struct HTable *htable);
+
+/* Returns the maximum amount of bytes ever stored by `htable`. */
+unsigned long
+htable_max_size(const struct HTable *htable);
+
 /* Searches a file with path `key` within `htable` and returns a pointer to its
  * contents if found, NULL otherwise. */
 struct File *
@@ -85,10 +97,16 @@ htable_remove_file(struct HTable *htable, const char *key, int fd);
 
 struct HTableVisitor;
 
+/* Allocates, initializes, and finally returns a new `HTableVisitor` to iterate
+ * over the contents of `htable` for up to, but not exceeding, `max_visits`
+ * items. */
 struct HTableVisitor *
 htable_visit(struct HTable *htable, unsigned max_visits);
 
 struct File *
 htable_visitor_next(struct HTableVisitor *visitor);
+
+void
+htable_visitor_free(struct HTableVisitor *visitor);
 
 #endif
