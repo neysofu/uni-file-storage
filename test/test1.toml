@@ -1,5 +1,5 @@
 [server]
-max-files = 10000
+max-files = 10_000
 max-storage = 128_000_000
 num-workers = 1
 socket-filepath = "/tmp/LSOfiletorage.sk"
