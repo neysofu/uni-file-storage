@@ -31,7 +31,6 @@ print_command_line_usage_info(void)
 void
 hard_signal_handler(int signum)
 {
-	/* To avoid a compiler warning. */
 	UNUSED(signum);
 	shutdown_hard();
 }
@@ -39,7 +38,6 @@ hard_signal_handler(int signum)
 void
 soft_signal_handler(int signum)
 {
-	/* To avoid a compiler warning. */
 	UNUSED(signum);
 	shutdown_soft();
 }
@@ -130,6 +128,7 @@ int
 main(int argc, char **argv)
 {
 	glog_debug("Initializing some internal resources.");
+
 	/* Seed the PRNG (pseudorandom number generator). */
 	srand(time(NULL));
 	/* Set signal handlers. */
@@ -139,7 +138,6 @@ main(int argc, char **argv)
 	glog_debug("Initialization was successful. Now parsing command-line args.");
 	if (argc != 2) {
 		print_command_line_usage_info();
-		puts("Goodbye.");
 		return EXIT_FAILURE;
 	} else if (strcmp(argv[1], "-h") == 0) {
 		print_command_line_usage_info();
@@ -157,9 +155,14 @@ main(int argc, char **argv)
 		log_add_fp(config->log_f, LOG_TRACE);
 	}
 	global_config = config;
-	/* Remove the server socket file, if it exists. We simply ignore any error. */
+	/* Remove the server socket file, if it exists. We simply ignore any error
+	 * because we don't care about whether on not the link existed in the first
+	 * place. */
 	unlink(config->socket_filepath);
 	workload_queues_init(config->num_workers);
-	htable = htable_create(10, config);
+	/* Initialize the global hash table with a reasonable number of buckets.
+	 * Ideally this should be set with a goal load factor, but we're splitting
+	 * hairs... */
+	htable = htable_create(config->max_files, config);
 	return inner_main(config);
 }
