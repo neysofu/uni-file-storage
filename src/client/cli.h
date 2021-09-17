@@ -38,6 +38,7 @@ struct CliArgs
 {
 	enum ClientErr err;
 	unsigned msec_between_connection_attempts;
+	unsigned sec_max_attempt_time;
 	char *socket_name;
 	bool help_message;
 	int log_level;

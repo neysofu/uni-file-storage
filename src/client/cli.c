@@ -9,7 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define OPTSTRING "hf:w:n:W:D:r:Rd:t:l:u:c:pZ:"
+#define OPTSTRING "hf:w:n:W:D:r:Rd:t:l:u:c:pZ:z:"
 
 void
 cli_args_add_action(struct CliArgs *cli_args, struct Action action)
@@ -233,6 +233,13 @@ cli_args_set_msec_between_connection_attempts(struct CliArgs *cli_args, char *ar
 	cli_args->msec_between_connection_attempts = atoi(arg);
 }
 
+void
+cli_args_set_max_attempt_time(struct CliArgs *cli_args, char *arg)
+{
+	assert(cli_args);
+	cli_args->sec_max_attempt_time = atoi(arg);
+}
+
 struct CliArgs *
 cli_args_default(void)
 {
@@ -243,6 +250,7 @@ cli_args_default(void)
 	cli_args->log_level = 1000;
 	cli_args->help_message = false;
 	cli_args->msec_between_connection_attempts = 300;
+	cli_args->sec_max_attempt_time = 5;
 	cli_args->head = NULL;
 	cli_args->last = NULL;
 	return cli_args;
@@ -261,6 +269,9 @@ cli_args_parse(int argc, char **argv)
 		switch (c) {
 			case 'Z':
 				cli_args_set_msec_between_connection_attempts(cli_args, optarg);
+				break;
+			case 'z':
+				cli_args_set_max_attempt_time(cli_args, optarg);
 				break;
 			case 'h':
 				cli_args_enable_help_message(cli_args);

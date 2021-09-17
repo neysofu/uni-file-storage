@@ -48,6 +48,10 @@ print_help(void)
 	puts("-Z");
 	puts("    Sets the time in milliseconds between connection attempts to the");
 	puts("    file storage server. 300 (msec) by default.");
+	puts("-z");
+	puts("    Sets the time in seconds after which connection attempts to the");
+	puts("    file storage server will stop and the client will abort. 5");
+	puts("    (seconds) by default. No limit if set to 0.");
 }
 
 void
@@ -103,23 +107,32 @@ main(int argc, char **argv)
 	}
 	/* Enable writing logs to STDOUT as per specification. */
 	log_add_fp(stdout, cli_args->log_level);
-	/* CLI arguments MUST specify a socket. Otherwise, it's impossible to connect
-	 * to the file storage server. */
-	if (!cli_args->socket_name) {
-		log_fatal("Socket path not specified. Abort.");
-		cli_args_free(cli_args);
-		return EXIT_FAILURE;
-	} else if (cli_args->help_message) {
+	if (cli_args->help_message) {
 		print_help();
 		cli_args_free(cli_args);
 		return EXIT_SUCCESS;
 	}
+	/* CLI arguments MUST specify a socket. Otherwise, it's impossible to connect
+	 * to the file storage server. */
+	if (!cli_args->socket_name) {
+		log_fatal("Socket path not specified. Abort.");
+		print_client_err(cli_args->err);
+		print_help();
+		cli_args_free(cli_args);
+		return EXIT_FAILURE;
+	}
 	/* Finally, everything seems to be in order. Let's proceed. */
-	int err = 0;
 	log_info("The client is up and running. Opening connection...");
-	err = openConnection(cli_args->socket_name,
-	                     cli_args->msec_between_connection_attempts,
-	                     (struct timespec){ 0 });
+	struct timespec connection_due = { 0 };
+	clock_gettime(CLOCK_REALTIME, &connection_due);
+	if (cli_args->sec_max_attempt_time) {
+		connection_due.tv_sec = connection_due.tv_sec + cli_args->sec_max_attempt_time;
+	} else {
+		connection_due.tv_sec = connection_due.tv_sec + 10000;
+	}
+	int err = 0;
+	err = openConnection(
+	  cli_args->socket_name, cli_args->msec_between_connection_attempts, connection_due);
 	if (err) {
 		log_fatal("Couldn't establish a connection with the server. Abort.");
 		cli_args_free(cli_args);
