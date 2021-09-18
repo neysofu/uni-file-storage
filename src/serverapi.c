@@ -4,7 +4,7 @@
 
 #include "serverapi.h"
 #include "logc/src/log.h"
-#include "serverapi_utils.h"
+#include "serverapi_utilities.h"
 #include "utilities.h"
 #include <assert.h>
 #include <errno.h>
@@ -40,7 +40,7 @@ struct ConnectionState state = {
 
 /******* UTILITY FUNCTIONS */
 
-int
+static int
 file_contents(const char *relative_path, char abs_path[], void **buffer, size_t *size)
 {
 	assert(relative_path);
@@ -66,7 +66,7 @@ file_contents(const char *relative_path, char abs_path[], void **buffer, size_t 
 	return 0;
 }
 
-int
+static int
 on_io_err(void)
 {
 	log_error("Tried to read/write data, but there's been some I/O error.");
@@ -74,7 +74,7 @@ on_io_err(void)
 	return -1;
 }
 
-int
+static int
 write_op(int fd, enum ApiOp op)
 {
 	char op_byte = op;
@@ -82,7 +82,7 @@ write_op(int fd, enum ApiOp op)
 }
 
 /* Writes a 64 bit unsigned number to `fd` as big endian. */
-int
+static int
 write_u64(int fd, uint64_t data)
 {
 	char bytes[8];
@@ -90,7 +90,7 @@ write_u64(int fd, uint64_t data)
 	return writen(fd, bytes, 8);
 }
 
-int
+static int
 attempt_connection(const char *sockname)
 {
 	assert(sockname);
@@ -117,7 +117,7 @@ attempt_connection(const char *sockname)
  *  - sets `errno`;
  *  - logs a descriptive error message;
  *  - returns `-1` as an error code. */
-int
+static int
 err_closed_connection(void)
 {
 	errno = ENOENT;
@@ -125,7 +125,7 @@ err_closed_connection(void)
 	return -1;
 }
 
-int
+static int
 write_file_to_dir(const char *dirname,
                   const void *original_pathname,
                   size_t original_pathname_size,
@@ -144,7 +144,7 @@ write_file_to_dir(const char *dirname,
 
 /* Reads a response from the server with a variable number of files and writes
  * them to `dirname`. */
-int
+static int
 handle_response_with_files(int fd, const char *dirname)
 {
 	int err = 0;
@@ -192,7 +192,7 @@ handle_response_with_files(int fd, const char *dirname)
  * - N remaining bytes for a single variable-length argument.
  *
  * The response is just one single byte with a response code. */
-int
+static int
 make_simple_request(enum ApiOp op, const char *pathname)
 {
 	state.last_operation = op;
@@ -223,7 +223,7 @@ make_simple_request(enum ApiOp op, const char *pathname)
  * - M bytes for 2nd argument.
  *
  * The response is operation-specific. */
-int
+static int
 make_request_with_two_args(enum ApiOp op,
                            const void *arg1,
                            size_t arg1_size,
@@ -348,7 +348,8 @@ readNFiles(int n, const char *dirname)
 int
 openFile(const char *pathname, int flags)
 {
-	return make_simple_request(API_OP_OPEN_FILE | flags, pathname);
+	return 0;
+	make_simple_request(API_OP_OPEN_FILE | flags, pathname);
 }
 
 int

@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 
-#include "logc/src/log.h"
 #include "utilities.h"
+#include "logc/src/log.h"
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@ void
 wait_msec(int msec)
 {
 	struct timespec interval;
-	interval.tv_nsec = (msec % 1000) * 1000000;
+	interval.tv_nsec = msec * 1000;
 	interval.tv_sec = msec / 1000;
 	int result = 1;
 	do {

@@ -4,7 +4,8 @@
 /* Unique identifiers for all operations available over the public API. */
 enum ApiOp
 {
-	API_OP_OPEN_CONNECTION,
+	/* We leave the three least significant bits availble for flags. */
+	API_OP_OPEN_CONNECTION = 8,
 	API_OP_CLOSE_CONNECTION,
 	API_OP_OPEN_FILE,
 	API_OP_READ_FILE,

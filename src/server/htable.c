@@ -124,7 +124,7 @@ htable_num_evictions(const struct HTable *htable)
 /* Returns a pointer to the bucket within `htable` that contains `key`, if
  * present at all. */
 static struct HTableBucket *
-bucket_ptr(struct HTable *htable, const char *key)
+htable_bucket_ptr(struct HTable *htable, const char *key)
 {
 	uint64_t hash = XXH64(key, strlen(key), XXHASH_SEED);
 	return &htable->buckets[hash % htable->buckets_count];
@@ -139,13 +139,15 @@ htable_fetch_item(struct HTable *htable, const char *key)
 	assert(htable);
 	assert(key);
 	int err = 0;
-	struct HTableBucket *bucket = bucket_ptr(htable, key);
+	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
+	assert(bucket);
 	err = pthread_mutex_lock(&bucket->guard);
 	if (err) {
 		return NULL;
 	}
 	struct HTableItem *item = bucket->head;
 	while (item) {
+		assert(&item->file);
 		if (item->file.key == key) {
 			return item;
 		}
@@ -157,6 +159,7 @@ htable_fetch_item(struct HTable *htable, const char *key)
 struct File *
 htable_fetch_file(struct HTable *htable, const char *key)
 {
+	assert(htable);
 	struct HTableItem *node = htable_fetch_item(htable, key);
 	if (!node) {
 		return NULL;
@@ -168,7 +171,7 @@ htable_fetch_file(struct HTable *htable, const char *key)
 int
 htable_release(struct HTable *htable, const char *key)
 {
-	struct HTableBucket *bucket = bucket_ptr(htable, key);
+	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
 	return pthread_mutex_unlock(&bucket->guard);
 }
 
@@ -211,9 +214,10 @@ htable_create_file(struct HTable *htable, const char *key, bool lock, int fd)
 	struct File *file = htable_fetch_file(htable, key);
 	if (file) {
 		htable_release(htable, key);
-		return -1;
+		/* The file is already present. */
+		return 0;
 	}
-	struct HTableBucket *bucket = bucket_ptr(htable, key);
+	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
 	struct HTableItem *item = xmalloc(sizeof(struct HTableItem));
 	item->file.contents = NULL;
 	item->file.length_in_bytes = 0;
@@ -225,6 +229,9 @@ htable_create_file(struct HTable *htable, const char *key, bool lock, int fd)
 	item->next = NULL;
 	item->prev = bucket->last;
 	bucket->last = item;
+	if (!bucket->head) {
+		bucket->head = item;
+	}
 	file->is_open = true;
 	htable_release(htable, key);
 	return 0;
@@ -333,14 +340,16 @@ int
 htable_remove_file(struct HTable *htable, const char *key, int fd)
 {
 	struct HTableItem *node = htable_fetch_item(htable, key);
-	struct HTableBucket *bucket = bucket_ptr(htable, key);
+
 	if (!node) {
-		return -1;
-	}
-	if (node->file.is_locked && node->file.fd_owner != fd) {
+		/* Nothing to remove in the first place. */
+		return 0;
+	} else if (node->file.is_locked && node->file.fd_owner != fd) {
 		htable_release(htable, key);
 		return -1;
 	}
+
+	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
 	/* Chain together the previous and next nodes within the bucket's linked
 	 * list. */
 	if (node->prev) {
@@ -353,10 +362,12 @@ htable_remove_file(struct HTable *htable, const char *key, int fd)
 	} else {
 		bucket->last = node->prev;
 	}
+
 	/* Free stuff. */
 	free(node->file.key);
 	free(node->file.contents);
 	free(node);
+
 	return htable_release(htable, key);
 }
 
@@ -408,6 +419,8 @@ htable_append_to_file_contents(struct HTable *htable,
 	}
 	return htable_evict_files(htable, false, size_in_bytes, evicted, evicted_count);
 }
+
+/************ VISITOR PATTERN ***********/
 
 struct HTableVisitor
 {

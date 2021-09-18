@@ -8,7 +8,7 @@
 #include "cli.h"
 #include "logc/src/log.h"
 #include "serverapi.h"
-#include "serverapi_utils.h"
+#include "serverapi_utilities.h"
 #include "utilities.h"
 #include <assert.h>
 #include <dirent.h>
@@ -48,19 +48,26 @@ int static write_file(const char *abspath)
 	} else {
 		log_debug("No destination directory was specified.");
 	}
-	int err = writeFile(abspath, NULL);
+
+	int err = 0;
+	err = openFile(abspath, O_CREATE | O_LOCK);
 	if (err < 0) {
-		log_error("API call failed.");
 		return err;
-	} else {
-		log_info("API call was successful.");
 	}
+
+	err = writeFile(abspath, NULL);
+	if (err < 0) {
+		return err;
+	}
+
 	return 0;
 }
 
 int
 run_action_write_file(struct Action *action)
 {
+	/* This might cause issue if the filepaths contain commas, but there's not
+	 * much we can do about that. */
 	char *path = strtok(action->arg_s1, ",");
 	while (path) {
 		write_file(path);
@@ -192,6 +199,8 @@ run_action_read_random_files(struct Action *action)
 int
 run_action(struct Action *action)
 {
+	assert(action);
+	log_trace("Executing action from the '%c' flag.", action->type);
 	switch (action->type) {
 		case 'w':
 			return run_action_write_file(action);

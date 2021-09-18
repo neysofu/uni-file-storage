@@ -8,11 +8,11 @@ mkdir $PARENT_PATH/data/target
 ./client -h
 
 for file in "$PARENT_PATH/data/Imgur/80s/*"; do
-   ./client -p -f /tmp/LSOfiletorage.sk -w $file -z 1
+   ./client -p debug -f /tmp/LSOfiletorage.sk -W $file
 done
 
 for file in "$PARENT_PATH/data/Imgur/80s/*"; do
-   ./client -p -f /tmp/LSOfiletorage.sk -r $file -d $PARENT_PATH/data/target/ -z 1
+   ./client -p debug -f /tmp/LSOfiletorage.sk -r $file -d $PARENT_PATH/data/target/ -z 1
 done
 
 find "$PARENT_PATH/data/target/80s" -type f -exec md5sum {} + | sort -k 2 > $PARENT_PATH/data/target/md5.txt

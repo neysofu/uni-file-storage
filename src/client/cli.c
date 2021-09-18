@@ -2,14 +2,14 @@
 
 #include "cli.h"
 #include "logc/src/log.h"
-#include "serverapi_utils.h"
+#include "serverapi_utilities.h"
 #include "utilities.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#define OPTSTRING "hf:w:n:W:D:r:Rd:t:l:u:c:pZ:z:"
+#define OPTSTRING "hf:w:n:W:D:r:Rd:t:l:u:c:p:Z:z:"
 
 void
 cli_args_add_action(struct CliArgs *cli_args, struct Action action)

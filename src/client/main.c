@@ -97,6 +97,7 @@ main(int argc, char **argv)
 {
 	/* Disable logs by default. */
 	log_set_quiet(true);
+	log_set_level(LOG_INFO);
 	/* Parse and store CLI arguments in a handy, special-purposed data structure
 	 * that allows easy retrieval later. */
 	struct CliArgs *cli_args = cli_args_parse(argc, argv);
@@ -122,7 +123,9 @@ main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	/* Finally, everything seems to be in order. Let's proceed. */
-	log_info("The client is up and running. Opening connection...");
+	log_info("The client is up and running.");
+	log_info("Opening connection with a timeout of %lu seconds...",
+	         cli_args->sec_max_attempt_time);
 	struct timespec connection_due = { 0 };
 	clock_gettime(CLOCK_REALTIME, &connection_due);
 	if (cli_args->sec_max_attempt_time) {
@@ -138,7 +141,6 @@ main(int argc, char **argv)
 		cli_args_free(cli_args);
 		exit(EXIT_FAILURE);
 	}
-	log_info("Done.");
 	for (struct Action *action = cli_args->head; action; action = action->next) {
 		run_action(action);
 	}

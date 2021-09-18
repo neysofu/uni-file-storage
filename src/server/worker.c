@@ -4,7 +4,7 @@
 #include "global_state.h"
 #include "htable.h"
 #include "logc/src/log.h"
-#include "serverapi_utils.h"
+#include "serverapi_utilities.h"
 #include "shutdown.h"
 #include "ts_counter.h"
 #include "utilities.h"
@@ -39,6 +39,7 @@ worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	char *path = buf_to_str(buffer, len_in_bytes);
 
 	struct File *file = htable_fetch_file(htable, path);
+	assert(file);
 	uint8_t response[9] = { RESPONSE_OK };
 	u64_to_big_endian(file->length_in_bytes, &response[1]);
 	int err = 0;
@@ -81,14 +82,17 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 	char *path = buf_to_str((uint8_t *)(buffer) + 16, arg1_size);
 	struct File *evicted = NULL;
 	unsigned evicted_count = 0;
-	htable_write_file_contents(htable,
-	                           path,
-	                           (uint8_t *)buffer + 16 + arg1_size,
-	                           arg2_size,
-	                           &evicted,
-	                           &evicted_count);
+	glog_debug("[Worker n.%u] Successfully parsed the latest message.", worker->id);
+	int err = htable_write_file_contents(htable,
+	                                     path,
+	                                     (uint8_t *)buffer + 16 + arg1_size,
+	                                     arg2_size,
+	                                     &evicted,
+	                                     &evicted_count);
+	if (err != 0) {
+		glog_error("[Worker n.%u] Last operation failed.", worker->id);
+	}
 	glog_debug("[Worker n.%u] Last operation evicted %u files.", worker->id, evicted_count);
-	int err = 0;
 	uint8_t buf_response_code[1] = { RESPONSE_OK };
 	uint8_t buf[8] = { 0 };
 	u64_to_big_endian(evicted_count, buf);
