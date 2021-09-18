@@ -120,6 +120,11 @@ test2: server client
 	@pidof ./server | xargs kill -SIGHUP
 .PHONY: test2
 
+test3: server client
+	@./server test/test3.toml >> server.out 2>&1 &
+	@./test/test3.sh
+.PHONY: test3
+
 help:
 	@echo "List of valid targets for this Makefile:"
 	@echo "- all (default)"
