@@ -50,10 +50,11 @@ config_parse_file(char abs_path[])
 	return config;
 err:
 	toml_free(toml);
+	free(config);
 	if (f) {
 		fclose(f);
 	}
-	return config;
+	return NULL;
 }
 
 void
