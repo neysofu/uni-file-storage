@@ -7,7 +7,7 @@
 #include "serverapi_utils.h"
 #include "shutdown.h"
 #include "ts_counter.h"
-#include "utils.h"
+#include "utilities.h"
 #include "workload_queue.h"
 #include <assert.h>
 #include <errno.h>
@@ -37,6 +37,7 @@ worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_
 {
 	glog_info("[Worker n.%u] New API request `readFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
+
 	struct File *file = htable_fetch_file(htable, path);
 	uint8_t response[9] = { RESPONSE_OK };
 	u64_to_big_endian(file->length_in_bytes, &response[1]);

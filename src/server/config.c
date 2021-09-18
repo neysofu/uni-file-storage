@@ -1,7 +1,7 @@
 #include "config.h"
 #include "global_state.h"
 #include "tomlc99/toml.h"
-#include "utils.h"
+#include "utilities.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -5,7 +5,7 @@
 #include "serverapi.h"
 #include "logc/src/log.h"
 #include "serverapi_utils.h"
-#include "utils.h"
+#include "utilities.h"
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
@@ -13,7 +13,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>

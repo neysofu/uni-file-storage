@@ -1,7 +1,7 @@
 #include "receiver.h"
 #include "deserializer.h"
 #include "global_state.h"
-#include "utils.h"
+#include "utilities.h"
 #include "workload_queue.h"
 #include <assert.h>
 #include <errno.h>
@@ -65,7 +65,7 @@ receiver_add_new_connection(struct Receiver *r)
 	int fd = accept(r->active_sockets[0].fd, NULL, NULL);
 	/* Faulty new connection. Let's keep going and don't stop the whole server. */
 	if (fd < 0) {
-		glog_info("Ignoring faulty connection.");
+		glog_warn("Ignoring faulty connection.");
 		return;
 	}
 	r->active_sockets_count++;

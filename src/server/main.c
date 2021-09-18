@@ -6,7 +6,7 @@
 #include "serverapi_utils.h"
 #include "shutdown.h"
 #include "ts_counter.h"
-#include "utils.h"
+#include "utilities.h"
 #include "worker.h"
 #include "workload_queue.h"
 #include <pthread.h>

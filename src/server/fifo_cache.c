@@ -1,5 +1,5 @@
 #include "fifo_cache.h"
-#include "utils.h"
+#include "utilities.h"
 #include <assert.h>
 #include <pthread.h>
 #include <stdlib.h>

@@ -1,7 +1,7 @@
 #include "workload_queue.h"
 #include "global_state.h"
 #include "receiver.h"
-#include "utils.h"
+#include "utilities.h"
 #include <assert.h>
 #include <errno.h>
 #include <pthread.h>

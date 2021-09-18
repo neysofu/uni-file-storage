@@ -1,7 +1,7 @@
 #include "htable.h"
 #include "config.h"
 #include "fifo_cache.h"
-#include "utils.h"
+#include "utilities.h"
 #include "xxHash/xxhash.h"
 #include <assert.h>
 #include <pthread.h>

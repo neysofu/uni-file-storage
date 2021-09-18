@@ -43,7 +43,7 @@ client:
 		src/client/run_action.h \
 		src/client/run_action.c \
 		src/serverapi.c \
-		src/utils.c \
+		src/utilities.c \
 		lib/logc/src/log.c
 	@echo "-- Done building the client binary."
 .PHONY: client
@@ -80,7 +80,7 @@ server: lz4
 		src/server/workload_queue.h \
 		src/server/workload_queue.c \
 		src/serverapi.c \
-		src/utils.c \
+		src/utilities.c \
 		lib/logc/src/log.c \
 		lib/xxHash/xxhash.c \
 		lib/tomlc99/toml.c \
@@ -96,7 +96,7 @@ serverapi:
 	$(CC) $(CCFLAGS) -c \
 		-o utils.o \
 		-I include -I lib \
-		src/utils.c
+		src/utilities.c
 	$(CC) $(CCFLAGS) -c \
 		-o api.o \
 		-I include -I lib \

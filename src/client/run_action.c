@@ -9,7 +9,7 @@
 #include "logc/src/log.h"
 #include "serverapi.h"
 #include "serverapi_utils.h"
-#include "utils.h"
+#include "utilities.h"
 #include <assert.h>
 #include <dirent.h>
 #include <libgen.h>

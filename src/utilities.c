@@ -1,8 +1,9 @@
 #define _POSIX_C_SOURCE 200809L
 
-#include "utils.h"
 #include "logc/src/log.h"
+#include "utilities.h"
 #include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
