@@ -26,13 +26,13 @@ struct Worker
 	unsigned id;
 };
 
-void
+static void
 log_io_err(const struct Worker *worker)
 {
 	glog_error("[Worker n.%u] Bad I/O during request handling. Ignoring.", worker->id);
 }
 
-void
+static void
 worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_info("[Worker n.%u] New API request `readFile`.", worker->id);
@@ -52,7 +52,7 @@ worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	free(path);
 }
 
-void
+static void
 worker_handle_read_n_files(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_info("[Worker n.%u] New API request `readNFiles`.", worker->id);
@@ -65,7 +65,7 @@ worker_handle_read_n_files(struct Worker *worker, int fd, void *buffer, size_t l
 	// TODO
 }
 
-void
+static void
 worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_debug("[Worker n.%u] New API request `writeFile`.", worker->id);
@@ -121,13 +121,21 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 	free(path);
 }
 
-void
-worker_handle_open_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+static void
+worker_handle_open_file(struct Worker *worker,
+                        int fd,
+                        void *buffer,
+                        size_t len_in_bytes,
+                        bool create,
+                        bool lock)
 {
-	glog_debug("[Worker n.%u] New API request `openFile`.", worker->id);
+	glog_debug("[Worker n.%u] New API request `openFile`, create = %d, lock = %d.",
+	           worker->id,
+	           create,
+	           lock);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
-	int result = htable_open_file(htable, path, fd);
+	int result = htable_open_file(htable, path, fd, create, lock);
 	if (result < 0) {
 		response[0] = RESPONSE_ERR;
 	} else {
@@ -140,7 +148,7 @@ worker_handle_open_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	free(path);
 }
 
-void
+static void
 worker_handle_lock_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_debug("[Worker n.%u] New API request `lockFile`.", worker->id);
@@ -159,7 +167,7 @@ worker_handle_lock_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	free(path);
 }
 
-void
+static void
 worker_handle_unlock_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_debug("[Worker n.%u] New API request `unlockFile`.", worker->id);
@@ -178,7 +186,7 @@ worker_handle_unlock_file(struct Worker *worker, int fd, void *buffer, size_t le
 	free(path);
 }
 
-void
+static void
 worker_handle_remove_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_debug("[Worker n.%u] New API request `removeFile`.", worker->id);
@@ -197,18 +205,21 @@ worker_handle_remove_file(struct Worker *worker, int fd, void *buffer, size_t le
 	free(path);
 }
 
-void
+static void
 worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	/* Validate the header, which contains the length of the payload in bytes. */
 	assert(big_endian_to_u64(buffer) == len_in_bytes - 8);
+	/* Check if the buffer only has a header, i.e. it is empty. */
 	if (len_in_bytes == 8) {
 		return;
 	}
-	glog_trace(
-	  "[Worker n.%u] The latest message is %zu bytes long.", worker->id, len_in_bytes);
-	/* Remove header details from the buffer. */
+	/* Read header details from the buffer. */
 	char op = ((char *)(buffer))[8];
+	glog_trace("[Worker n.%u] The latest message is %zu bytes long, with opcode %d.",
+	           worker->id,
+	           len_in_bytes,
+	           (int)op);
 	buffer = &((char *)(buffer))[9];
 	len_in_bytes = len_in_bytes - 9;
 	switch (op) {
@@ -219,7 +230,16 @@ worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in
 			worker_handle_read_n_files(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_OPEN_FILE:
-			worker_handle_open_file(worker, fd, buffer, len_in_bytes);
+			worker_handle_open_file(worker, fd, buffer, len_in_bytes, false, false);
+			break;
+		case API_OP_OPEN_FILE_CREATE:
+			worker_handle_open_file(worker, fd, buffer, len_in_bytes, true, false);
+			break;
+		case API_OP_OPEN_FILE_LOCK:
+			worker_handle_open_file(worker, fd, buffer, len_in_bytes, false, true);
+			break;
+		case API_OP_OPEN_FILE_CREATE_LOCK:
+			worker_handle_open_file(worker, fd, buffer, len_in_bytes, true, true);
 			break;
 		case API_OP_WRITE_FILE:
 			worker_handle_write_file(worker, fd, buffer, len_in_bytes);

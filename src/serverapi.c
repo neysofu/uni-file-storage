@@ -41,19 +41,15 @@ struct ConnectionState state = {
 /******* UTILITY FUNCTIONS */
 
 static int
-file_contents(const char *relative_path, char abs_path[], void **buffer, size_t *size)
+file_contents(const char *filepath, void **buffer, size_t *size)
 {
-	assert(relative_path);
+	assert(filepath);
+	assert(buffer);
+	assert(size);
+
+	log_debug("Opening the file '%s'...", filepath);
 	FILE *f = NULL;
-	log_trace("Getting the absolute path of '%s'...", relative_path);
-	char *s = realpath(relative_path, abs_path);
-	if (!s) {
-		log_error("Couldn't get the absolute path.");
-		errno = ENAMETOOLONG;
-		return -1;
-	}
-	log_trace("Done, it's '%s'.", s);
-	f = fopen(abs_path, "r");
+	f = fopen(filepath, "rb");
 	if (!f) {
 		log_error("Couldn't open the given file.");
 		errno = EIO;
@@ -62,7 +58,10 @@ file_contents(const char *relative_path, char abs_path[], void **buffer, size_t 
 	fseek(f, 0L, SEEK_END);
 	*size = ftell(f);
 	*buffer = xmalloc(*size);
+	fseek(f, 0, SEEK_SET);
 	fread(*buffer, 1, *size, f);
+	fclose(f);
+	log_debug("Done reading the file '%s'.", filepath);
 	return 0;
 }
 
@@ -195,6 +194,8 @@ handle_response_with_files(int fd, const char *dirname)
 static int
 make_simple_request(enum ApiOp op, const char *pathname)
 {
+	assert(pathname);
+
 	state.last_operation = op;
 	if (!state.connection_is_open) {
 		return err_closed_connection();
@@ -348,8 +349,19 @@ readNFiles(int n, const char *dirname)
 int
 openFile(const char *pathname, int flags)
 {
-	return 0;
-	make_simple_request(API_OP_OPEN_FILE | flags, pathname);
+	switch (flags) {
+		case O_CREATE:
+			return make_simple_request(API_OP_OPEN_FILE_CREATE, pathname);
+		case O_LOCK:
+			return make_simple_request(API_OP_OPEN_FILE_LOCK, pathname);
+		case O_CREATE | O_LOCK:
+			return make_simple_request(API_OP_OPEN_FILE_CREATE_LOCK, pathname);
+		case 0:
+			return make_simple_request(API_OP_OPEN_FILE, pathname);
+		default:
+			errno = EINVAL;
+			return -1;
+	}
 }
 
 int
@@ -381,20 +393,25 @@ removeFile(const char *pathname)
  * account. */
 
 int
-writeFile(const char *pathname, const char *dirname)
+writeFile(const char *filepath, const char *dirname)
 {
-	char abs_path[PATH_MAX];
 	void *buffer = NULL;
 	size_t buffer_size = 0;
-	int err = file_contents(pathname, abs_path, &buffer, &buffer_size);
+	int err = 0;
+
+	err = file_contents(filepath, &buffer, &buffer_size);
 	if (err) {
 		return -1;
 	}
-	err |= make_request_with_two_args(
-	  API_OP_WRITE_FILE, abs_path, strlen(abs_path), buffer, buffer_size);
+
+	log_trace("`writeFile` on '%s', %llu bytes long.", filepath, buffer_size);
+
+	err = make_request_with_two_args(
+	  API_OP_WRITE_FILE, filepath, strlen(filepath), buffer, buffer_size);
 	if (err < 0) {
 		return -1;
 	}
+
 	return handle_response_with_files(state.fd, dirname);
 }
 

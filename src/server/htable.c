@@ -238,7 +238,7 @@ htable_create_file(struct HTable *htable, const char *key, bool lock, int fd)
 }
 
 int
-htable_open_file(struct HTable *htable, const char *key, int fd)
+htable_open_file(struct HTable *htable, const char *key, int fd, bool create, bool lock)
 {
 	struct File *file = htable_fetch_file(htable, key);
 	if (!file) {

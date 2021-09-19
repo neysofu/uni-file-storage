@@ -26,7 +26,7 @@ buf_to_str(void *buf, size_t len_in_bytes)
 {
 	char *s = xmalloc(len_in_bytes + 1);
 	memcpy(s, buf, len_in_bytes);
-	s[len_in_bytes - 1] = '\0';
+	s[len_in_bytes] = '\0';
 	return s;
 }
 

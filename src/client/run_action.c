@@ -19,7 +19,7 @@
 #include <time.h>
 #include <unistd.h>
 
-int
+static int
 run_generic_action_over_files(struct Action *action,
                               int (*api_f)(const char *pathname),
                               const char *api_f_name)
@@ -39,44 +39,62 @@ run_generic_action_over_files(struct Action *action,
 	return 0;
 }
 
-int static write_file(const char *abspath)
+static int
+run_action_write_file(const char *relative_filepath)
 {
+	char *filepath = realpath(relative_filepath, NULL);
+	if (!filepath) {
+		return -1;
+	}
+
+	log_info("Calling API function `openFile`.");
+
+	int err = 0;
+	err = openFile(filepath, O_CREATE | O_LOCK);
+	if (err < 0) {
+		log_error("`openFile` failed.");
+		return err;
+	}
+
 	log_info("Calling API function `writeFile`.");
-	log_debug("Target file: '%s'.", abspath);
+	log_debug("Target file: '%s'.", filepath);
 	if (false) {
 		log_debug("Destination directory: '%s'.", NULL);
 	} else {
 		log_debug("No destination directory was specified.");
 	}
 
-	int err = 0;
-	err = openFile(abspath, O_CREATE | O_LOCK);
+	err = writeFile(filepath, NULL);
 	if (err < 0) {
+		log_error("`writeFile` failed.");
 		return err;
 	}
 
-	err = writeFile(abspath, NULL);
+	log_info("Calling API function `closeFile`.");
+	err = closeFile(filepath);
 	if (err < 0) {
+		log_error("`closeFile` failed.");
 		return err;
 	}
 
 	return 0;
 }
 
-int
-run_action_write_file(struct Action *action)
+static int
+run_action_write_list_of_files(struct Action *action)
 {
 	/* This might cause issue if the filepaths contain commas, but there's not
 	 * much we can do about that. */
 	char *path = strtok(action->arg_s1, ",");
 	while (path) {
-		write_file(path);
+		run_action_write_file(path);
 		path = strtok(NULL, ",");
 	}
 	return 0;
 }
 
-int static write_dir(const char *absdir, int *limit)
+static int
+write_dir(const char *absdir, int *limit)
 {
 	DIR *d;
 	struct dirent *dir;
@@ -114,7 +132,7 @@ int static write_dir(const char *absdir, int *limit)
 	return 0;
 }
 
-int
+static int
 run_action_write_dir(struct Action *action)
 {
 	char *dirname = NULL;
@@ -138,7 +156,7 @@ run_action_write_dir(struct Action *action)
 	}
 }
 
-int
+static int
 run_action_read_files(struct Action *action)
 {
 	char *dir_name = NULL;
@@ -174,7 +192,7 @@ run_action_read_files(struct Action *action)
 	return 0;
 }
 
-int
+static int
 run_action_read_random_files(struct Action *action)
 {
 	log_info("Calling API function `readNFiles`.");
@@ -203,7 +221,7 @@ run_action(struct Action *action)
 	log_trace("Executing action from the '%c' flag.", action->type);
 	switch (action->type) {
 		case 'w':
-			return run_action_write_file(action);
+			return run_action_write_list_of_files(action);
 		case 'W':
 			return run_action_write_dir(action);
 		case 'r':

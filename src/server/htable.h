@@ -92,7 +92,7 @@ htable_unlock_file(struct HTable *htable, const char *key, int fd);
 /* Opens the file with path `key` within `htable` and returns 0 if the operation
  * was successful, -1 otherwise. */
 int
-htable_open_file(struct HTable *htable, const char *key, int fd);
+htable_open_file(struct HTable *htable, const char *key, int fd, bool create, bool lock);
 
 /* Removes the file with path `key` within `htable` and returns 0 if the operation
  * was successful, -1 otherwise. */
