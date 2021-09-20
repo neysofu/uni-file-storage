@@ -69,8 +69,6 @@ server: lz4
 		src/server/main.c \
 		src/server/receiver.c \
 		src/server/receiver.h \
-		src/server/report.c \
-		src/server/report.h \
 		src/server/shutdown.h \
 		src/server/shutdown.c \
 		src/server/ts_counter.h \

@@ -9,7 +9,8 @@ static unsigned thread_id_counter = 0;
 static void
 on_mutex_err(void)
 {
-	glog_fatal("Unexpected mutex error. This is a bug and should be fixed.");
+	glog_fatal(
+	  "Unexpected mutex error. This is most probably a bug and it should be fixed.");
 	abort();
 }
 
