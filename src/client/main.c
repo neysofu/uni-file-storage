@@ -124,8 +124,10 @@ main(int argc, char **argv)
 	}
 	/* Finally, everything seems to be in order. Let's proceed. */
 	log_info("The client is up and running.");
-	log_info("Opening connection with a timeout of %lu seconds...",
-	         cli_args->sec_max_attempt_time);
+	log_info("Opening connection with a timeout of %lu seconds, reattempting every %lu "
+	         "milliseconds...",
+	         cli_args->sec_max_attempt_time,
+	         cli_args->msec_between_connection_attempts);
 	struct timespec connection_due = { 0 };
 	clock_gettime(CLOCK_REALTIME, &connection_due);
 	if (cli_args->sec_max_attempt_time) {

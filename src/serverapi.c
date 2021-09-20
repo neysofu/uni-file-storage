@@ -272,6 +272,7 @@ openConnection(const char *sockname, int msec, const struct timespec abstime)
 		log_info("New connection attempt.");
 		int err = attempt_connection(sockname);
 		if (!err) {
+			log_info("Attempt failed.");
 			break;
 		}
 		wait_msec(msec);

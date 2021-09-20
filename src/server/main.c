@@ -141,6 +141,7 @@ inner_main(struct Config *config)
 	if (f_log) {
 		fclose(f_log);
 	}
+	glog_info("Exiting.");
 	return 0;
 }
 

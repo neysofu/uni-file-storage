@@ -444,7 +444,7 @@ htable_visit(struct HTable *htable, unsigned max_visits)
 	struct HTableBucket *bucket = &htable->buckets[0];
 	int err = 0;
 	/* Lock the first bucket. */
-	err |= pthread_mutex_lock(&bucket->guard);
+	err = pthread_mutex_lock(&bucket->guard);
 	if (err < 0) {
 		free(visitor);
 		return NULL;
