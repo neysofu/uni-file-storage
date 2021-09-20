@@ -85,8 +85,11 @@ print_summary(void)
 	struct HTableVisitor *visitor = htable_visit(htable, 0);
 	struct File *current_file = htable_visitor_next(visitor);
 	unsigned long i = 1;
+	/* Visual separator. */
+	printf("================\n");
 	while (current_file) {
-		printf("- %lu: %s %lu", i, current_file->key, current_file->length_in_bytes);
+		printf("- %lu (size): %lu\n", i, current_file->length_in_bytes);
+		printf("  %lu (path): %s\n", i, current_file->key);
 		current_file = htable_visitor_next(visitor);
 		i++;
 	}
