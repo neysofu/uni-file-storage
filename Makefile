@@ -18,7 +18,7 @@ CCFLAGS    += \
 	-Wold-style-definition \
 	-Wunreachable-code \
 
-all: lz4 server client serverapi
+all: lz4 server client serverapi test1 test2 test3
 
 default_target: all
 .PHONY: default_target
@@ -107,19 +107,19 @@ serverapi:
 .PHONY: serverapi
 
 test1: server client
-	@valgrind --leak-check=full ./server test/test1.toml >> server.out 2>&1 &
+	@valgrind --leak-check=full ./server config/test1.toml >> server.out 2>&1 &
 	@./test/test1.sh
 	@pidof valgrind.bin | xargs kill -SIGHUP
 .PHONY: test1
 
 test2: server client
-	@./server test/test2.toml >> server.out 2>&1 &
+	@./server config/test2.toml >> server.out 2>&1 &
 	@./test/test2.sh
 	@pidof ./server | xargs kill -SIGHUP
 .PHONY: test2
 
 test3: server client
-	@./server test/test3.toml >> server.out 2>&1 &
+	@./server config/test3.toml >> server.out 2>&1 &
 	@./test/test3.sh
 .PHONY: test3
 
@@ -134,4 +134,5 @@ help:
 	@echo "- serverapi"
 	@echo "- test1"
 	@echo "- test2"
+	@echo "- test3"
 .PHONY: help
