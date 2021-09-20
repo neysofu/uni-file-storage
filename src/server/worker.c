@@ -33,13 +33,32 @@ log_io_err(const struct Worker *worker)
 }
 
 static void
+write_response_byte(struct Worker *worker, int fd, int result)
+{
+	char response[1];
+	if (result == 0) {
+		response[0] = RESPONSE_OK;
+	} else {
+		response[0] = RESPONSE_ERR;
+	}
+	int err = write(fd, response, 1);
+	if (err < 0) {
+		log_io_err(worker);
+	}
+}
+
+static void
 worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	glog_info("[Worker n.%u] New API request `readFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 
 	struct File *file = htable_fetch_file(htable, path);
-	assert(file);
+	if (!file) {
+		write_response_byte(worker, fd, -1);
+		return;
+	}
+
 	uint8_t response[9] = { RESPONSE_OK };
 	u64_to_big_endian(file->length_in_bytes, &response[1]);
 	int err = 0;
@@ -83,12 +102,12 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 	struct File *evicted = NULL;
 	unsigned evicted_count = 0;
 	glog_debug("[Worker n.%u] Successfully parsed the latest message.", worker->id);
-	int err = htable_write_file_contents(htable,
-	                                     path,
-	                                     (uint8_t *)buffer + 16 + arg1_size,
-	                                     arg2_size,
-	                                     &evicted,
-	                                     &evicted_count);
+	int err = htable_replace_file_contents(htable,
+	                                       path,
+	                                       (uint8_t *)buffer + 16 + arg1_size,
+	                                       arg2_size,
+	                                       &evicted,
+	                                       &evicted_count);
 	if (err != 0) {
 		glog_error("[Worker n.%u] Last operation failed.", worker->id);
 	}
@@ -134,18 +153,9 @@ worker_handle_open_file(struct Worker *worker,
 	           create,
 	           lock);
 	char *path = buf_to_str(buffer, len_in_bytes);
-	char response[1];
-	int result = htable_open_file(htable, path, fd, create, lock);
-	if (result < 0) {
-		response[0] = RESPONSE_ERR;
-	} else {
-		response[0] = RESPONSE_OK;
-	}
-	int err = write(fd, response, 1);
-	if (err < 0) {
-		log_io_err(worker);
-	}
+	int result = htable_open_or_create_file(htable, path, fd, create, lock);
 	free(path);
+	write_response_byte(worker, fd, result);
 }
 
 static void
@@ -172,18 +182,19 @@ worker_handle_unlock_file(struct Worker *worker, int fd, void *buffer, size_t le
 {
 	glog_debug("[Worker n.%u] New API request `unlockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
-	char response[1];
 	int result = htable_unlock_file(htable, path, fd);
-	if (result < 0) {
-		response[0] = RESPONSE_ERR;
-	} else {
-		response[0] = RESPONSE_OK;
-	}
-	int err = write(fd, response, 1);
-	if (err < 0) {
-		log_io_err(worker);
-	}
 	free(path);
+	write_response_byte(worker, fd, result);
+}
+
+static void
+worker_handle_close_file(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
+{
+	glog_debug("[Worker n.%u] New API request `closeFile`.", worker->id);
+	char *path = buf_to_str(buffer, len_in_bytes);
+	int result = htable_close_file(htable, path, fd);
+	free(path);
+	write_response_byte(worker, fd, result);
 }
 
 static void
@@ -191,18 +202,9 @@ worker_handle_remove_file(struct Worker *worker, int fd, void *buffer, size_t le
 {
 	glog_debug("[Worker n.%u] New API request `removeFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
-	char response[1];
 	int result = htable_unlock_file(htable, path, fd);
-	if (result < 0) {
-		response[0] = RESPONSE_ERR;
-	} else {
-		response[0] = RESPONSE_OK;
-	}
-	int err = write(fd, response, 1);
-	if (err < 0) {
-		log_io_err(worker);
-	}
 	free(path);
+	write_response_byte(worker, fd, result);
 }
 
 static void
@@ -249,6 +251,9 @@ worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in
 			break;
 		case API_OP_LOCK_FILE:
 			worker_handle_lock_file(worker, fd, buffer, len_in_bytes);
+			break;
+		case API_OP_CLOSE_FILE:
+			worker_handle_close_file(worker, fd, buffer, len_in_bytes);
 			break;
 		case API_OP_REMOVE_FILE:
 			worker_handle_remove_file(worker, fd, buffer, len_in_bytes);

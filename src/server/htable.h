@@ -5,6 +5,30 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+enum HTableError
+{
+	HTABLE_ERR_OK = 0,
+	HTABLE_ERR_ALREADY_LOCKED,
+	HTABLE_ERR_ALREADY_OPEN,
+	HTABLE_ERR_ALREADY_CLOSED,
+	HTABLE_ERR_ALREADY_UNLOCKED,
+	HTABLE_ERR_MUTEX,
+	HTABLE_ERR_FILE_NOT_FOUND,
+	HTABLE_ERR_CANT_UNLOCK,
+	HTABLE_ERR_CANT_OPEN,
+	HTABLE_ERR_CANT_CLOSE,
+};
+
+struct HTableStats
+{
+	size_t total_space_in_bytes;
+	size_t items_count;
+	size_t open_count;
+	long unsigned historical_max_items_count;
+	long unsigned historical_max_space_in_bytes;
+	long unsigned historical_num_evictions;
+};
+
 struct Subscriber
 {
 	int fd;
@@ -36,36 +60,24 @@ htable_create(size_t buckets, const struct Config *config);
 void
 htable_free(struct HTable *htable);
 
-/* Returns the amount of files currently stored by `htable`. */
-unsigned long
-htable_num_items(const struct HTable *htable);
-
-/* Returns the maximum amount of files ever stored by `htable`. */
-unsigned long
-htable_max_files_stored(const struct HTable *htable);
-
-/* Returns the total number of file evictions ever performed by `htable`. */
-long unsigned
-htable_num_evictions(const struct HTable *htable);
-
-/* Returns the maximum amount of bytes ever stored by `htable`. */
-unsigned long
-htable_max_size(const struct HTable *htable);
+/* Returns a pointer to the internal `struct HTableStats` of `htable`. */
+const struct HTableStats *
+htable_stats(const struct HTable *htable);
 
 /* Searches a file with path `key` within `htable` and returns a pointer to its
  * contents if found, NULL otherwise. */
 struct File *
 htable_fetch_file(struct HTable *htable, const char *key);
 
-int
-htable_write_file_contents(struct HTable *htable,
-                           const char *key,
-                           const void *contents,
-                           size_t size_in_bytes,
-                           struct File **evicted,
-                           unsigned *evicted_count);
+enum HTableError
+htable_replace_file_contents(struct HTable *htable,
+                             const char *key,
+                             const void *contents,
+                             size_t size_in_bytes,
+                             struct File **evicted,
+                             unsigned *evicted_count);
 
-int
+enum HTableError
 htable_append_to_file_contents(struct HTable *htable,
                                const char *key,
                                const void *contents,
@@ -74,29 +86,32 @@ htable_append_to_file_contents(struct HTable *htable,
                                unsigned *evicted_count);
 
 /* Drops a unique handle on the file with path `key` within `htable` and releases
- * an internal lock that blocks access to it from other threads. Returns 0 on
- * success, -1 on failure. */
-int
+ * an internal lock that blocks access to it from other threads. */
+enum HTableError
 htable_release(struct HTable *htable, const char *key);
 
-/* Locks the file with path `key` within `htable` and returns 0 if the operation
- * was successful, -1 otherwise. */
-int
+/* Locks the file with path `key` within `htable`. */
+enum HTableError
 htable_lock_file(struct HTable *htable, const char *key, int fd);
 
-/* Unlocks the file with path `key` within `htable` and returns 0 if the operation
- * was successful, -1 otherwise. */
-int
+/* Unlocks the file with path `key` within `htable`. */
+enum HTableError
 htable_unlock_file(struct HTable *htable, const char *key, int fd);
 
-/* Opens the file with path `key` within `htable` and returns 0 if the operation
- * was successful, -1 otherwise. */
-int
-htable_open_file(struct HTable *htable, const char *key, int fd, bool create, bool lock);
+enum HTableError
+htable_close_file(struct HTable *htable, const char *key, int fd);
+
+/* Opens the file with path `key` within `htable`. */
+enum HTableError
+htable_open_or_create_file(struct HTable *htable,
+                           const char *key,
+                           int fd,
+                           bool create,
+                           bool lock);
 
 /* Removes the file with path `key` within `htable` and returns 0 if the operation
  * was successful, -1 otherwise. */
-int
+enum HTableError
 htable_remove_file(struct HTable *htable, const char *key, int fd);
 
 struct HTableVisitor;

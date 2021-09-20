@@ -74,14 +74,13 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 void
 print_summary(void)
 {
-	unsigned long max_files_stored = htable_max_files_stored(htable);
-	printf("Max. files stored: %lu\n", max_files_stored);
-	unsigned long max_space_in_bytes = htable_max_size(htable);
-	printf("Max. space in bytes: %lu\n", max_space_in_bytes);
-	unsigned long num_evictions = htable_num_evictions(htable);
-	printf("Num. of evictions: %lu\n", num_evictions);
+	const struct HTableStats *stats = htable_stats(htable);
+	printf("Max. files stored: %lu\n", stats->historical_max_items_count);
+	printf("Max. space in bytes: %lu\n", stats->historical_max_space_in_bytes);
+	printf("Num. of evictions: %lu\n", stats->historical_num_evictions);
 
-	printf("Current contents of the file storage server: %lu\n", htable_num_items(htable));
+	printf("Current space in bytes: %lu\n", stats->total_space_in_bytes);
+	printf("Current contents of the file storage server: %lu\n", stats->items_count);
 
 	struct HTableVisitor *visitor = htable_visit(htable, 0);
 	struct File *current_file = htable_visitor_next(visitor);
