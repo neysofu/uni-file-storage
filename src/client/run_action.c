@@ -12,7 +12,6 @@
 #include "utilities.h"
 #include <assert.h>
 #include <dirent.h>
-#include <libgen.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <string.h>
@@ -20,9 +19,9 @@
 #include <unistd.h>
 
 static int
-run_generic_action_over_files(struct Action *action,
-                              int (*api_f)(const char *pathname),
-                              const char *api_f_name)
+run_some_action_over_list_of_files(struct Action *action,
+                                   int (*api_f)(const char *pathname),
+                                   const char *api_f_name)
 {
 	char *path = strtok(action->arg_s1, ",");
 	while (path) {
@@ -133,7 +132,7 @@ write_dir(const char *absdir, int *limit)
 }
 
 static int
-run_action_write_dir(struct Action *action)
+run_action_write_files_in_dir(struct Action *action)
 {
 	char *dirname = NULL;
 	/* We must differentiate between relative and absolute directory path. */
@@ -156,8 +155,45 @@ run_action_write_dir(struct Action *action)
 	}
 }
 
+static char *
+basename(char const *filepath)
+{
+	char *s = strrchr(filepath, '/');
+	if (!s) {
+		return strdup(filepath);
+	} else {
+		return strdup(s + 1);
+	}
+}
+
 static int
-run_action_read_files(struct Action *action)
+write_file_to_dir(const void *buffer,
+                  size_t buffer_size,
+                  const char *dir,
+                  const char *original_filepath)
+{
+	char *base = basename(original_filepath);
+	if (!base) {
+		return -1;
+	}
+	char *filepath = xmalloc(strlen(dir) + 1 + strlen(base) + 1);
+	strcpy(filepath, dir);
+	strcpy(filepath + strlen(dir), "/");
+	strcpy(filepath + strlen(dir) + 1, base);
+
+	FILE *f = fopen(filepath, "wb");
+	if (!f) {
+		free(filepath);
+		return -1;
+	}
+	fwrite(buffer, buffer_size, 1, f);
+	fclose(f);
+	free(filepath);
+	return 0;
+}
+
+static int
+run_action_read_list_of_files(struct Action *action)
 {
 	char *dir_name = NULL;
 	DIR *d = NULL;
@@ -174,17 +210,14 @@ run_action_read_files(struct Action *action)
 			log_error("`realpath` failed");
 			break;
 		}
-		FILE *f = fopen(filepath, "wb");
 		void *buffer = NULL;
 		size_t buffer_size = 0;
 		int err = readFile(filepath, &buffer, &buffer_size);
 		if (err) {
 			return err;
 		}
-		fwrite(buffer, buffer_size, 1, f);
+		write_file_to_dir(buffer, buffer_size, dir_name, filepath);
 		rel_filepath = strtok(NULL, ",");
-		free(filepath);
-		fclose(f);
 	}
 	if (d) {
 		closedir(d);
@@ -221,23 +254,23 @@ run_action(struct Action *action)
 	log_trace("Executing action from the '%c' flag.", action->type);
 	switch (action->type) {
 		case 'w':
-			return run_action_write_list_of_files(action);
+			return run_action_write_files_in_dir(action);
 		case 'W':
-			return run_action_write_dir(action);
+			return run_action_write_list_of_files(action);
 		case 'r':
-			return run_action_read_files(action);
+			return run_action_read_list_of_files(action);
 		case 'R':
 			return run_action_read_random_files(action);
+		case 'l':
+			return run_some_action_over_list_of_files(action, lockFile, "lockFile");
+		case 'u':
+			return run_some_action_over_list_of_files(action, unlockFile, "unlockFile");
+		case 'c':
+			return run_some_action_over_list_of_files(action, removeFile, "removeFile");
 		case 't':
 			log_debug("Waiting %d milliseconds.", action->arg_i);
 			wait_msec(action->arg_i);
 			return 0;
-		case 'l':
-			return run_generic_action_over_files(action, lockFile, "lockFile");
-		case 'u':
-			return run_generic_action_over_files(action, unlockFile, "unlockFile");
-		case 'c':
-			return run_generic_action_over_files(action, removeFile, "removeFile");
 		default:
 			log_fatal("Unrecognized client action symbol. This is a bug.");
 			assert(false);

@@ -94,22 +94,24 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 	}
 	uint64_t arg1_size = big_endian_to_u64(buffer);
 	uint64_t arg2_size = big_endian_to_u64((uint8_t *)buffer + 8);
-	if (len_in_bytes != 8 + 8 + arg1_size + arg2_size) {
+	if (len_in_bytes != 8 * 2 + arg1_size + arg2_size) {
 		glog_error("[Worker n.%u] Bad message format.", worker->id);
 		return;
 	}
 	char *path = buf_to_str((uint8_t *)(buffer) + 16, arg1_size);
+	glog_debug("[Worker n.%u] The path is '%s', file size is %lu bytes.",
+	           worker->id,
+	           path,
+	           arg2_size);
 	struct File *evicted = NULL;
 	unsigned evicted_count = 0;
 	glog_debug("[Worker n.%u] Successfully parsed the latest message.", worker->id);
-	int err = htable_replace_file_contents(htable,
-	                                       path,
-	                                       (uint8_t *)buffer + 16 + arg1_size,
-	                                       arg2_size,
-	                                       &evicted,
-	                                       &evicted_count);
+	void *arg2_buffer = (char *)buffer + 8 * 2 + arg1_size;
+	int err = htable_replace_file_contents(
+	  htable, path, arg2_buffer, arg2_size, &evicted, &evicted_count);
 	if (err != 0) {
-		glog_error("[Worker n.%u] Last operation failed.", worker->id);
+		glog_error(
+		  "[Worker n.%u] Last operation failed with err code %d.", worker->id, err);
 	}
 	glog_debug("[Worker n.%u] Last operation evicted %u files.", worker->id, evicted_count);
 	uint8_t buf_response_code[1] = { RESPONSE_OK };
@@ -153,6 +155,7 @@ worker_handle_open_file(struct Worker *worker,
 	           create,
 	           lock);
 	char *path = buf_to_str(buffer, len_in_bytes);
+	glog_debug("[Worker n.%u] The path is '%s'.", worker->id, path);
 	int result = htable_open_or_create_file(htable, path, fd, create, lock);
 	free(path);
 	write_response_byte(worker, fd, result);

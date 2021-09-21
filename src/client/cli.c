@@ -76,7 +76,7 @@ cli_args_add_action_write_files(struct CliArgs *cli_args, char *arg)
 		return;
 	}
 	struct Action action;
-	action.type = 'w';
+	action.type = 'W';
 	action.arg_s1 = arg;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;

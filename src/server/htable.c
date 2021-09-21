@@ -163,8 +163,7 @@ htable_fetch_item(struct HTable *htable, const char *key)
 	}
 	struct HTableItem *item = bucket->head;
 	while (item) {
-		assert(&item->file);
-		if (item->file.key == key) {
+		if (strcmp(item->file.key, key) == 0) {
 			return item;
 		}
 		item = item->next;
@@ -338,8 +337,12 @@ htable_open_file(struct HTable *htable, const char *key, int fd, bool lock)
 enum HTableError
 htable_create_file(struct HTable *htable, const char *key, int fd, bool lock)
 {
+	if (htable_fetch_item(htable, key)) {
+		return_if_err(htable_release(htable, key));
+		return HTABLE_ERR_ALREADY_CREATED;
+	}
+
 	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
-	return_if_err(pthread_mutex_lock(&bucket->guard));
 	struct HTableItem *item = xmalloc(sizeof(struct HTableItem));
 	item->file.fd_owner = fd;
 	item->file.is_locked = lock;
@@ -349,15 +352,12 @@ htable_create_file(struct HTable *htable, const char *key, int fd, bool lock)
 	item->file.length_in_bytes = 0;
 	item->file.contents = NULL;
 	item->file.subs = NULL;
-	item->next = NULL;
-	item->prev = bucket->last;
-	if (!bucket->head) {
-		bucket->head = item;
+	item->next = bucket->head;
+	if (bucket->head) {
+		bucket->head->prev = item;
 	}
-	if (bucket->last) {
-		bucket->last->next = item;
-	}
-	bucket->last = item;
+	item->prev = NULL;
+	bucket->head = item;
 	return_if_err(htable_release(htable, key));
 	return_if_err(htable_lock_stats(htable));
 	htable->stats.open_count++;
