@@ -10,7 +10,8 @@ mkdir $PARENT_PATH/data/target
 
 echo ""
 
-for file in "$PARENT_PATH/data/Imgur/80s/*"; do
+for file in $PARENT_PATH/data/Imgur/80s/*; do
+   echo "$file"
    ./client -p trace -f /tmp/LSOfiletorage.sk -W $file -D $PARENT_PATH/data/target
    echo ""
 done

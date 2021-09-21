@@ -144,7 +144,14 @@ main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	for (struct Action *action = cli_args->head; action; action = action->next) {
-		run_action(action);
+		log_trace("Beginning a new action...");
+		err = run_action(action);
+		if (err == 0) {
+			log_trace("Action success.");
+		} else {
+			log_error("Action failure (error: %d).", err);
+			break;
+		}
 	}
 	log_info("Closing connection...");
 	err = closeConnection(cli_args->socket_name);

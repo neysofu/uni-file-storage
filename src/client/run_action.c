@@ -86,7 +86,11 @@ run_action_write_list_of_files(struct Action *action)
 	 * much we can do about that. */
 	char *path = strtok(action->arg_s1, ",");
 	while (path) {
-		run_action_write_file(path);
+		int err = run_action_write_file(path);
+		if (err) {
+			return err;
+		}
+
 		path = strtok(NULL, ",");
 	}
 	return 0;
