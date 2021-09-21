@@ -11,9 +11,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-/* It's important to define a timeout so that we can catch shutdown signals. */
-#define TIMEOUT_MILLISECONDS 500
-
 struct Receiver
 {
 	unsigned num_workers;
@@ -131,7 +128,7 @@ receiver_poll(struct Receiver *r)
 	glog_debug("New iteration in the polling loop with %zu connection(s).",
 	           r->active_sockets_count - 1);
 	/* Block until something happens. */
-	int num_reads = poll(r->active_sockets, r->active_sockets_count, TIMEOUT_MILLISECONDS);
+	int num_reads = poll(r->active_sockets, r->active_sockets_count, -1);
 	if (num_reads < 0) {
 		errno = EIO;
 		return -1;
