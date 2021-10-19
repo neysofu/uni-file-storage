@@ -4,8 +4,6 @@
 #include "logc/src/log.h"
 #include "receiver.h"
 #include "serverapi_utilities.h"
-#include "shutdown.h"
-#include "ts_counter.h"
 #include "utilities.h"
 #include "worker.h"
 #include "workload_queue.h"

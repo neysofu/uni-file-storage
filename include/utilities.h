@@ -55,4 +55,9 @@ xmalloc(size_t size);
 void *
 xrealloc(void *buf, size_t size);
 
+/* Exits from the running process if `err` is non-zero. Before exiting, it prints
+ * an explanation to STDERR. */
+void
+exit_if_err(int err);
+
 #endif

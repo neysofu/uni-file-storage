@@ -16,7 +16,7 @@ struct Config
 	int err;
 };
 
-/* Allocates a `struct Config` on the heap and it fills it in with values read
+/* Allocates a `struct Config` on the heap and fills it in with values read
  * from the TOML file found at `abs_path`. */
 struct Config *
 config_parse_file(char abs_path[]);

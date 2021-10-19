@@ -5,10 +5,9 @@
 #include "serverapi_utilities.h"
 #include <stdlib.h>
 
-/* Opaque data structure that simplifies the following:
- *  - reading incoming data from client connections; and
- *  - automatically accepting new connections.
- */
+/* Opaque data structure that simplifies the following actions:
+ *  - reading incoming data from client connections.
+ *  - automatically accepting new connections. */
 struct Receiver;
 
 /* The data type of incoming messages. */

@@ -24,7 +24,8 @@ deserializer_create(void);
  * were inserted into the internal buffer since the last call to this function.
  *
  * After a `struct Buffer` is successfully returned from this function,
- * `deserializer` is not valid anymore and it should be discarded.
+ * `deserializer` is not valid anymore (freed) and pointers to it should be
+ * discarded.
  * */
 struct Buffer *
 deserializer_detach(struct Deserializer *deserializer, size_t new_bytes);
@@ -35,7 +36,7 @@ size_t
 deserializer_missing(const struct Deserializer *deserializer);
 
 /* Returns an internal buffer from `deserializer` that you can use as a sink for
- * incoming data. It is always guaranteed to be of the size dicated by
+ * incoming data. It is always guaranteed to be of the size indicated by
  * `deserializer_missing`. */
 void *
 deserializer_buffer(struct Deserializer *deserializer);

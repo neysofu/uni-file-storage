@@ -5,8 +5,6 @@
 #include "htable.h"
 #include "logc/src/log.h"
 #include "serverapi_utilities.h"
-#include "shutdown.h"
-#include "ts_counter.h"
 #include "utilities.h"
 #include "workload_queue.h"
 #include <assert.h>
