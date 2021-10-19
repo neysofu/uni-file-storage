@@ -39,6 +39,7 @@ readn(long fd, void *buf, size_t size);
 int
 writen(long fd, const void *buf, size_t size);
 
+/* Copies eight bytes (big endian is assumed) into an `uint64_t`. */
 uint64_t
 big_endian_to_u64(uint8_t bytes[8]);
 

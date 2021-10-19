@@ -2,7 +2,7 @@
 
 #include "cli.h"
 #include "logc/src/log.h"
-#include "serverapi_utilities.h"
+#include "serverapi.h"
 #include "utilities.h"
 #include <assert.h>
 #include <stdlib.h>

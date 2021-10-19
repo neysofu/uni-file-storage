@@ -5,6 +5,31 @@
 #include <stddef.h>
 #include <time.h>
 
+/* Unique identifiers for all operations available over the public API. */
+enum ApiOp
+{
+	API_OP_OPEN_CONNECTION,
+	API_OP_CLOSE_CONNECTION,
+	API_OP_OPEN_FILE,
+	API_OP_OPEN_FILE_CREATE,
+	API_OP_OPEN_FILE_LOCK,
+	API_OP_OPEN_FILE_CREATE_LOCK,
+	API_OP_READ_FILE,
+	API_OP_READ_N_FILES,
+	API_OP_WRITE_FILE,
+	API_OP_APPEND_TO_FILE,
+	API_OP_LOCK_FILE,
+	API_OP_UNLOCK_FILE,
+	API_OP_CLOSE_FILE,
+	API_OP_REMOVE_FILE,
+};
+
+enum ResponseType
+{
+	RESPONSE_OK,
+	RESPONSE_ERR,
+};
+
 enum FileFlag
 {
 	O_CREATE = 1,

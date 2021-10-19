@@ -4,7 +4,6 @@
 
 #include "serverapi.h"
 #include "logc/src/log.h"
-#include "serverapi_utilities.h"
 #include "utilities.h"
 #include <assert.h>
 #include <errno.h>

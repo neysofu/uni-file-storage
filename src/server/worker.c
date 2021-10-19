@@ -4,7 +4,7 @@
 #include "global_state.h"
 #include "htable.h"
 #include "logc/src/log.h"
-#include "serverapi_utilities.h"
+#include "serverapi.h"
 #include "utilities.h"
 #include "workload_queue.h"
 #include <assert.h>

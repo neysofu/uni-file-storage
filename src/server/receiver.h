@@ -2,7 +2,7 @@
 #define SOL_SERVER_RECEIVER
 
 #include "deserializer.h"
-#include "serverapi_utilities.h"
+#include "serverapi.h"
 #include <stdlib.h>
 
 /* Opaque data structure that simplifies the following actions:
