@@ -42,6 +42,7 @@ run_action_write_file(const char *relative_filepath)
 {
 	char *filepath = realpath(relative_filepath, NULL);
 	if (!filepath) {
+		log_error("`realpath` failed.");
 		return -1;
 	}
 

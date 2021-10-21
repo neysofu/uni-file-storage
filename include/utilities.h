@@ -43,6 +43,7 @@ writen(long fd, const void *buf, size_t size);
 uint64_t
 big_endian_to_u64(uint8_t bytes[8]);
 
+/* Copies the bytes of an `uint64_t` into a buffer as big endian. */
 void
 u64_to_big_endian(uint64_t data, uint8_t bytes[8]);
 
