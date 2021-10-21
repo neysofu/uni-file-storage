@@ -3,6 +3,7 @@
 client
 server
 server.valgrind
+server.log
 !client/
 !server/
 
