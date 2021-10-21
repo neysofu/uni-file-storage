@@ -3,4 +3,4 @@ max-files = 100
 max-storage = 32_000_000
 num-workers = 8
 socket-filepath = "/tmp/LSOfiletorage.sk"
-log-filepath = "/var/log/LSOfilestorage.txt"
+log-filepath = "server.log"
