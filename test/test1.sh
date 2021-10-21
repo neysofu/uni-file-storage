@@ -4,7 +4,7 @@ PARENT_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P)
 echo "The parent path of this test is $PARENT_PATH."
 echo ""
 
-mkdir $PARENT_PATH/data/target
+mkdir -p $PARENT_PATH/data/target
 
 ./client -h
 
@@ -12,7 +12,7 @@ echo ""
 
 for file in $PARENT_PATH/data/Imgur/80s/*; do
    echo "$file"
-   ./client -p trace -f /tmp/LSOfiletorage.sk -W $file -D $PARENT_PATH/data/target
+   ./client -p trace -f /tmp/LSOfiletorage.sk -W "$file" -D $PARENT_PATH/data/target
    echo ""
 done
 
