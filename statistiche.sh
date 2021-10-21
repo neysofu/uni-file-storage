@@ -25,9 +25,9 @@ done
 
 echo "Num. of new connections: $NUM_NEW_CONNECTIONS"
 echo "Max. number of concurrent connections: $NUM_NEW_CONNECTIONS"
-echo "Num. of lock operatoins: $NUM_LOCKS"
-echo "Num. of unlock operatoins: $NUM_UNLOCKS"
-echo "Num. of close operatoins: $NUM_CLOSES"
+echo "Num. of lock operations: $NUM_LOCKS"
+echo "Num. of unlock operations: $NUM_UNLOCKS"
+echo "Num. of close operations: $NUM_CLOSES"
 echo "Num. of evictions: $NUM_EVICTIONS"
 
 exit 0
