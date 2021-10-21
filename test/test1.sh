@@ -4,32 +4,32 @@ PARENT_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P)
 echo "The parent path of this test is $PARENT_PATH."
 echo ""
 
-mkdir -p $PARENT_PATH/data/target
+rm -rf "$PARENT_PATH/data/target"
+mkdir -p "$PARENT_PATH/data/target/80s"
+mkdir -p "$PARENT_PATH/data/target/Gangsta"
+mkdir -p "$PARENT_PATH/data/target/Pokemon"
+mkdir -p "$PARENT_PATH/data/target/Winter"
+mkdir -p "$PARENT_PATH/data/target/evicted"
+
+# TEST -h
 
 ./client -h
-
 echo ""
+
+# TEST -W (single file, looping)
 
 for file in $PARENT_PATH/data/Imgur/80s/*; do
    echo "$file"
-   ./client -p trace -f /tmp/LSOfiletorage.sk -W "$file" -D "$PARENT_PATH/data/target"
-   echo ""
+   ./client -p warn -f /tmp/LSOfiletorage.sk -W "$file" -D "$PARENT_PATH/data/target/evicted" -z 1
 done
 
-echo "Evicted $(ls -l $PARENT_PATH/data/target) files."
-echo ""
+echo "Written $(ls -1q $PARENT_PATH/data/Imgur/80s | wc -l) files."
 
-for file in "$PARENT_PATH/data/Imgur/80s/*"; do
-   ./client -p trace -f /tmp/LSOfiletorage.sk -r "$file" -d "$PARENT_PATH/data/target/" -z 1
-   echo ""
+for file in $PARENT_PATH/data/Imgur/80s/*; do
+   echo "$file"
+   ./client -p warn -f /tmp/LSOfiletorage.sk -r "$file" -d "$PARENT_PATH/data/target/80s" -z 1
 done
 
-find "$PARENT_PATH/data/target/80s" -type f -exec md5sum {} + | sort -k 2 > $PARENT_PATH/data/target/md5.txt
-find "$PARENT_PATH/data/Imgur/80s" -type f -exec md5sum {} + | sort -k 2 > $PARENT_PATH/data/target/original.txt
-
-# Compare the original directory and the one we got from the server's contents.
-diff -u "$PARENT_PATH/data/target/md5.txt" "$PARENT_PATH/data/target/original.txt"
-
-rm -rf "$PARENT_PATH/data/target"
+echo "Got back $(ls -1q $PARENT_PATH/data/target/80s | wc -l) files."
 
 exit 0

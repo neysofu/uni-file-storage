@@ -211,7 +211,7 @@ run_action_read_list_of_files(struct Action *action)
 	while (rel_filepath) {
 		char *filepath = realpath(rel_filepath, NULL);
 		if (!filepath) {
-			log_error("`realpath` failed");
+			log_error("`realpath` failed with %s", rel_filepath);
 			break;
 		}
 		void *buffer = NULL;

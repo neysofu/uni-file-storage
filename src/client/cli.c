@@ -206,6 +206,10 @@ cli_args_enable_log(struct CliArgs *cli_args, char *arg)
 	assert(cli_args);
 	if (!arg || strcmp(arg, "info") == 0) {
 		cli_args->log_level = LOG_INFO;
+	} else if (strcmp(arg, "error") == 0) {
+		cli_args->log_level = LOG_ERROR;
+	} else if (strcmp(arg, "warn") == 0) {
+		cli_args->log_level = LOG_WARN;
 	} else if (strcmp(arg, "debug") == 0) {
 		cli_args->log_level = LOG_DEBUG;
 	} else if (strcmp(arg, "trace") == 0) {
