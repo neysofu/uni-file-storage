@@ -149,7 +149,6 @@ int
 main(int argc, char **argv)
 {
 	glog_debug("Initializing some internal resources.");
-
 	/* Seed the PRNG (pseudorandom number generator). */
 	srand(time(NULL));
 	/* Set signal handlers. */
