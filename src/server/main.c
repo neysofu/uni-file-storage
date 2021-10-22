@@ -72,7 +72,7 @@ listen_for_connections(const char *socket_filepath, int *socket_fd)
 void
 print_summary(void)
 {
-	const struct HTableStats *stats = htable_stats(htable);
+	const struct HTableStats *stats = htable_stats(global_htable);
 	printf("Max. files stored: %lu\n", stats->historical_max_items_count);
 	printf("Max. space in bytes: %lu\n", stats->historical_max_space_in_bytes);
 	printf("Num. of evictions: %lu\n", stats->historical_num_evictions);
@@ -80,7 +80,7 @@ print_summary(void)
 	printf("Current space in bytes: %lu\n", stats->total_space_in_bytes);
 	printf("Current contents of the file storage server: %lu\n", stats->items_count);
 
-	struct HTableVisitor *visitor = htable_visit(htable, 0);
+	struct HTableVisitor *visitor = htable_visit(global_htable, 0);
 	struct File *current_file = htable_visitor_next(visitor);
 	unsigned long i = 1;
 	/* Visual separator. */
@@ -183,6 +183,6 @@ main(int argc, char **argv)
 	/* Initialize the global hash table with a reasonable number of buckets.
 	 * Ideally this should be set with a goal load factor, but we're splitting
 	 * hairs... */
-	htable = htable_create(config->max_files, config);
+	global_htable = htable_create(config->max_files, config);
 	return inner_main(config);
 }

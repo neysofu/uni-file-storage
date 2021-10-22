@@ -6,7 +6,7 @@
 
 pthread_mutex_t log_guard = PTHREAD_MUTEX_INITIALIZER;
 struct Config *global_config = NULL;
-struct HTable *htable = NULL;
+struct HTable *global_htable = NULL;
 
 static pthread_mutex_t thread_id_guard = PTHREAD_MUTEX_INITIALIZER;
 static unsigned thread_id_counter = 0;

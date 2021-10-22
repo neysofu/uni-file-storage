@@ -87,9 +87,10 @@ htable_append_to_file_contents(struct HTable *htable,
                                unsigned *evicted_count);
 
 /* Drops a unique handle on the file with path `key` within `htable` and releases
- * an internal lock that blocks access to it from other threads. */
-enum HTableError
-htable_release(struct HTable *htable, const char *key);
+ * an internal lock that blocks access to it from other threads. This MUST
+ * always be called after `htable_fetch_file`. */
+void
+htable_release_file(struct HTable *htable, const char *key);
 
 /* Locks the file with path `key` within `htable`. */
 enum HTableError

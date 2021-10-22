@@ -23,7 +23,7 @@
 
 extern pthread_mutex_t log_guard;
 extern struct Config *global_config;
-extern struct HTable *htable;
+extern struct HTable *global_htable;
 
 /* Returns the current counter value and then increments the global counter.
  * Thread-safe.

@@ -1,6 +1,8 @@
 #include "htable.h"
 #include "config.h"
 #include "fifo_cache.h"
+#include "global_state.h"
+#include "server_utilities.h"
 #include "utilities.h"
 #include "xxHash/xxhash.h"
 #include <assert.h>
@@ -9,15 +11,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define return_if_err(x)                                                                   \
-	do {                                                                                   \
-		int err = (x);                                                                     \
-		if (err != 0) {                                                                    \
-			return err;                                                                    \
-		}                                                                                  \
-	} while (0)
-
 #define XXHASH_SEED 0
+
+#define ON_MUTEX_ERR(err)                                                                  \
+	ON_ERR((err), "Unexpected mutex error during hash table internal manipulation.")
+
+#define MODIFY_STATS(htable, ...)                                                          \
+	do {                                                                                   \
+		ON_MUTEX_ERR(pthread_mutex_lock(&htable->stats_guard));                            \
+		{ __VA_ARGS__ };                                                                   \
+		ON_MUTEX_ERR(pthread_mutex_unlock(&htable->stats_guard));                          \
+	} while (0);
 
 struct HTableItem
 {
@@ -56,12 +60,7 @@ htable_create(size_t buckets, const struct Config *config)
 		free(htable);
 		return NULL;
 	}
-	int err = pthread_mutex_init(&htable->stats_guard, NULL);
-	if (err) {
-		free(htable);
-		free(htable->fcache);
-		return NULL;
-	}
+	ON_MUTEX_ERR(pthread_mutex_init(&htable->stats_guard, NULL));
 	htable->max_items_count = config->max_files;
 	htable->max_space_in_bytes = config->max_storage_in_bytes;
 	htable->stats.items_count = 0;
@@ -75,13 +74,7 @@ htable_create(size_t buckets, const struct Config *config)
 	for (size_t i = 0; i < buckets; i++) {
 		htable->buckets[i].head = NULL;
 		htable->buckets[i].last = NULL;
-		err = pthread_mutex_init(&htable->buckets[i].guard, NULL);
-		if (err != 0) {
-			pthread_mutex_destroy(&htable->stats_guard);
-			free(htable->buckets);
-			free(htable);
-			return NULL;
-		}
+		ON_MUTEX_ERR(pthread_mutex_init(&htable->buckets[i].guard, NULL));
 	}
 	return htable;
 }
@@ -93,9 +86,7 @@ htable_free(struct HTable *htable)
 		return;
 	}
 	for (size_t i = 0; i < htable->buckets_count; i++) {
-		/* Ignore any errors: everything will be out of scope very soon, we don't
-		 * really care. */
-		pthread_mutex_destroy(&htable->buckets[i].guard);
+		ON_MUTEX_ERR(pthread_mutex_destroy(&htable->buckets[i].guard));
 		struct HTableItem *item = htable->buckets[i].head;
 		while (item) {
 			free(item->file.contents);
@@ -110,32 +101,12 @@ htable_free(struct HTable *htable)
 		}
 	}
 	fifo_cache_free(htable->fcache);
-	pthread_mutex_destroy(&htable->stats_guard);
+	ON_MUTEX_ERR(pthread_mutex_destroy(&htable->stats_guard));
 	free(htable->buckets);
 	free(htable);
 }
 
 /************ INTERNAL HTABLE UTILITIES ***********/
-
-static enum HTableError
-htable_lock_stats(struct HTable *htable)
-{
-	if (pthread_mutex_lock(&htable->stats_guard) == 0) {
-		return HTABLE_ERR_OK;
-	} else {
-		return HTABLE_ERR_MUTEX;
-	}
-}
-
-static enum HTableError
-htable_unlock_stats(struct HTable *htable)
-{
-	if (pthread_mutex_unlock(&htable->stats_guard) == 0) {
-		return HTABLE_ERR_OK;
-	} else {
-		return HTABLE_ERR_MUTEX;
-	}
-}
 
 /* Returns a pointer to the bucket within `htable` that contains `key`, if
  * present at all. */
@@ -156,11 +127,7 @@ htable_fetch_item(struct HTable *htable, const char *key)
 	assert(key);
 	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
 	assert(bucket);
-	int err = 0;
-	err = pthread_mutex_lock(&bucket->guard);
-	if (err) {
-		return NULL;
-	}
+	ON_MUTEX_ERR(pthread_mutex_lock(&bucket->guard));
 	struct HTableItem *item = bucket->head;
 	while (item) {
 		if (strcmp(item->file.key, key) == 0) {
@@ -179,24 +146,19 @@ htable_fetch_file(struct HTable *htable, const char *key)
 	struct HTableItem *node = htable_fetch_item(htable, key);
 	if (!node) {
 		struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
-		pthread_mutex_unlock(&bucket->guard);
+		ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 		return NULL;
 	}
 	return &node->file;
 }
 
 /* Frees the bucket within `htable` that contains `key`. */
-enum HTableError
-htable_release(struct HTable *htable, const char *key)
+void
+htable_release_file(struct HTable *htable, const char *key)
 {
 	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
 	assert(bucket);
-
-	if (pthread_mutex_unlock(&bucket->guard) == 0) {
-		return HTABLE_ERR_OK;
-	} else {
-		return HTABLE_ERR_MUTEX;
-	}
+	ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 }
 
 struct File *
@@ -227,13 +189,15 @@ htable_evict_files_locked(struct HTable *htable,
 	*evicted_count = 0;
 	while (htable->stats.items_count > htable->max_items_count ||
 	       htable->stats.total_space_in_bytes > htable->max_space_in_bytes) {
-		evicted_count++;
+
+		(*evicted_count)++;
 		*evicted = xrealloc(*evicted, sizeof(struct File *) * *evicted_count);
-		struct File **file_ptr = &(*evicted)[*evicted_count - 1];
-		*file_ptr = htable_evict_one_file_locked(htable);
-		if (*file_ptr) {
+
+		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
+		*file_ptr = *htable_evict_one_file_locked(htable);
+		if (file_ptr) {
 			htable->stats.items_count--;
-			htable->stats.total_space_in_bytes -= (*file_ptr)->length_in_bytes;
+			htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
 		} else {
 			return 0;
 		}
@@ -283,12 +247,13 @@ htable_lock_file(struct HTable *htable, const char *key, int fd)
 	if (!file) {
 		return HTABLE_ERR_FILE_NOT_FOUND;
 	} else if (file->is_locked) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_ALREADY_LOCKED;
 	} else {
 		file->is_locked = true;
 		file->fd_owner = fd;
-		return htable_release(htable, key);
+		htable_release_file(htable, key);
+		return HTABLE_ERR_OK;
 	}
 }
 
@@ -299,14 +264,15 @@ htable_unlock_file(struct HTable *htable, const char *key, int fd)
 	if (!file) {
 		return HTABLE_ERR_FILE_NOT_FOUND;
 	} else if (!file->is_locked) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_ALREADY_UNLOCKED;
 	} else if (file->fd_owner != fd) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_CANT_UNLOCK;
 	} else {
 		file->is_locked = false;
-		return htable_release(htable, key);
+		htable_release_file(htable, key);
+		return HTABLE_ERR_OK;
 	}
 }
 
@@ -317,19 +283,19 @@ htable_open_file(struct HTable *htable, const char *key, int fd, bool lock)
 	if (!file) {
 		return HTABLE_ERR_FILE_NOT_FOUND;
 	} else if (file->is_open) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_ALREADY_OPEN;
 	} else if (file->is_locked && file->fd_owner != fd) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_CANT_OPEN;
 	} else {
 		file->is_open = true;
 		file->is_locked = lock;
 		file->fd_owner = fd;
-		return_if_err(htable_release(htable, key));
-		return_if_err(htable_lock_stats(htable));
+		htable_release_file(htable, key);
+		ON_MUTEX_ERR(pthread_mutex_lock(&htable->stats_guard));
 		htable->stats.open_count++;
-		return_if_err(htable_unlock_stats(htable));
+		ON_MUTEX_ERR(pthread_mutex_unlock(&htable->stats_guard));
 		return HTABLE_ERR_OK;
 	}
 }
@@ -338,7 +304,7 @@ enum HTableError
 htable_create_file(struct HTable *htable, const char *key, int fd, bool lock)
 {
 	if (htable_fetch_item(htable, key)) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_ALREADY_CREATED;
 	}
 
@@ -358,11 +324,11 @@ htable_create_file(struct HTable *htable, const char *key, int fd, bool lock)
 	}
 	item->prev = NULL;
 	bucket->head = item;
-	return_if_err(htable_release(htable, key));
-	return_if_err(htable_lock_stats(htable));
-	htable->stats.open_count++;
-	htable->stats.items_count++;
-	return_if_err(htable_unlock_stats(htable));
+	htable_release_file(htable, key);
+	MODIFY_STATS(htable, {
+		htable->stats.open_count++;
+		htable->stats.items_count++;
+	});
 	return HTABLE_ERR_OK;
 }
 
@@ -387,17 +353,15 @@ htable_close_file(struct HTable *htable, const char *key, int fd)
 	if (!file) {
 		return HTABLE_ERR_FILE_NOT_FOUND;
 	} else if (!file->is_open) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_ALREADY_CLOSED;
 	} else if (file->is_locked && file->fd_owner != fd) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_CANT_CLOSE;
 	} else {
 		file->is_open = false;
-		return_if_err(htable_release(htable, key));
-		return_if_err(htable_lock_stats(htable));
-		htable->stats.open_count--;
-		return_if_err(htable_unlock_stats(htable));
+		htable_release_file(htable, key);
+		MODIFY_STATS(htable, { htable->stats.open_count--; });
 		return HTABLE_ERR_OK;
 	}
 }
@@ -409,7 +373,7 @@ htable_remove_file(struct HTable *htable, const char *key, int fd)
 	if (!node) {
 		return HTABLE_ERR_FILE_NOT_FOUND;
 	} else if (node->file.is_locked && node->file.fd_owner != fd) {
-		return_if_err(htable_release(htable, key));
+		htable_release_file(htable, key);
 		return HTABLE_ERR_OK;
 	}
 
@@ -433,12 +397,12 @@ htable_remove_file(struct HTable *htable, const char *key, int fd)
 	free(node->file.contents);
 	free(node);
 
-	return_if_err(htable_release(htable, key));
-	return_if_err(htable_lock_stats(htable));
-	htable->stats.open_count--;
-	htable->stats.items_count--;
-	htable->stats.total_space_in_bytes -= size_in_bytes;
-	return_if_err(htable_unlock_stats(htable));
+	htable_release_file(htable, key);
+	MODIFY_STATS(htable, {
+		htable->stats.open_count--;
+		htable->stats.items_count--;
+		htable->stats.total_space_in_bytes -= size_in_bytes;
+	});
 	return HTABLE_ERR_OK;
 }
 
@@ -462,11 +426,11 @@ htable_replace_file_contents(struct HTable *htable,
 	memcpy(file->contents, contents, size_in_bytes);
 	file->length_in_bytes = size_in_bytes;
 
-	return_if_err(htable_release(htable, key));
-	return_if_err(htable_lock_stats(htable));
-	htable->stats.total_space_in_bytes =
-	  htable->stats.total_space_in_bytes + size_in_bytes - old_size_in_bytes;
-	return_if_err(htable_unlock_stats(htable));
+	htable_release_file(htable, key);
+	MODIFY_STATS(htable, {
+		htable->stats.total_space_in_bytes =
+		  htable->stats.total_space_in_bytes + size_in_bytes - old_size_in_bytes;
+	});
 
 	return htable_evict_files(htable, true, size_in_bytes, evicted, evicted_count);
 }
@@ -490,10 +454,8 @@ htable_append_to_file_contents(struct HTable *htable,
 	       contents,
 	       size_in_bytes);
 
-	return_if_err(htable_release(htable, key));
-	return_if_err(htable_lock_stats(htable));
-	htable->stats.total_space_in_bytes += size_in_bytes;
-	return_if_err(htable_unlock_stats(htable));
+	htable_release_file(htable, key);
+	MODIFY_STATS(htable, { htable->stats.total_space_in_bytes += size_in_bytes; });
 
 	return htable_evict_files(htable, false, size_in_bytes, evicted, evicted_count);
 }
