@@ -155,6 +155,9 @@ main(int argc, char **argv)
 	signal(SIGHUP, soft_signal_handler);
 	signal(SIGINT, hard_signal_handler);
 	signal(SIGQUIT, hard_signal_handler);
+	/* We don't want the server to crash with `SIGPIPE` in case clients exit
+	 * early and stop listening. */
+	signal(SIGPIPE, SIG_IGN);
 	glog_debug("Initialization was successful. Now parsing command-line args.");
 	if (argc != 2) {
 		print_command_line_usage_info();
