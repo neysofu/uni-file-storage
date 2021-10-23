@@ -133,11 +133,3 @@ xrealloc(void *buf, size_t size)
 	}
 	return new;
 }
-
-void
-exit_if_err(int err)
-{
-	if (err != 0) {
-		exit(1);
-	}
-}

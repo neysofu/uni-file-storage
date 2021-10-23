@@ -16,13 +16,6 @@
 #define ON_MUTEX_ERR(err)                                                                  \
 	ON_ERR((err), "Unexpected mutex error during hash table internal manipulation.")
 
-#define MODIFY_STATS(htable, ...)                                                          \
-	do {                                                                                   \
-		ON_MUTEX_ERR(pthread_mutex_lock(&htable->stats_guard));                            \
-		{ __VA_ARGS__ };                                                                   \
-		ON_MUTEX_ERR(pthread_mutex_unlock(&htable->stats_guard));                          \
-	} while (0);
-
 struct HTableItem
 {
 	struct File file;
@@ -118,15 +111,12 @@ htable_bucket_ptr(struct HTable *htable, const char *key)
 }
 
 /* Locks the bucket within `htable` that contains `key` and returns a pointer to
- * its associated item, if present. Returns NULL for unsuccesful searches. The
+ * its associated item, if present. Returns NULL for unsuccessful searches. The
  * bucket must be unlocked after this call. */
 struct HTableItem *
 htable_fetch_item(struct HTable *htable, const char *key)
 {
-	assert(htable);
-	assert(key);
 	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
-	assert(bucket);
 	ON_MUTEX_ERR(pthread_mutex_lock(&bucket->guard));
 	struct HTableItem *item = bucket->head;
 	while (item) {
@@ -135,18 +125,15 @@ htable_fetch_item(struct HTable *htable, const char *key)
 		}
 		item = item->next;
 	}
+	ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 	return NULL;
 }
 
 struct File *
 htable_fetch_file(struct HTable *htable, const char *key)
 {
-	assert(htable);
-	assert(key);
 	struct HTableItem *node = htable_fetch_item(htable, key);
 	if (!node) {
-		struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
-		ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 		return NULL;
 	}
 	return &node->file;
@@ -157,52 +144,41 @@ void
 htable_release_file(struct HTable *htable, const char *key)
 {
 	struct HTableBucket *bucket = htable_bucket_ptr(htable, key);
-	assert(bucket);
 	ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 }
 
-struct File *
-htable_evict_one_file_locked(struct HTable *htable)
+void
+htable_stats_lock(struct HTable *htable)
 {
-	size_t attempts = 3;
-	while (attempts > 0) {
-		size_t i = rand() % htable->buckets_count;
-		struct HTableBucket *bucket = &htable->buckets[i];
-		struct HTableItem *last = bucket->last;
-		if (!bucket->last) {
-			attempts--;
-			continue;
-		}
-		bucket->last = last->prev;
-		assert(last);
-		return &last->file;
-	}
-	return NULL;
+	ON_MUTEX_ERR(pthread_mutex_lock(&htable->stats_guard));
 }
 
-enum HTableError
-htable_evict_files_locked(struct HTable *htable,
-                          struct File **evicted,
-                          unsigned *evicted_count)
+void
+htable_stats_unlock(struct HTable *htable)
 {
-	*evicted = NULL;
-	*evicted_count = 0;
-	while (htable->stats.items_count > htable->max_items_count ||
-	       htable->stats.total_space_in_bytes > htable->max_space_in_bytes) {
+	ON_MUTEX_ERR(pthread_mutex_unlock(&htable->stats_guard));
+}
 
-		(*evicted_count)++;
-		*evicted = xrealloc(*evicted, sizeof(struct File *) * *evicted_count);
-
-		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
-		*file_ptr = *htable_evict_one_file_locked(htable);
-		if (file_ptr) {
-			htable->stats.items_count--;
-			htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
-		} else {
-			return 0;
+struct HTableItem *
+htable_evict_single_file(struct HTable *htable)
+{
+	while (htable->stats.items_count > 0) {
+		size_t i = rand() % htable->buckets_count;
+		struct HTableBucket *bucket = &htable->buckets[i];
+		if (!bucket->last) {
+			assert(!bucket->head);
+			continue;
 		}
+		struct HTableItem *last = bucket->last;
+		bucket->last = last->prev;
+		if (bucket->last) {
+			bucket->last->next = NULL;
+		}
+		last->next = NULL;
+		last->prev = NULL;
+		return last;
 	}
-	return HTABLE_ERR_OK;
+	return NULL;
 }
 
 /* Runs the cache replacement policy algorithm on `htable` after some operation
@@ -210,26 +186,40 @@ htable_evict_files_locked(struct HTable *htable,
  * been created, `new_space_in_bytes` is the new amount of space in bytes that
  * must be taken into account. `evicted` and `evicted_count` will -after this
  * call- hold data about evicted files. */
-int
+enum HTableError
 htable_evict_files(struct HTable *htable,
                    bool new_file,
                    size_t new_space_in_bytes,
                    struct File **evicted,
                    unsigned *evicted_count)
 {
-	int err = 0;
-	err |= pthread_mutex_lock(&htable->stats_guard);
+	htable_stats_lock(htable);
 	htable->stats.total_space_in_bytes += new_space_in_bytes;
 	if (new_file) {
 		htable->stats.items_count++;
 	}
-	htable_evict_files_locked(htable, evicted, evicted_count);
-	err |= pthread_mutex_unlock(&htable->stats_guard);
-	if (err) {
-		return -1;
-	} else {
-		return 0;
+
+	*evicted = NULL;
+	*evicted_count = 0;
+	while (htable->stats.items_count > htable->max_items_count ||
+	       htable->stats.total_space_in_bytes > htable->max_space_in_bytes) {
+
+		(*evicted_count)++;
+		*evicted = xrealloc(*evicted, sizeof(struct File) * *evicted_count);
+
+		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
+		struct HTableItem *evicted_item = htable_evict_single_file(htable);
+		if (evicted_item) {
+			*file_ptr = evicted_item->file;
+			htable->stats.items_count--;
+			htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
+			free(evicted_item);
+		} else {
+			return HTABLE_ERR_OK;
+		}
 	}
+	htable_stats_unlock(htable);
+	return HTABLE_ERR_OK;
 }
 
 /************ HIGH LEVEL APIS ***********/
@@ -324,11 +314,14 @@ htable_create_file(struct HTable *htable, const char *key, int fd, bool lock)
 	}
 	item->prev = NULL;
 	bucket->head = item;
+	if (!bucket->last) {
+		bucket->last = item;
+	}
 	htable_release_file(htable, key);
-	MODIFY_STATS(htable, {
-		htable->stats.open_count++;
-		htable->stats.items_count++;
-	});
+	htable_stats_lock(htable);
+	htable->stats.open_count++;
+	htable->stats.items_count++;
+	htable_stats_unlock(htable);
 	return HTABLE_ERR_OK;
 }
 
@@ -361,7 +354,9 @@ htable_close_file(struct HTable *htable, const char *key, int fd)
 	} else {
 		file->is_open = false;
 		htable_release_file(htable, key);
-		MODIFY_STATS(htable, { htable->stats.open_count--; });
+		htable_stats_lock(htable);
+		htable->stats.open_count--;
+		htable_stats_unlock(htable);
 		return HTABLE_ERR_OK;
 	}
 }
@@ -398,11 +393,11 @@ htable_remove_file(struct HTable *htable, const char *key, int fd)
 	free(node);
 
 	htable_release_file(htable, key);
-	MODIFY_STATS(htable, {
-		htable->stats.open_count--;
-		htable->stats.items_count--;
-		htable->stats.total_space_in_bytes -= size_in_bytes;
-	});
+	htable_stats_lock(htable);
+	htable->stats.open_count--;
+	htable->stats.items_count--;
+	htable->stats.total_space_in_bytes -= size_in_bytes;
+	htable_stats_unlock(htable);
 	return HTABLE_ERR_OK;
 }
 
@@ -427,10 +422,10 @@ htable_replace_file_contents(struct HTable *htable,
 	file->length_in_bytes = size_in_bytes;
 
 	htable_release_file(htable, key);
-	MODIFY_STATS(htable, {
-		htable->stats.total_space_in_bytes =
-		  htable->stats.total_space_in_bytes + size_in_bytes - old_size_in_bytes;
-	});
+	htable_stats_lock(htable);
+	htable->stats.total_space_in_bytes += size_in_bytes;
+	htable->stats.total_space_in_bytes -= old_size_in_bytes;
+	htable_stats_unlock(htable);
 
 	return htable_evict_files(htable, true, size_in_bytes, evicted, evicted_count);
 }
@@ -455,7 +450,9 @@ htable_append_to_file_contents(struct HTable *htable,
 	       size_in_bytes);
 
 	htable_release_file(htable, key);
-	MODIFY_STATS(htable, { htable->stats.total_space_in_bytes += size_in_bytes; });
+	htable_stats_lock(htable);
+	htable->stats.total_space_in_bytes += size_in_bytes;
+	htable_stats_unlock(htable);
 
 	return htable_evict_files(htable, false, size_in_bytes, evicted, evicted_count);
 }
@@ -475,7 +472,7 @@ struct HTableVisitor *
 htable_visit(struct HTable *htable, unsigned max_visits)
 {
 	/* Immediately allocate enough memory on the heap. */
-	struct HTableVisitor *visitor = xmalloc(sizeof(struct HTableVisitor *));
+	struct HTableVisitor *visitor = xmalloc(sizeof(struct HTableVisitor));
 	visitor->htable = htable;
 	visitor->max_visits = max_visits;
 	visitor->visits = 0;
