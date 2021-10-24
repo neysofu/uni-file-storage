@@ -30,12 +30,6 @@ buf_to_str(const void *buf, size_t len_in_bytes)
 	return s;
 }
 
-/** Evita letture parziali
- *
- *   \retval -1   errore (errno settato)
- *   \retval  0   se durante la lettura da fd leggo EOF
- *   \retval size se termina con successo
- */
 int
 read_bytes(long fd, void *buf, size_t size)
 {
@@ -56,12 +50,6 @@ read_bytes(long fd, void *buf, size_t size)
 	return size;
 }
 
-/** Evita scritture parziali
- *
- *   \retval -1   errore (errno settato)
- *   \retval  0   se durante la scrittura la write ritorna 0
- *   \retval  1   se la scrittura termina con successo
- */
 int
 write_bytes(long fd, const void *buf, size_t size)
 {
@@ -121,14 +109,13 @@ xmalloc(size_t size)
 	return buf;
 }
 
-/* Infallible wrapper for `realloc`. Immediately exits on allocation failure,
- * otherwise identical to `realloc`. */
 void *
 xrealloc(void *buf, size_t size)
 {
 	void *new = realloc(buf, size);
 	if (!new) {
-		log_fatal("Allocation failure of %zu. This error is non-recoverable. Abort.", size);
+		log_fatal("Re-allocation failure on %zu. This error is non-recoverable. Abort.",
+		          size);
 		exit(EXIT_FAILURE);
 	}
 	return new;
