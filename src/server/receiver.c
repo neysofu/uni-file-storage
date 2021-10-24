@@ -62,7 +62,7 @@ receiver_add_new_connection(struct Receiver *r)
 	int fd = accept(r->active_sockets[0].fd, NULL, NULL);
 	/* Faulty new connection. Let's keep going and don't stop the whole server. */
 	if (fd < 0) {
-		glog_warn("Ignoring faulty connection.");
+		glog_warn("Ignoring faulty connection (errno = %d).", errno);
 		return;
 	}
 	r->active_sockets_count++;
@@ -86,6 +86,7 @@ receiver_cleanup(struct Receiver *r)
 	size_t last_i = r->active_sockets_count - 1;
 	for (size_t i = 1; i <= last_i; i++) {
 		if (r->active_sockets[i].fd < 0) {
+			close(-r->active_sockets[i].fd);
 			r->active_sockets[i] = r->active_sockets[last_i];
 			r->deserializers[i] = r->deserializers[last_i];
 			last_i--;

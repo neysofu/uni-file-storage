@@ -10,6 +10,7 @@ mkdir -p "$PARENT_PATH/data/target/Gangsta"
 mkdir -p "$PARENT_PATH/data/target/Pokemon"
 mkdir -p "$PARENT_PATH/data/target/Winter"
 mkdir -p "$PARENT_PATH/data/target/evicted"
+mkdir -p "$PARENT_PATH/data/target/others"
 
 # TEST -h
 
@@ -45,5 +46,11 @@ for file in $PARENT_PATH/data/Imgur/Pokemon/*; do
 done
 
 echo "Got back $(ls -1q $PARENT_PATH/data/target/Pokemon | wc -l) files."
+
+./client -p trace -f /tmp/LSOfiletorage.sk -w "$PARENT_PATH/data/Imgur/Winter,n=1" -D "$PARENT_PATH/data/target/evicted" -z 1
+./client -p trace -f /tmp/LSOfiletorage.sk -R n=0 -d "$PARENT_PATH/data/target/others" -z 1
+
+./client -p trace -f /tmp/LSOfiletorage.sk -w "$PARENT_PATH/data/Imgur/Gangsta,n=0" -D "$PARENT_PATH/data/target/evicted" -z 1
+./client -p trace -f /tmp/LSOfiletorage.sk -w "$PARENT_PATH/data/Imgur/Nested,n=0" -D "$PARENT_PATH/data/target/evicted" -z 1
 
 exit 0

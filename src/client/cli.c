@@ -44,7 +44,7 @@ cli_args_add_action_write_dir(struct CliArgs *cli_args, char *arg)
 	char *comma = strrchr(arg, ',');
 	char *equal_sign = strrchr(arg, '=');
 	struct Action action;
-	action.type = 'W';
+	action.type = 'w';
 	action.arg_s1 = arg;
 	action.arg_s2 = NULL;
 	action.arg_i = 0;

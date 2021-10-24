@@ -114,7 +114,8 @@ xrealloc(void *buf, size_t size)
 {
 	void *new = realloc(buf, size);
 	if (!new) {
-		log_fatal("Re-allocation failure on %zu. This error is non-recoverable. Abort.",
+		log_fatal("Re-allocation failure (%zu bytes requested). This error is "
+		          "non-recoverable. Abort.",
 		          size);
 		exit(EXIT_FAILURE);
 	}

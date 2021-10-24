@@ -1,6 +1,7 @@
 #include "workload_queue.h"
 #include "global_state.h"
 #include "receiver.h"
+#include "server_utilities.h"
 #include "utilities.h"
 #include <assert.h>
 #include <errno.h>
@@ -9,6 +10,10 @@
 static struct WorkloadQueue *workload_queues = NULL;
 static unsigned count = 0;
 
+#define ON_MUTEX_ERR(err)                                                                  \
+	ON_ERR((err),                                                                          \
+	       "Mutex error during workload queue manipulation. This is most likely a bug.")
+
 void
 workload_queues_init(unsigned n)
 {
@@ -16,8 +21,8 @@ workload_queues_init(unsigned n)
 	count = n;
 	for (size_t i = 0; i < count; i++) {
 		int err = 0;
-		err |= pthread_cond_init(&workload_queues[i].cond, NULL);
-		err |= pthread_mutex_init(&workload_queues[i].mutex, NULL);
+		ON_MUTEX_ERR(pthread_cond_init(&workload_queues[i].cond, NULL));
+		ON_MUTEX_ERR(pthread_mutex_init(&workload_queues[i].mutex, NULL));
 		/* We're not supposed to have any error whatsover here. If we do, that's
 		 * a bug within the initialization logic and/or workers are already
 		 * reading data. */
@@ -33,26 +38,13 @@ workload_queue_get(unsigned i)
 	return &workload_queues[i];
 }
 
-void
-on_mutex_err(void)
-{
-	/* Errors would only arise in the case of race conditions of concurrency bugs
-	 * (deadlocks, bad semaphore waits, etc.). They are thus non-recoverable. */
-	glog_fatal("Poisoned mutex on workload queue. This is a non-recoverable error.");
-	exit(EXIT_FAILURE);
-}
-
 struct Message *
 workload_queue_pull(unsigned i)
 {
 	struct WorkloadQueue *queue = &workload_queues[i];
 	assert(queue);
 	while (true) {
-		int err = 0;
-		err = pthread_mutex_lock(&queue->mutex);
-		if (err) {
-			on_mutex_err();
-		}
+		ON_MUTEX_ERR(pthread_mutex_lock(&queue->mutex));
 		while (!queue->next_incoming) {
 			pthread_cond_wait(&queue->cond, &queue->mutex);
 		}
@@ -61,10 +53,7 @@ workload_queue_pull(unsigned i)
 			queue->next_incoming = msg->next;
 			msg->next = NULL;
 		}
-		err = pthread_mutex_unlock(&queue->mutex);
-		if (err) {
-			on_mutex_err();
-		}
+		ON_MUTEX_ERR(pthread_mutex_unlock(&queue->mutex));
 		return msg;
 	}
 }
@@ -76,11 +65,7 @@ workload_queue_add(struct Message *msg, unsigned i)
 	assert(!msg->next);
 	struct WorkloadQueue *queue = &workload_queues[i];
 	assert(queue);
-	int err = 0;
-	err = pthread_mutex_lock(&queue->mutex);
-	if (err) {
-		on_mutex_err();
-	}
+	ON_MUTEX_ERR(pthread_mutex_lock(&queue->mutex));
 	queue->next_incoming = msg;
 	struct Message *last = queue->last_incoming;
 	if (last) {
@@ -90,14 +75,8 @@ workload_queue_add(struct Message *msg, unsigned i)
 		queue->next_incoming = msg;
 		queue->last_incoming = msg;
 	}
-	err = pthread_cond_signal(&queue->cond);
-	if (err) {
-		on_mutex_err();
-	}
-	err = pthread_mutex_unlock(&queue->mutex);
-	if (err) {
-		on_mutex_err();
-	}
+	ON_MUTEX_ERR(pthread_cond_signal(&queue->cond));
+	ON_MUTEX_ERR(pthread_mutex_unlock(&queue->mutex));
 }
 
 void

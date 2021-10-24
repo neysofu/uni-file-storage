@@ -81,14 +81,36 @@ worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_
 static void
 worker_handle_read_n_files(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
+	int err = 0;
 	glog_info("[Worker n.%u] New API request `readNFiles`.", worker->id);
 	if (len_in_bytes != 8) {
 		glog_error("[Worker n.%u] Bad message format.", worker->id);
 		return;
 	}
-	/* The whole requets fits into 8 bytes, i.e. N. */
 	uint64_t n = big_endian_to_u64(buffer);
-	// TODO
+	struct HTableVisitor *visitor = htable_visit(global_htable, n);
+	struct File *file = NULL;
+	while ((file = htable_visitor_next(visitor))) {
+		glog_debug("[Worker n.%u] Sending '%s' to client.", worker->id, file->key);
+		uint8_t buf1[8] = { 0 };
+		uint8_t buf2[8] = { 0 };
+		u64_to_big_endian(strlen(file->key), buf1);
+		u64_to_big_endian(file->length_in_bytes, buf2);
+		err |= write_bytes(fd, buf1, 8);
+		err |= write_bytes(fd, buf2, 8);
+		err |= write_bytes(fd, file->key, strlen(file->key));
+		err |= write_bytes(fd, file->contents, file->length_in_bytes);
+		if (err < 0) {
+			log_io_err(worker);
+			break;
+		}
+	}
+	uint8_t buf[8] = { 0 };
+	err |= write_bytes(fd, buf, 8);
+	if (err < 0) {
+		log_io_err(worker);
+	}
+	htable_visitor_free(visitor);
 }
 
 static void

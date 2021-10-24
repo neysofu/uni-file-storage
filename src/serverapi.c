@@ -361,7 +361,46 @@ readNFiles(int n, const char *dirname)
 	if (err < 0) {
 		return on_io_err();
 	}
-	return handle_response_with_files(state.fd, dirname);
+
+	// FIXME
+
+	/* Read header. */
+	uint8_t buffer_response_code[1] = { '\0' };
+	uint8_t buffer_num_files[8] = { '\0' };
+	err |= read_bytes(state.fd, buffer_response_code, 1);
+	if (err < 0 || buffer_response_code[0] == RESPONSE_ERR) {
+		return -1;
+	}
+	err |= read_bytes(state.fd, buffer_num_files, 8);
+	if (err < 0) {
+		return -1;
+	}
+	size_t num_files = big_endian_to_u64(buffer_num_files);
+	/* Read actual file contents. */
+	for (uint64_t i = 0; i < num_files; i++) {
+		uint8_t buffer_lengths[16] = { '\0' };
+		err |= read_bytes(state.fd, buffer_lengths, 16);
+		if (err < 0) {
+			return on_io_err();
+		}
+		size_t len_path = big_endian_to_u64(buffer_lengths);
+		size_t len_contents = big_endian_to_u64(buffer_lengths + 8);
+		void *buffer = xmalloc(len_path + len_contents);
+		err |= read_bytes(state.fd, buffer, len_path + len_contents);
+		if (!err) {
+			free(buffer);
+			return on_io_err();
+		}
+		err |= write_file_to_dir(
+		  dirname, buffer, len_path, (char *)buffer + len_path, len_contents);
+		if (err < 0) {
+			free(buffer);
+			return -1;
+		}
+		free(buffer);
+	}
+
+	return 0;
 }
 
 int
