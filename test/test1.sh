@@ -20,28 +20,28 @@ echo ""
 
 for file in $PARENT_PATH/data/Imgur/80s/*; do
    echo "$file"
-   ./client -p warn -f /tmp/LSOfiletorage.sk -W "$file" -D "$PARENT_PATH/data/target/evicted" -z 1
+   ./client -p trace -f /tmp/LSOfiletorage.sk -W "$file" -D "$PARENT_PATH/data/target/evicted" -z 1
 done
 
 echo "Written $(ls -1q $PARENT_PATH/data/Imgur/80s | wc -l) files."
 
 for file in $PARENT_PATH/data/Imgur/80s/*; do
    echo "$file"
-   ./client -p warn -f /tmp/LSOfiletorage.sk -r "$file" -d "$PARENT_PATH/data/target/80s" -z 1
+   ./client -p trace -f /tmp/LSOfiletorage.sk -r "$file" -d "$PARENT_PATH/data/target/80s" -z 1
 done
 
 echo "Got back $(ls -1q $PARENT_PATH/data/target/80s | wc -l) files."
 
 for file in $PARENT_PATH/data/Imgur/Pokemon/*; do
    echo "$file"
-   ./client -p warn -f /tmp/LSOfiletorage.sk -W "$file" -D "$PARENT_PATH/data/target/evicted" -z 1
+   ./client -p trace -f /tmp/LSOfiletorage.sk -W "$file" -D "$PARENT_PATH/data/target/evicted" -z 1
 done
 
 echo "Written $(ls -1q $PARENT_PATH/data/Imgur/Pokemon | wc -l) files."
 
 for file in $PARENT_PATH/data/Imgur/Pokemon/*; do
    echo "$file"
-   ./client -p warn -f /tmp/LSOfiletorage.sk -r "$file" -d "$PARENT_PATH/data/target/Pokemon" -z 1
+   ./client -p trace -f /tmp/LSOfiletorage.sk -r "$file" -d "$PARENT_PATH/data/target/Pokemon" -z 1
 done
 
 echo "Got back $(ls -1q $PARENT_PATH/data/target/Pokemon | wc -l) files."

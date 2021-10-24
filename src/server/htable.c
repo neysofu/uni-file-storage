@@ -1,6 +1,5 @@
 #include "htable.h"
 #include "config.h"
-#include "fifo_cache.h"
 #include "global_state.h"
 #include "server_utilities.h"
 #include "utilities.h"
@@ -32,7 +31,6 @@ struct HTableBucket
 
 struct HTable
 {
-	struct FifoCache *fcache;
 	/* Settings. */
 	size_t max_items_count;
 	size_t max_space_in_bytes;
@@ -48,11 +46,6 @@ htable_create(size_t buckets, const struct Config *config)
 {
 	assert(buckets > 0);
 	struct HTable *htable = xmalloc(sizeof(struct HTable));
-	htable->fcache = fifo_cache_create(config->max_files, config->max_storage_in_bytes);
-	if (!htable->fcache) {
-		free(htable);
-		return NULL;
-	}
 	ON_MUTEX_ERR(pthread_mutex_init(&htable->stats_guard, NULL));
 	htable->max_items_count = config->max_files;
 	htable->max_space_in_bytes = config->max_storage_in_bytes;
@@ -90,10 +83,11 @@ htable_free(struct HTable *htable)
 				free(sub);
 				sub = next;
 			}
-			item = item->next;
+			struct HTableItem *next = item->next;
+			free(item);
+			item = next;
 		}
 	}
-	fifo_cache_free(htable->fcache);
 	ON_MUTEX_ERR(pthread_mutex_destroy(&htable->stats_guard));
 	free(htable->buckets);
 	free(htable);
@@ -162,6 +156,7 @@ htable_stats_unlock(struct HTable *htable)
 struct HTableItem *
 htable_evict_single_file(struct HTable *htable)
 {
+	assert(htable->stats.items_count);
 	while (htable->stats.items_count > 0) {
 		size_t i = rand() % htable->buckets_count;
 		struct HTableBucket *bucket = &htable->buckets[i];
@@ -169,16 +164,18 @@ htable_evict_single_file(struct HTable *htable)
 			assert(!bucket->head);
 			continue;
 		}
-		struct HTableItem *last = bucket->last;
-		bucket->last = last->prev;
+		struct HTableItem *item = bucket->last;
+		bucket->last = item->prev;
 		if (bucket->last) {
 			bucket->last->next = NULL;
+		} else {
+			bucket->head = NULL;
 		}
-		last->next = NULL;
-		last->prev = NULL;
-		return last;
+		item->next = NULL;
+		item->prev = NULL;
+		return item;
 	}
-	return NULL;
+	exit(EXIT_FAILURE);
 }
 
 /* Runs the cache replacement policy algorithm on `htable` after some operation
@@ -209,14 +206,10 @@ htable_evict_files(struct HTable *htable,
 
 		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
 		struct HTableItem *evicted_item = htable_evict_single_file(htable);
-		if (evicted_item) {
-			*file_ptr = evicted_item->file;
-			htable->stats.items_count--;
-			htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
-			free(evicted_item);
-		} else {
-			return HTABLE_ERR_OK;
-		}
+		*file_ptr = evicted_item->file;
+		htable->stats.items_count--;
+		htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
+		free(evicted_item);
 	}
 	htable_stats_unlock(htable);
 	return HTABLE_ERR_OK;
@@ -309,14 +302,14 @@ htable_create_file(struct HTable *htable, const char *key, int fd, bool lock)
 	item->file.contents = NULL;
 	item->file.subs = NULL;
 	item->next = bucket->head;
+	item->prev = NULL;
 	if (bucket->head) {
 		bucket->head->prev = item;
 	}
-	item->prev = NULL;
-	bucket->head = item;
 	if (!bucket->last) {
 		bucket->last = item;
 	}
+	bucket->head = item;
 	htable_release_file(htable, key);
 	htable_stats_lock(htable);
 	htable->stats.open_count++;

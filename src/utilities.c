@@ -37,7 +37,7 @@ buf_to_str(void *buf, size_t len_in_bytes)
  *   \retval size se termina con successo
  */
 int
-readn(long fd, void *buf, size_t size)
+read_bytes(long fd, void *buf, size_t size)
 {
 	size_t left = size;
 	int r;
@@ -63,7 +63,7 @@ readn(long fd, void *buf, size_t size)
  *   \retval  1   se la scrittura termina con successo
  */
 int
-writen(long fd, const void *buf, size_t size)
+write_bytes(long fd, const void *buf, size_t size)
 {
 	size_t left = size;
 	int r;

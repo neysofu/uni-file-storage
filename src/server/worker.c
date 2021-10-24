@@ -31,6 +31,15 @@ log_io_err(const struct Worker *worker)
 }
 
 static void
+free_files(struct File *files, unsigned int size)
+{
+	for (size_t i = 0; i < size; i++) {
+		free(files[i].key);
+		free(files[i].contents);
+	}
+}
+
+static void
 write_response_byte(struct Worker *worker, int fd, int result)
 {
 	char response[1];
@@ -60,8 +69,8 @@ worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	uint8_t response[9] = { RESPONSE_OK };
 	u64_to_big_endian(file->length_in_bytes, &response[1]);
 	int err = 0;
-	err |= writen(fd, response, 9);
-	err |= writen(fd, file->contents, file->length_in_bytes);
+	err |= write_bytes(fd, response, 9);
+	err |= write_bytes(fd, file->contents, file->length_in_bytes);
 	if (err < 0) {
 		log_io_err(worker);
 	}
@@ -107,7 +116,7 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 	void *arg2_buffer = (char *)buffer + 8 * 2 + arg1_size;
 	int err = htable_replace_file_contents(
 	  global_htable, path, arg2_buffer, arg2_size, &evicted, &evicted_count);
-	if (err != 0) {
+	if (err != HTABLE_ERR_OK) {
 		glog_error(
 		  "[Worker n.%u] Last operation failed with err code %d.", worker->id, err);
 	}
@@ -115,29 +124,35 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 	uint8_t buf_response_code[1] = { RESPONSE_OK };
 	uint8_t buf[8] = { 0 };
 	u64_to_big_endian(evicted_count, buf);
-	err |= writen(fd, buf_response_code, 1);
-	err |= writen(fd, buf, 8);
+	err |= write_bytes(fd, buf_response_code, 1);
+	err |= write_bytes(fd, buf, 8);
 	if (err < 0) {
 		free(path);
+		free_files(evicted, evicted_count);
 		log_io_err(worker);
 		return;
 	}
-	for (unsigned i = 0; i < evicted_count; i++) {
+	glog_trace("[Worker n.%u] Sending over %d evicted files.", worker->id, evicted_count);
+	for (size_t i = 0; i < evicted_count; i++) {
+		glog_trace(
+		  "[Worker n.%u] Sending over the evicted file '%s'.", worker->id, evicted[i].key);
 		uint8_t buf_arg1_size[8];
 		uint8_t buf_arg2_size[8];
 		u64_to_big_endian(strlen(evicted[i].key), buf_arg1_size);
 		u64_to_big_endian(evicted[i].length_in_bytes, buf_arg2_size);
-		err |= writen(fd, buf_arg1_size, 8);
-		err |= writen(fd, buf_arg2_size, 8);
-		err |= writen(fd, evicted[i].key, strlen(evicted[i].key));
-		err |= writen(fd, evicted[i].contents, evicted[i].length_in_bytes);
+		err |= write_bytes(fd, buf_arg1_size, 8);
+		err |= write_bytes(fd, buf_arg2_size, 8);
+		err |= write_bytes(fd, evicted[i].key, strlen(evicted[i].key));
+		err |= write_bytes(fd, evicted[i].contents, evicted[i].length_in_bytes);
 		if (err < 0) {
 			free(path);
+			free_files(evicted, evicted_count);
 			log_io_err(worker);
 			return;
 		}
 	}
 	free(path);
+	free_files(evicted, evicted_count);
 }
 
 static void

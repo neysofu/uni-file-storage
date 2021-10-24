@@ -60,8 +60,6 @@ server: lz4
 		src/server/config.h \
 		src/server/deserializer.h \
 		src/server/deserializer.c \
-		src/server/fifo_cache.c \
-		src/server/fifo_cache.h \
 		src/server/global_state.h \
 		src/server/global_state.c \
 		src/server/htable.c \
@@ -69,10 +67,6 @@ server: lz4
 		src/server/main.c \
 		src/server/receiver.c \
 		src/server/receiver.h \
-		src/server/shutdown.h \
-		src/server/shutdown.c \
-		src/server/ts_counter.h \
-		src/server/ts_counter.c \
 		src/server/worker.h \
 		src/server/worker.c \
 		src/server/workload_queue.h \

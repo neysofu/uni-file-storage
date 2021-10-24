@@ -38,7 +38,7 @@ run_some_action_over_list_of_files(struct Action *action,
 }
 
 static int
-run_action_write_file(const char *relative_filepath)
+run_action_write_file(const char *relative_filepath, const char *dirname)
 {
 	char *filepath = realpath(relative_filepath, NULL);
 	if (!filepath) {
@@ -57,13 +57,13 @@ run_action_write_file(const char *relative_filepath)
 
 	log_info("Calling API function `writeFile`.");
 	log_debug("Target file: '%s'.", filepath);
-	if (false) {
-		log_debug("Destination directory: '%s'.", NULL);
+	if (dirname) {
+		log_debug("Destination directory: '%s'.", dirname);
 	} else {
 		log_debug("No destination directory was specified.");
 	}
 
-	err = writeFile(filepath, NULL);
+	err = writeFile(filepath, dirname);
 	if (err < 0) {
 		log_error("`writeFile` failed.");
 		return err;
@@ -86,7 +86,7 @@ run_action_write_list_of_files(struct Action *action)
 	 * much we can do about that. */
 	char *path = strtok(action->arg_s1, ",");
 	while (path) {
-		int err = run_action_write_file(path);
+		int err = run_action_write_file(path, action->arg_s2);
 		if (err) {
 			return err;
 		}
@@ -204,7 +204,9 @@ run_action_read_list_of_files(struct Action *action)
 	/* Open the destination directory. */
 	if (action->arg_s2) {
 		dir_name = action->arg_s2;
+		log_trace("Will write to '%s'.", dir_name);
 		d = opendir(dir_name);
+		log_trace("Done opening target directory.");
 	}
 	/* Iterate through files. */
 	char *rel_filepath = strtok(action->arg_s1, ",");
@@ -216,6 +218,7 @@ run_action_read_list_of_files(struct Action *action)
 		}
 		void *buffer = NULL;
 		size_t buffer_size = 0;
+		log_debug("Callind `readFile`...");
 		int err = readFile(filepath, &buffer, &buffer_size);
 		if (err) {
 			return err;
