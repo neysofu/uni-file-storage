@@ -34,7 +34,9 @@ config_parse_file(char abs_path[])
 	toml_datum_t param_socket_filepath = toml_string_in(toml_table, "socket-filepath");
 	toml_datum_t param_log_filepath = toml_string_in(toml_table, "log-filepath");
 	if (!param_max_files.ok || !param_max_storage.ok || !param_num_workers.ok ||
-	    !param_socket_filepath.ok || !param_log_filepath.ok) {
+	    !param_socket_filepath.ok || !param_log_filepath.ok || param_max_files.u.i < 1 ||
+	    param_max_storage.u.i < 10000 || param_num_workers.u.i < 1 ||
+	    param_num_workers.u.i > 32) {
 		glog_fatal("Malformed TOML attributes in configuration file.");
 		goto err;
 	}

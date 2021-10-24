@@ -1,4 +1,5 @@
-- Aggiungere dei test di eviction a test1.sh
+- Aggiungere dei test di eviction a test1.sh.
+- Special condition così che il file appena inserito non venga MAI evicted.
 - Creare test2.sh.
 - Creare test3.sh.
 - Creare un Makefile e testarlo.

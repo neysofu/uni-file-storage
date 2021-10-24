@@ -1,15 +1,31 @@
 #!/usr/bin/env bash
 
-# Hide output! We only care about clients.
-./server test/test2.toml > /dev/null 2>&1 &
-SERVER_PID=$!
+PARENT_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P)
+echo "The parent path of this test is $PARENT_PATH."
+echo ""
 
-echo "Server PID is $SERVER_PID."
-echo "Launching clients."
+rm -rf "$PARENT_PATH/data/target"
+mkdir -p "$PARENT_PATH/data/target/evicted"
 
-./client -f /tmp/LSOfiletorage.sk -p -W Makefile,README.md,.clang-format
-sleep 2
+# 796Ki
+./client -p trace -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/1 - cG6STRJ.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1
+echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (0 expected)."
 
-kill -s SIGHUP $SERVER_PID
+# 856Ki
+./client -p trace -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/2 - lHjYzzm.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1
+echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (1 expected)."
+
+# 972Ki
+./client -p trace -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/3 - Cpx97PW.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1
+echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (2 expected)."
+
+# 410Ki
+./client -p trace -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/5 - N1V9PES.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1
+echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (3 expected)."
+
+# The last file should fit and not cause any evictions.
+# 336Ki
+./client -p trace -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/7 - L1KaXjH.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1
+echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (3 expected)."
 
 exit 0

@@ -154,7 +154,7 @@ htable_stats_unlock(struct HTable *htable)
 }
 
 struct HTableItem *
-htable_evict_single_file(struct HTable *htable)
+htable_evict_single_file(struct HTable *htable, const char *dont_replace)
 {
 	assert(htable->stats.items_count);
 	while (htable->stats.items_count > 0) {
@@ -162,6 +162,8 @@ htable_evict_single_file(struct HTable *htable)
 		struct HTableBucket *bucket = &htable->buckets[i];
 		if (!bucket->last) {
 			assert(!bucket->head);
+			continue;
+		} else if (strcmp(bucket->last->file.key, dont_replace) == 0) {
 			continue;
 		}
 		struct HTableItem *item = bucket->last;
@@ -185,17 +187,11 @@ htable_evict_single_file(struct HTable *htable)
  * call- hold data about evicted files. */
 enum HTableError
 htable_evict_files(struct HTable *htable,
-                   bool new_file,
-                   size_t new_space_in_bytes,
+                   const char *dont_replace,
                    struct File **evicted,
                    unsigned *evicted_count)
 {
 	htable_stats_lock(htable);
-	htable->stats.total_space_in_bytes += new_space_in_bytes;
-	if (new_file) {
-		htable->stats.items_count++;
-	}
-
 	*evicted = NULL;
 	*evicted_count = 0;
 	while (htable->stats.items_count > htable->max_items_count ||
@@ -205,7 +201,7 @@ htable_evict_files(struct HTable *htable,
 		*evicted = xrealloc(*evicted, sizeof(struct File) * *evicted_count);
 
 		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
-		struct HTableItem *evicted_item = htable_evict_single_file(htable);
+		struct HTableItem *evicted_item = htable_evict_single_file(htable, dont_replace);
 		*file_ptr = evicted_item->file;
 		htable->stats.items_count--;
 		htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
@@ -407,6 +403,13 @@ htable_replace_file_contents(struct HTable *htable,
 		return HTABLE_ERR_FILE_NOT_FOUND;
 	}
 
+	htable_stats_lock(htable);
+	if (size_in_bytes > htable->max_space_in_bytes) {
+		htable_release_file(htable, key);
+		htable_stats_unlock(htable);
+		return HTABLE_ERR_SIZE;
+	}
+
 	size_t old_size_in_bytes = file->length_in_bytes;
 	file->length_in_bytes = size_in_bytes;
 	free(file->contents);
@@ -415,12 +418,11 @@ htable_replace_file_contents(struct HTable *htable,
 	file->length_in_bytes = size_in_bytes;
 
 	htable_release_file(htable, key);
-	htable_stats_lock(htable);
 	htable->stats.total_space_in_bytes += size_in_bytes;
 	htable->stats.total_space_in_bytes -= old_size_in_bytes;
 	htable_stats_unlock(htable);
 
-	return htable_evict_files(htable, true, size_in_bytes, evicted, evicted_count);
+	return htable_evict_files(htable, key, evicted, evicted_count);
 }
 
 enum HTableError
@@ -435,6 +437,14 @@ htable_append_to_file_contents(struct HTable *htable,
 	if (!file) {
 		return HTABLE_ERR_FILE_NOT_FOUND;
 	}
+
+	htable_stats_lock(htable);
+	if (file->length_in_bytes + size_in_bytes > htable->max_space_in_bytes) {
+		htable_release_file(htable, key);
+		htable_stats_unlock(htable);
+		return HTABLE_ERR_SIZE;
+	}
+
 	file->length_in_bytes += size_in_bytes;
 	void *new_buffer = xrealloc(file->contents, file->length_in_bytes);
 	file->contents = new_buffer;
@@ -443,11 +453,10 @@ htable_append_to_file_contents(struct HTable *htable,
 	       size_in_bytes);
 
 	htable_release_file(htable, key);
-	htable_stats_lock(htable);
 	htable->stats.total_space_in_bytes += size_in_bytes;
 	htable_stats_unlock(htable);
 
-	return htable_evict_files(htable, false, size_in_bytes, evicted, evicted_count);
+	return htable_evict_files(htable, key, evicted, evicted_count);
 }
 
 /************ VISITOR PATTERN ***********/
