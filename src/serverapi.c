@@ -203,7 +203,7 @@ handle_response_with_files(int fd, const char *dirname)
  *
  * The response is just one single byte with a response code. */
 static int
-make_simple_request(enum ApiOp op, const char *pathname)
+make_simple_request(enum ApiOp op, const char *pathname, int err_response_meaning)
 {
 	assert(pathname);
 
@@ -222,6 +222,10 @@ make_simple_request(enum ApiOp op, const char *pathname)
 	err |= read(state.fd, buffer, 1);
 	if (err < 0) {
 		return on_io_err();
+	} else if (buffer[0] == RESPONSE_ERR) {
+		log_error("Received a negative response from the server.");
+		errno = err_response_meaning;
+		return -1;
 	}
 	return 0;
 }
@@ -318,7 +322,7 @@ closeConnection(const char *sockname)
 int
 readFile(const char *pathname, void **buf, size_t *size)
 {
-	int err = make_simple_request(API_OP_READ_FILE, pathname);
+	int err = make_simple_request(API_OP_READ_FILE, pathname, ESTALE);
 	if (err < 0) {
 		return -1;
 	}
@@ -365,13 +369,13 @@ openFile(const char *pathname, int flags)
 {
 	switch (flags) {
 		case O_CREATE:
-			return make_simple_request(API_OP_OPEN_FILE_CREATE, pathname);
+			return make_simple_request(API_OP_OPEN_FILE_CREATE, pathname, EINVAL);
 		case O_LOCK:
-			return make_simple_request(API_OP_OPEN_FILE_LOCK, pathname);
+			return make_simple_request(API_OP_OPEN_FILE_LOCK, pathname, EINVAL);
 		case O_CREATE | O_LOCK:
-			return make_simple_request(API_OP_OPEN_FILE_CREATE_LOCK, pathname);
+			return make_simple_request(API_OP_OPEN_FILE_CREATE_LOCK, pathname, EINVAL);
 		case 0:
-			return make_simple_request(API_OP_OPEN_FILE, pathname);
+			return make_simple_request(API_OP_OPEN_FILE, pathname, EINVAL);
 		default:
 			errno = EINVAL;
 			return -1;
@@ -381,25 +385,25 @@ openFile(const char *pathname, int flags)
 int
 lockFile(const char *pathname)
 {
-	return make_simple_request(API_OP_LOCK_FILE, pathname);
+	return make_simple_request(API_OP_LOCK_FILE, pathname, EINVAL);
 }
 
 int
 unlockFile(const char *pathname)
 {
-	return make_simple_request(API_OP_UNLOCK_FILE, pathname);
+	return make_simple_request(API_OP_UNLOCK_FILE, pathname, EINVAL);
 }
 
 int
 closeFile(const char *pathname)
 {
-	return make_simple_request(API_OP_CLOSE_FILE, pathname);
+	return make_simple_request(API_OP_CLOSE_FILE, pathname, EINVAL);
 }
 
 int
 removeFile(const char *pathname)
 {
-	return make_simple_request(API_OP_REMOVE_FILE, pathname);
+	return make_simple_request(API_OP_REMOVE_FILE, pathname, EINVAL);
 }
 
 /******* API WRITE OPERATIONS
