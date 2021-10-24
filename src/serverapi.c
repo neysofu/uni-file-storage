@@ -329,14 +329,14 @@ readFile(const char *pathname, void **buf, size_t *size)
 	/* After the "simple" request, `readFile` also must read the file contents. */
 	uint8_t buffer_len[8] = { 0 };
 	err |= read_bytes(state.fd, buffer_len, 8);
-	*size = big_endian_to_u64(buffer_len);
 	if (err < 0) {
-		return -1;
+		return on_io_err();
 	}
+	*size = big_endian_to_u64(buffer_len);
 	*buf = xmalloc(*size);
 	err |= read_bytes(state.fd, *buf, *size);
 	if (err < 0) {
-		return -1;
+		return on_io_err();
 	}
 	return 0;
 }

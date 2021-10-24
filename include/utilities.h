@@ -19,7 +19,7 @@ void
 wait_msec(int msec);
 
 char *
-buf_to_str(void *buf, size_t len_in_bytes);
+buf_to_str(const void *buf, size_t len_in_bytes);
 
 /** Evita letture parziali
  *

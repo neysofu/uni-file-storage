@@ -22,7 +22,7 @@ wait_msec(int msec)
 }
 
 char *
-buf_to_str(void *buf, size_t len_in_bytes)
+buf_to_str(const void *buf, size_t len_in_bytes)
 {
 	char *s = xmalloc(len_in_bytes + 1);
 	memcpy(s, buf, len_in_bytes);
