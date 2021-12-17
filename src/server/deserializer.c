@@ -20,6 +20,16 @@ deserializer_create(void)
 	return de;
 }
 
+void
+deserializer_free(struct Deserializer *de)
+{
+	if (!de) {
+		return;
+	}
+	free(de->buffer);
+	free(de);
+}
+
 struct Buffer *
 deserializer_detach(struct Deserializer *de, size_t new_bytes)
 {

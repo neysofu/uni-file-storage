@@ -83,8 +83,8 @@ void
 workload_queues_free(void)
 {
 	for (size_t i = 0; i < count; i++) {
-		pthread_cond_destroy(&workload_queues[i].cond);
-		pthread_mutex_destroy(&workload_queues[i].mutex);
+		ON_MUTEX_ERR(pthread_cond_destroy(&workload_queues[i].cond));
+		ON_MUTEX_ERR(pthread_mutex_destroy(&workload_queues[i].mutex));
 	}
 	free(workload_queues);
 }

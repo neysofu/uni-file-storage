@@ -1,6 +1,5 @@
 - Aggiungere dei test di eviction a test1.sh.
-- Special condition così che il file appena inserito non venga MAI evicted.
-- Creare test2.sh.
+- Directory di riferimento e path relativi/assoluti.
 - Creare test3.sh.
 - Creare un Makefile e testarlo.
 - Controlla errno.

@@ -18,6 +18,10 @@ struct Buffer
 struct Deserializer *
 deserializer_create(void);
 
+/* Frees all memory used by `deserializer`. */
+void
+deserializer_free(struct Deserializer *deserializer);
+
 /* Parses the contents of `deserializer`'s internal buffer and returns a pointer
  * to a heap-allocated `struct Buffer` in case it is a full message, NULL
  * otherwise (i.e. it needs more data). `new_bytes` is the number of bytes that

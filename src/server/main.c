@@ -123,7 +123,7 @@ inner_main(struct Config *config)
 		return -1;
 	}
 	glog_info("Now spawning %d worker threads...", config->num_workers);
-	spawn_workers(config->num_workers);
+	workers_spawn(config->num_workers);
 	glog_info("Done.");
 	struct Receiver *receiver = receiver_create(socket_fd, config->num_workers);
 	while (!detect_shutdown_hard()) {
@@ -137,11 +137,15 @@ inner_main(struct Config *config)
 		}
 	}
 	print_summary();
-	receiver_free(receiver);
+	glog_info("Exiting.");
 	if (f_log) {
 		fclose(f_log);
 	}
-	glog_info("Exiting.");
+	receiver_free(receiver);
+	htable_free(global_htable);
+	config_free(global_config);
+	workers_join();
+	workload_queues_free();
 	return 0;
 }
 

@@ -184,11 +184,14 @@ receiver_free(struct Receiver *r)
 	if (!r) {
 		return;
 	}
-	for (size_t i = 1; i < r->active_sockets_count; i++) {
+	for (size_t i = 0; i < r->active_sockets_count; i++) {
 		close(r->active_sockets[i].fd);
 	}
-	close(r->active_sockets[0].fd);
 	free(r->active_sockets);
+	for (size_t i = 0; i < r->active_sockets_count; i++) {
+		deserializer_free(r->deserializers[i]);
+	}
+	free(r->deserializers);
 	free(r);
 }
 
@@ -200,12 +203,6 @@ receiver_add(struct Receiver *r, int fd)
 	struct Deserializer **new_deserializers =
 	  xrealloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
 	struct Deserializer *deserializer = deserializer_create();
-	if (!new_active_sockets || !new_deserializers || !deserializer) {
-		free(new_active_sockets);
-		free(new_deserializers);
-		free(deserializer);
-		return -1;
-	}
 	r->active_sockets = new_active_sockets;
 	r->deserializers = new_deserializers;
 	r->active_sockets[r->active_sockets_count].events = POLLIN;

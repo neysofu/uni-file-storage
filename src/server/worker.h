@@ -3,17 +3,13 @@
 
 #include <pthread.h>
 
-/* Unique entry point for all worker threads. */
-void *
-worker_entry_point(void *args);
+/* Creates `num` listening workers. */
+void
+workers_spawn(unsigned num);
 
-inline static void
-spawn_workers(unsigned num)
-{
-	for (unsigned i = 0; i < num; i++) {
-		pthread_t worker;
-		pthread_create(&worker, NULL, worker_entry_point, NULL);
-	}
-}
+/* Waits for all workers to exit, then frees any data structures allocated during
+ * `workers_spawn` to manage worker threads. */
+void
+workers_join(void);
 
 #endif

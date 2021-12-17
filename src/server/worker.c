@@ -18,6 +18,9 @@
 #include <time.h>
 #include <unistd.h>
 
+static unsigned workers_count = 0;
+static pthread_t *workers = NULL;
+
 /* Worker ID tracker. */
 struct Worker
 {
@@ -313,14 +316,36 @@ worker_entry_point(void *args)
 	unsigned id = ts_counter();
 	struct Worker worker;
 	worker.id = id;
-	while (true) {
+	while (!detect_shutdown_soft()) {
 		struct Message *msg = workload_queue_pull(id);
 		glog_trace("[Worker n.%u] New message incoming. Pulling...", id);
 		if (!msg) {
+			/* Incomplete message. Keep polling. */
 			continue;
 		}
 		glog_trace("[Worker n.%u] Done.", id);
 		worker_handle_message(&worker, msg->fd, msg->buffer.raw, msg->buffer.size_in_bytes);
 	}
+	glog_info("[Worker n.%u] Exiting thread.", id);
+	pthread_exit(NULL);
 	return NULL;
+}
+
+void
+workers_spawn(unsigned num)
+{
+	workers_count = num;
+	workers = xmalloc(num * sizeof(pthread_t));
+	for (unsigned i = 0; i < num; i++) {
+		pthread_create(&workers[i], NULL, worker_entry_point, NULL);
+	}
+}
+
+void
+workers_join(void)
+{
+	for (unsigned i = 0; i < workers_count; i++) {
+		pthread_join(workers[i], NULL);
+	}
+	free(workers);
 }
