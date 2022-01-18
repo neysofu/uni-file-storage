@@ -3,4 +3,5 @@ max-files = 10
 max-storage = 1_000_000
 num-workers = 4
 socket-filepath = "/tmp/LSOfiletorage.sk"
+cache-eviction-policy = "fifo"
 log-filepath = "server.log"

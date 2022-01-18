@@ -122,6 +122,7 @@ main(int argc, char **argv)
 		cli_args_free(cli_args);
 		return EXIT_FAILURE;
 	}
+
 	/* Finally, everything seems to be in order. Let's proceed. */
 	log_info("The client is up and running.");
 	log_info("Opening connection with a timeout of %lu seconds, reattempting every %lu "

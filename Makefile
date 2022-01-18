@@ -60,6 +60,8 @@ server: lz4
 		src/server/config.h \
 		src/server/deserializer.h \
 		src/server/deserializer.c \
+		src/server/eviction_policy.h \
+		src/server/eviction_policy.c \
 		src/server/global_state.h \
 		src/server/global_state.c \
 		src/server/htable.c \

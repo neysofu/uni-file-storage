@@ -8,4 +8,5 @@ max-files = 100
 max-storage = 80_000_000
 num-workers = 4
 socket-filepath = "/tmp/LSOfiletorage.sk"
+cache-eviction-policy = "fifo"
 log-filepath = "server.log"

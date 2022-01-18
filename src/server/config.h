@@ -3,6 +3,12 @@
 
 #include <stdio.h>
 
+enum CacheEvictionPolicy
+{
+	CACHE_EVICTION_POLICY_FIFO,
+	CACHE_EVICTION_POLICY_SEGMENTED_FIFO,
+};
+
 /* Server configuration settings. */
 struct Config
 {
@@ -11,6 +17,7 @@ struct Config
 	unsigned num_workers;
 	char *socket_filepath;
 	char *log_filepath;
+	enum CacheEvictionPolicy cache_eviction_policy;
 	FILE *log_f;
 	/* Set to `-1` in case of decoding or deserialization errors, `0` on success. */
 	int err;

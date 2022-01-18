@@ -32,9 +32,12 @@ config_parse_file(char abs_path[])
 	toml_datum_t param_max_storage = toml_int_in(toml_table, "max-storage");
 	toml_datum_t param_num_workers = toml_int_in(toml_table, "num-workers");
 	toml_datum_t param_socket_filepath = toml_string_in(toml_table, "socket-filepath");
+	toml_datum_t param_cache_eviction_policy =
+	  toml_string_in(toml_table, "cache-eviction-policy");
 	toml_datum_t param_log_filepath = toml_string_in(toml_table, "log-filepath");
 	if (!param_max_files.ok || !param_max_storage.ok || !param_num_workers.ok ||
-	    !param_socket_filepath.ok || !param_log_filepath.ok || param_max_files.u.i < 1 ||
+	    !param_socket_filepath.ok || !param_cache_eviction_policy.ok ||
+	    !param_log_filepath.ok || param_max_files.u.i < 1 ||
 	    param_max_storage.u.i < 10000 || param_num_workers.u.i < 1 ||
 	    param_num_workers.u.i > 32) {
 		glog_fatal("Malformed TOML attributes in configuration file.");
@@ -44,6 +47,14 @@ config_parse_file(char abs_path[])
 	config->max_storage_in_bytes = param_max_storage.u.i;
 	config->num_workers = param_num_workers.u.i;
 	config->socket_filepath = param_socket_filepath.u.s;
+	if (strcmp(param_cache_eviction_policy.u.s, "fifo") == 0) {
+		config->cache_eviction_policy = CACHE_EVICTION_POLICY_FIFO;
+	} else if (strcmp(param_cache_eviction_policy.u.s, "segmented-fifo") == 0) {
+		config->cache_eviction_policy = CACHE_EVICTION_POLICY_SEGMENTED_FIFO;
+	} else {
+		glog_fatal("Invalid cache eviction policy.");
+		goto err;
+	}
 	config->log_filepath = param_log_filepath.u.s;
 	config->log_f = fopen(config->socket_filepath, "a");
 	config->err = 0;

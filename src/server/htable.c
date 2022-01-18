@@ -34,6 +34,8 @@ struct HTable
 	/* Settings. */
 	size_t max_items_count;
 	size_t max_space_in_bytes;
+	enum CacheEvictionPolicy policy;
+	struct Fifo *fifo;
 	/* Internal data. */
 	pthread_mutex_t stats_guard;
 	struct HTableStats stats;
@@ -47,8 +49,17 @@ htable_create(size_t buckets, const struct Config *config)
 	assert(buckets > 0);
 	struct HTable *htable = xmalloc(sizeof(struct HTable));
 	ON_MUTEX_ERR(pthread_mutex_init(&htable->stats_guard, NULL));
+
 	htable->max_items_count = config->max_files;
 	htable->max_space_in_bytes = config->max_storage_in_bytes;
+	htable->policy = config->cache_eviction_policy;
+
+	/* We only create a FIFO if the cache eviction policy says to. */
+	htable->fifo = NULL;
+	if (htable->policy == CACHE_EVICTION_POLICY_FIFO) {
+		htable->fifo = fifo_create();
+	}
+
 	htable->stats.items_count = 0;
 	htable->stats.open_count = 0;
 	htable->stats.total_space_in_bytes = 0;
@@ -151,64 +162,6 @@ void
 htable_stats_unlock(struct HTable *htable)
 {
 	ON_MUTEX_ERR(pthread_mutex_unlock(&htable->stats_guard));
-}
-
-struct HTableItem *
-htable_evict_single_file(struct HTable *htable, const char *dont_replace)
-{
-	assert(htable->stats.items_count);
-	while (htable->stats.items_count > 0) {
-		size_t i = rand() % htable->buckets_count;
-		struct HTableBucket *bucket = &htable->buckets[i];
-		if (!bucket->last) {
-			assert(!bucket->head);
-			continue;
-		} else if (strcmp(bucket->last->file.key, dont_replace) == 0) {
-			continue;
-		}
-		struct HTableItem *item = bucket->last;
-		bucket->last = item->prev;
-		if (bucket->last) {
-			bucket->last->next = NULL;
-		} else {
-			bucket->head = NULL;
-		}
-		item->next = NULL;
-		item->prev = NULL;
-		return item;
-	}
-	exit(EXIT_FAILURE);
-}
-
-/* Runs the cache replacement policy algorithm on `htable` after some operation
- * that might trigger evictions. `new_file` is `true` iff a new file has just
- * been created, `new_space_in_bytes` is the new amount of space in bytes that
- * must be taken into account. `evicted` and `evicted_count` will -after this
- * call- hold data about evicted files. */
-enum HTableError
-htable_evict_files(struct HTable *htable,
-                   const char *dont_replace,
-                   struct File **evicted,
-                   unsigned *evicted_count)
-{
-	htable_stats_lock(htable);
-	*evicted = NULL;
-	*evicted_count = 0;
-	while (htable->stats.items_count > htable->max_items_count ||
-	       htable->stats.total_space_in_bytes > htable->max_space_in_bytes) {
-
-		(*evicted_count)++;
-		*evicted = xrealloc(*evicted, sizeof(struct File) * *evicted_count);
-
-		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
-		struct HTableItem *evicted_item = htable_evict_single_file(htable, dont_replace);
-		*file_ptr = evicted_item->file;
-		htable->stats.items_count--;
-		htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
-		free(evicted_item);
-	}
-	htable_stats_unlock(htable);
-	return HTABLE_ERR_OK;
 }
 
 /************ HIGH LEVEL APIS ***********/
@@ -422,7 +375,7 @@ htable_replace_file_contents(struct HTable *htable,
 	htable->stats.total_space_in_bytes -= old_size_in_bytes;
 	htable_stats_unlock(htable);
 
-	return htable_evict_files(htable, key, evicted, evicted_count);
+	return htable_evict_files(htable, evicted, evicted_count);
 }
 
 enum HTableError
@@ -456,7 +409,7 @@ htable_append_to_file_contents(struct HTable *htable,
 	htable->stats.total_space_in_bytes += size_in_bytes;
 	htable_stats_unlock(htable);
 
-	return htable_evict_files(htable, key, evicted, evicted_count);
+	return htable_evict_files(htable, key, evicted);
 }
 
 /************ VISITOR PATTERN ***********/
@@ -483,11 +436,7 @@ htable_visit(struct HTable *htable, unsigned max_visits)
 	struct HTableBucket *bucket = &htable->buckets[0];
 	int err = 0;
 	/* Lock the first bucket. */
-	err = pthread_mutex_lock(&bucket->guard);
-	if (err < 0) {
-		free(visitor);
-		return NULL;
-	}
+	ON_MUTEX_ERR(pthread_mutex_lock(&bucket->guard));
 	return visitor;
 }
 
@@ -509,20 +458,14 @@ htable_visitor_next(struct HTableVisitor *visitor)
 	/* The current bucket doesn't have any more items, so let's unlock this one
 	 * and lock the next one, until we find one with at least one item. */
 	while (!next_in_bucket) {
-		int err = pthread_mutex_unlock(&bucket->guard);
-		if (err < 0) {
-			return NULL;
-		}
+		ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 		visitor->bucket_i++;
 		if (visitor->bucket_i == htable->buckets_count) {
 			/* No more buckets! */
 			return NULL;
 		}
 		bucket++;
-		err = pthread_mutex_lock(&bucket->guard);
-		if (err < 0) {
-			return NULL;
-		}
+		ON_MUTEX_ERR(pthread_mutex_lock(&bucket->guard));
 		next_in_bucket = bucket->head;
 	}
 	visitor->last_visited = next_in_bucket;
@@ -537,4 +480,120 @@ void
 htable_visitor_free(struct HTableVisitor *visitor)
 {
 	free(visitor);
+}
+
+/************ EVICTION POLICIES ***********/
+
+struct HTableItem *
+htable_evict_single_file_segmented_fifo(struct HTable *htable)
+{
+	assert(htable->stats.items_count);
+	while (htable->stats.items_count > 0) {
+		size_t i = rand() % htable->buckets_count;
+		struct HTableBucket *bucket = &htable->buckets[i];
+		if (!bucket->last) {
+			// The bucket is empty, so we can't evict anything. Let's try again.
+			assert(!bucket->head);
+			continue;
+		}
+		struct HTableItem *item = bucket->last;
+		bucket->last = item->prev;
+		if (bucket->last) {
+			bucket->last->next = NULL;
+		} else {
+			bucket->head = NULL;
+		}
+		item->next = NULL;
+		item->prev = NULL;
+		return item;
+	}
+	exit(EXIT_FAILURE);
+}
+
+/* Runs the cache replacement policy algorithm on `htable` after some operation
+ * that might trigger evictions. `evicted` and `evicted_count` will -after this
+ * call- hold data about evicted files. */
+enum HTableError
+htable_evict_files(struct HTable *htable, struct File **evicted, unsigned *evicted_count)
+{
+	htable_stats_lock(htable);
+
+	*evicted = NULL;
+	*evicted_count = 0;
+	while (htable->stats.items_count > htable->max_items_count ||
+	       htable->stats.total_space_in_bytes > htable->max_space_in_bytes) {
+
+		(*evicted_count)++;
+		*evicted = xrealloc(*evicted, sizeof(struct File) * *evicted_count);
+		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
+
+		if (htable->policy == CACHE_EVICTION_POLICY_SEGMENTED_FIFO) {
+			struct HTableItem *evicted_item =
+			  htable_evict_single_file_segmented_fifo(htable);
+			*file_ptr = evicted_item->file;
+			htable->stats.items_count--;
+			htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
+			free(evicted_item);
+		} else {
+			char *key = fifo_evict(htable->fifo);
+			file_ptr->key = key;
+		}
+	}
+
+	htable_stats_unlock(htable);
+	return HTABLE_ERR_OK;
+}
+
+struct FifoItem
+{
+	char *key;
+	struct FifoItem *prev;
+};
+
+struct Fifo
+{
+	pthread_mutex_t guard;
+	struct FifoItem *head;
+	struct FifoItem *last;
+};
+
+struct Fifo *
+fifo_create(void)
+{
+	struct Fifo *fifo = xmalloc(sizeof(struct Fifo));
+	ON_MUTEX_ERR(pthread_mutex_init(&fifo->guard, NULL));
+	fifo->head = NULL;
+	fifo->last = NULL;
+	return fifo;
+}
+
+void
+fifo_free(struct Fifo *fifo)
+{
+	if (!fifo) {
+		return;
+	}
+
+	struct FifoItem *last = fifo->last;
+	while (last) {
+		struct FifoItem *prev = last->prev;
+		free(last->key);
+		free(last);
+		last = prev;
+	}
+	free(fifo);
+}
+
+char *
+fifo_evict(struct Fifo *fifo)
+{
+	struct FifoItem *last = fifo->last;
+	if (!last) {
+		return NULL;
+	} else {
+		fifo->last = last->prev;
+		char *key = last->key;
+		free(last);
+		return key;
+	}
 }
