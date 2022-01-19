@@ -1,8 +1,7 @@
 #ifndef SOL_SERVERAPI
 #define SOL_SERVERAPI
 
-#include <stdbool.h>
-#include <stddef.h>
+#define __USE_POSIX199309
 #include <time.h>
 
 /* Unique identifiers for all operations available over the public API. */

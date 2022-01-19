@@ -3,6 +3,7 @@
 
 #include "serverapi.h"
 #include <stdlib.h>
+#include <time.h>
 
 /* A deserializer for protocol messages. Implemented as a state machine under the
  * hood. */
