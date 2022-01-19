@@ -9,7 +9,6 @@ CCFLAGS    += \
 	-Wcomment \
 	-Wno-missing-braces \
 	-Wno-missing-field-initializers \
-	-Wswitch-default \
 	-Wcast-align \
 	-Wpointer-arith \
 	-Wundef \
@@ -18,7 +17,7 @@ CCFLAGS    += \
 	-Wold-style-definition \
 	-Wunreachable-code \
 
-all: lz4 server client serverapi test1 test2 test3
+all: lz4 server client test1 test2 test3
 
 default_target: all
 .PHONY: default_target
@@ -60,8 +59,6 @@ server: lz4
 		src/server/config.h \
 		src/server/deserializer.h \
 		src/server/deserializer.c \
-		src/server/eviction_policy.h \
-		src/server/eviction_policy.c \
 		src/server/global_state.h \
 		src/server/global_state.c \
 		src/server/htable.c \
@@ -73,6 +70,8 @@ server: lz4
 		src/server/worker.c \
 		src/server/workload_queue.h \
 		src/server/workload_queue.c \
+		include/serverapi.h \
+		include/utilities.h \
 		src/serverapi.c \
 		src/utilities.c \
 		lib/logc/src/log.c \
@@ -81,26 +80,6 @@ server: lz4
 		-lpthread
 	@echo "-- Done building the server binary."
 .PHONY: server
-
-serverapi:
-	$(CC) $(CCFLAGS) -c \
-		-o logc.o \
-		-I lib \
-		lib/logc/src/log.c
-	$(CC) $(CCFLAGS) -c \
-		-o utils.o \
-		-I include -I lib \
-		src/utilities.c
-	$(CC) $(CCFLAGS) -c \
-		-o api.o \
-		-I include -I lib \
-		src/serverapi.c
-	@ld -r -o serverapi.o api.o utils.o logc.o
-	@rm -f utils.o
-	@rm -f api.o
-	@rm -f logc.o
-	@echo "-- Done building the server API library."
-.PHONY: serverapi
 
 test1: server client
 	@valgrind --leak-check=full ./server config/test1.toml >> server.out 2>&1 &
@@ -127,7 +106,6 @@ help:
 	@echo "- client"
 	@echo "- lz4"
 	@echo "- server"
-	@echo "- serverapi"
 	@echo "- test1"
 	@echo "- test2"
 	@echo "- test3"

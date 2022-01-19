@@ -15,6 +15,14 @@
 #define ON_MUTEX_ERR(err)                                                                  \
 	ON_ERR((err), "Unexpected mutex error during hash table internal manipulation.")
 
+struct Fifo;
+
+struct Fifo *
+fifo_create(void);
+
+enum HTableError
+htable_evict_files(struct HTable *htable, struct File **evicted, unsigned *evicted_count);
+
 struct HTableItem
 {
 	struct File file;
@@ -434,7 +442,6 @@ htable_visit(struct HTable *htable, unsigned max_visits)
 	visitor->bucket_i = 0;
 	visitor->last_visited = NULL;
 	struct HTableBucket *bucket = &htable->buckets[0];
-	int err = 0;
 	/* Lock the first bucket. */
 	ON_MUTEX_ERR(pthread_mutex_lock(&bucket->guard));
 	return visitor;
@@ -483,66 +490,6 @@ htable_visitor_free(struct HTableVisitor *visitor)
 }
 
 /************ EVICTION POLICIES ***********/
-
-struct HTableItem *
-htable_evict_single_file_segmented_fifo(struct HTable *htable)
-{
-	assert(htable->stats.items_count);
-	while (htable->stats.items_count > 0) {
-		size_t i = rand() % htable->buckets_count;
-		struct HTableBucket *bucket = &htable->buckets[i];
-		if (!bucket->last) {
-			// The bucket is empty, so we can't evict anything. Let's try again.
-			assert(!bucket->head);
-			continue;
-		}
-		struct HTableItem *item = bucket->last;
-		bucket->last = item->prev;
-		if (bucket->last) {
-			bucket->last->next = NULL;
-		} else {
-			bucket->head = NULL;
-		}
-		item->next = NULL;
-		item->prev = NULL;
-		return item;
-	}
-	exit(EXIT_FAILURE);
-}
-
-/* Runs the cache replacement policy algorithm on `htable` after some operation
- * that might trigger evictions. `evicted` and `evicted_count` will -after this
- * call- hold data about evicted files. */
-enum HTableError
-htable_evict_files(struct HTable *htable, struct File **evicted, unsigned *evicted_count)
-{
-	htable_stats_lock(htable);
-
-	*evicted = NULL;
-	*evicted_count = 0;
-	while (htable->stats.items_count > htable->max_items_count ||
-	       htable->stats.total_space_in_bytes > htable->max_space_in_bytes) {
-
-		(*evicted_count)++;
-		*evicted = xrealloc(*evicted, sizeof(struct File) * *evicted_count);
-		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
-
-		if (htable->policy == CACHE_EVICTION_POLICY_SEGMENTED_FIFO) {
-			struct HTableItem *evicted_item =
-			  htable_evict_single_file_segmented_fifo(htable);
-			*file_ptr = evicted_item->file;
-			htable->stats.items_count--;
-			htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
-			free(evicted_item);
-		} else {
-			char *key = fifo_evict(htable->fifo);
-			file_ptr->key = key;
-		}
-	}
-
-	htable_stats_unlock(htable);
-	return HTABLE_ERR_OK;
-}
 
 struct FifoItem
 {
@@ -596,4 +543,65 @@ fifo_evict(struct Fifo *fifo)
 		free(last);
 		return key;
 	}
+}
+
+struct HTableItem *
+htable_evict_single_file_segmented_fifo(struct HTable *htable)
+{
+	assert(htable->stats.items_count);
+	while (htable->stats.items_count > 0) {
+		size_t i = rand() % htable->buckets_count;
+		struct HTableBucket *bucket = &htable->buckets[i];
+		if (!bucket->last) {
+			assert(!bucket->head);
+			// The bucket is empty, so we can't evict anything. Let's try again.
+			continue;
+		}
+		struct HTableItem *item = bucket->last;
+		bucket->last = item->prev;
+		if (bucket->last) {
+			bucket->last->next = NULL;
+		} else {
+			bucket->head = NULL;
+		}
+		item->next = NULL;
+		item->prev = NULL;
+		return item;
+	}
+	glog_fatal("Trying to evict a file from an empty cache. This is bug!");
+	exit(EXIT_FAILURE);
+}
+
+/* Runs the cache replacement policy algorithm on `htable` after some operation
+ * that might trigger evictions. `evicted` and `evicted_count` will -after this
+ * call- hold data about evicted files. */
+enum HTableError
+htable_evict_files(struct HTable *htable, struct File **evicted, unsigned *evicted_count)
+{
+	htable_stats_lock(htable);
+
+	*evicted = NULL;
+	*evicted_count = 0;
+	while (htable->stats.items_count > htable->max_items_count ||
+	       htable->stats.total_space_in_bytes > htable->max_space_in_bytes) {
+
+		(*evicted_count)++;
+		*evicted = xrealloc(*evicted, sizeof(struct File) * *evicted_count);
+		struct File *file_ptr = &(*evicted)[*evicted_count - 1];
+
+		if (htable->policy == CACHE_EVICTION_POLICY_SEGMENTED_FIFO) {
+			struct HTableItem *evicted_item =
+			  htable_evict_single_file_segmented_fifo(htable);
+			*file_ptr = evicted_item->file;
+			htable->stats.items_count--;
+			htable->stats.total_space_in_bytes -= file_ptr->length_in_bytes;
+			free(evicted_item);
+		} else {
+			char *key = fifo_evict(htable->fifo);
+			file_ptr->key = key;
+		}
+	}
+
+	htable_stats_unlock(htable);
+	return HTABLE_ERR_OK;
 }
