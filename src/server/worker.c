@@ -325,6 +325,8 @@ worker_entry_point(void *args)
 		}
 		glog_trace("[Worker n.%u] Done.", id);
 		worker_handle_message(&worker, msg->fd, msg->buffer.raw, msg->buffer.size_in_bytes);
+		free(msg->buffer.raw);
+		free(msg);
 	}
 	glog_info("[Worker n.%u] Exiting thread.", id);
 	pthread_exit(NULL);
