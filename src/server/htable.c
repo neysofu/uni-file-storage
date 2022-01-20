@@ -417,7 +417,7 @@ htable_append_to_file_contents(struct HTable *htable,
 	htable->stats.total_space_in_bytes += size_in_bytes;
 	htable_stats_unlock(htable);
 
-	return htable_evict_files(htable, key, evicted);
+	return htable_evict_files(htable, evicted, evicted_count);
 }
 
 /************ VISITOR PATTERN ***********/
