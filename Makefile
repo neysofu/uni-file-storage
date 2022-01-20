@@ -78,18 +78,21 @@ server:
 
 test1: server client
 	@valgrind --leak-check=full ./server config/test1.toml >> server.out 2>&1 &
+	@sleep 1
 	@./test/test1.sh
 	@pidof valgrind.bin | xargs kill -SIGHUP
 .PHONY: test1
 
 test2: server client
 	@./server config/test2.toml >> server.out 2>&1 &
+	@sleep 1
 	@./test/test2.sh
 	@pidof ./server | xargs kill -SIGHUP
 .PHONY: test2
 
 test3: server client
 	@./server config/test3.toml >> server.out 2>&1 &
+	@sleep 1
 	@./test/test3.sh
 .PHONY: test3
 
