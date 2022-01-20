@@ -3,12 +3,12 @@
 LOG_FILE=$1
 
 NUM_NEW_CONNECTIONS=`grep -r "Adding a new connection" $1 | wc -l`
-NUM_LOCKS=`grep -r "Lock" $1 | wc -l`
-NUM_UNLOCKS=`grep -r "Unlock" $1 | wc -l`
-NUM_LOCKED_OPENS=`grep -r "Open (locked)" $1 | wc -l`
-NUM_OPENS=`grep -r "Open (unlocked)" $1 | wc -l`
-NUM_CLOSES=`grep -r "Close" $1 | wc -l`
-NUM_EVICTIONS=`grep -r "Evict" $1 | wc -l`
+NUM_LOCKS=`grep -r "New API request `lockFile`" $1 | wc -l`
+NUM_UNLOCKS=`grep -r "New API request `unlockFile`" $1 | wc -l`
+NUM_LOCKED_OPENS=`grep -r "New API request `openFile`, create = 1, lock = 1" $1 | wc -l`
+NUM_OPENS=`grep -r "New API request `openFile`, create = 1, lock = 0." $1 | wc -l`
+NUM_CLOSES=`grep -r "New API request `closeFile`" $1 | wc -l`
+NUM_EVICTIONS=`grep -r "Evict TODO" $1 | wc -l`
 
 let MAX_NUM_CONNECTIONS=0
 let NUM_CONNECTIONS=0

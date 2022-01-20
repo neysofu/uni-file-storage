@@ -360,7 +360,7 @@ readNFiles(int n, const char *dirname)
 		return on_io_err();
 	}
 
-	// FIXME
+	// FIXME: can't remember what this is supposed to be doing...
 
 	/* Read header. */
 	uint8_t buffer_response_code[1] = { '\0' };
