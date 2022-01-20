@@ -17,7 +17,7 @@ CCFLAGS    += \
 	-Wold-style-definition \
 	-Wunreachable-code \
 
-all: server client test1 test2 test3
+all: server client
 
 default_target: all
 .PHONY: default_target
