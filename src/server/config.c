@@ -41,6 +41,9 @@ config_parse_file(char abs_path[])
 	    !param_log_filepath.ok || param_max_files.u.i < 1 ||
 	    param_max_storage.u.i < 10000 || param_num_workers.u.i < 1 ||
 	    param_num_workers.u.i > 32) {
+		free(param_socket_filepath.u.s);
+		free(param_cache_eviction_policy.u.s);
+		free(param_log_filepath.u.s);
 		glog_fatal("Malformed TOML attributes in configuration file.");
 		goto err;
 	}
@@ -53,12 +56,16 @@ config_parse_file(char abs_path[])
 	} else if (strcmp(param_cache_eviction_policy.u.s, "segmented-fifo") == 0) {
 		config->cache_eviction_policy = CACHE_EVICTION_POLICY_SEGMENTED_FIFO;
 	} else {
+		free(param_socket_filepath.u.s);
+		free(param_cache_eviction_policy.u.s);
+		free(param_log_filepath.u.s);
 		glog_fatal("Invalid cache eviction policy.");
 		goto err;
 	}
 	config->log_filepath = param_log_filepath.u.s;
 	config->log_f = fopen(config->socket_filepath, "a");
 	config->err = 0;
+	free(param_cache_eviction_policy.u.s);
 	toml_free(toml);
 	fclose(f);
 	return config;
