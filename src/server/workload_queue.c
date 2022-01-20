@@ -43,19 +43,21 @@ workload_queue_pull(unsigned i)
 {
 	struct WorkloadQueue *queue = &workload_queues[i];
 	assert(queue);
-	while (true) {
-		ON_MUTEX_ERR(pthread_mutex_lock(&queue->mutex));
-		while (!queue->next_incoming) {
-			pthread_cond_wait(&queue->cond, &queue->mutex);
+
+	ON_MUTEX_ERR(pthread_mutex_lock(&queue->mutex));
+	while (!queue->next_incoming || detect_shutdown_soft()) {
+		if (detect_shutdown_soft()) {
+			break;
 		}
-		struct Message *msg = queue->next_incoming;
-		if (msg) {
-			queue->next_incoming = msg->next;
-			msg->next = NULL;
-		}
-		ON_MUTEX_ERR(pthread_mutex_unlock(&queue->mutex));
-		return msg;
+		ON_MUTEX_ERR(pthread_cond_wait(&queue->cond, &queue->mutex));
 	}
+	struct Message *msg = queue->next_incoming;
+	if (msg) {
+		queue->next_incoming = msg->next;
+		msg->next = NULL;
+	}
+	ON_MUTEX_ERR(pthread_mutex_unlock(&queue->mutex));
+	return msg;
 }
 
 void
@@ -80,11 +82,31 @@ workload_queue_add(struct Message *msg, unsigned i)
 }
 
 void
+workload_queues_cond_signal(void)
+{
+	for (size_t i = 0; i < count; i++) {
+		ON_MUTEX_ERR(pthread_cond_signal(&workload_queues[i].cond));
+	}
+}
+
+void
 workload_queues_free(void)
 {
 	for (size_t i = 0; i < count; i++) {
 		ON_MUTEX_ERR(pthread_cond_destroy(&workload_queues[i].cond));
 		ON_MUTEX_ERR(pthread_mutex_destroy(&workload_queues[i].mutex));
+		workload_queue_free(&workload_queues[i]);
 	}
 	free(workload_queues);
+}
+
+void
+workload_queue_free(struct WorkloadQueue *queue)
+{
+	while (queue->next_incoming) {
+		struct Message *msg = queue->next_incoming;
+		queue->next_incoming = msg->next;
+		free(msg->buffer.raw);
+		free(msg);
+	}
 }

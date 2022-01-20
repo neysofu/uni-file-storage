@@ -337,15 +337,26 @@ workers_spawn(unsigned num)
 	workers_count = num;
 	workers = xmalloc(num * sizeof(pthread_t));
 	for (unsigned i = 0; i < num; i++) {
-		pthread_create(&workers[i], NULL, worker_entry_point, NULL);
+		int err = pthread_create(&workers[i], NULL, worker_entry_point, NULL);
+		if (err) {
+			glog_fatal("Unexpected `pthread_create` error code %d when spawning workers.",
+			           err);
+			exit(EXIT_FAILURE);
+		}
 	}
 }
 
 void
 workers_join(void)
 {
+	workload_queues_cond_signal();
+
 	for (unsigned i = 0; i < workers_count; i++) {
-		pthread_join(workers[i], NULL);
+		int err = pthread_join(workers[i], NULL);
+		if (err) {
+			glog_fatal("Unexpected error code %d while shutting down worker n.%u.", err, i);
+			exit(EXIT_FAILURE);
+		}
 	}
 	free(workers);
 }

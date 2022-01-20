@@ -18,7 +18,13 @@
 struct Fifo;
 
 struct Fifo *
-fifo_create(void);
+fifo_create(struct HTable *htable);
+
+void
+fifo_free(struct Fifo *fifo);
+
+void
+fifo_add_file(struct Fifo *fifo, const char *key);
 
 enum HTableError
 htable_evict_files(struct HTable *htable, struct File **evicted, unsigned *evicted_count);
@@ -65,7 +71,7 @@ htable_create(size_t buckets, const struct Config *config)
 	/* We only create a FIFO if the cache eviction policy says to. */
 	htable->fifo = NULL;
 	if (htable->policy == CACHE_EVICTION_POLICY_FIFO) {
-		htable->fifo = fifo_create();
+		htable->fifo = fifo_create(htable);
 	}
 
 	htable->stats.items_count = 0;
@@ -91,7 +97,8 @@ htable_free(struct HTable *htable)
 		return;
 	}
 	for (size_t i = 0; i < htable->buckets_count; i++) {
-		ON_MUTEX_ERR(pthread_mutex_destroy(&htable->buckets[i].guard));
+		// TODO(I can't figure this out, but maybe it doesn't matter): unlock and destroy
+		// all mutexes.
 		struct HTableItem *item = htable->buckets[i].head;
 		while (item) {
 			free(item->file.contents);
@@ -109,6 +116,7 @@ htable_free(struct HTable *htable)
 	}
 	ON_MUTEX_ERR(pthread_mutex_destroy(&htable->stats_guard));
 	free(htable->buckets);
+	fifo_free(htable->fifo);
 	free(htable);
 }
 
@@ -233,9 +241,9 @@ htable_open_file(struct HTable *htable, const char *key, int fd, bool lock)
 		file->is_locked = lock;
 		file->fd_owner = fd;
 		htable_release_file(htable, key);
-		ON_MUTEX_ERR(pthread_mutex_lock(&htable->stats_guard));
+		htable_stats_lock(htable);
 		htable->stats.open_count++;
-		ON_MUTEX_ERR(pthread_mutex_unlock(&htable->stats_guard));
+		htable_stats_unlock(htable);
 		return HTABLE_ERR_OK;
 	}
 }
@@ -268,10 +276,15 @@ htable_create_file(struct HTable *htable, const char *key, int fd, bool lock)
 	}
 	bucket->head = item;
 	htable_release_file(htable, key);
+
 	htable_stats_lock(htable);
 	htable->stats.open_count++;
 	htable->stats.items_count++;
+	if (htable->policy == CACHE_EVICTION_POLICY_FIFO) {
+		fifo_add_file(htable->fifo, key);
+	}
 	htable_stats_unlock(htable);
+
 	return HTABLE_ERR_OK;
 }
 
@@ -451,17 +464,21 @@ struct File *
 htable_visitor_next(struct HTableVisitor *visitor)
 {
 	assert(visitor);
+	struct HTable *htable = visitor->htable;
+	struct HTableBucket *bucket = &htable->buckets[visitor->bucket_i];
+
 	/* Check if we have visited enough items already. */
 	if (visitor->visits >= visitor->max_visits && visitor->max_visits != 0) {
 		/* The visit is complete. */
+		ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 		return NULL;
 	}
-	struct HTable *htable = visitor->htable;
-	struct HTableBucket *bucket = &htable->buckets[visitor->bucket_i];
+
 	struct HTableItem *next_in_bucket = bucket->head;
 	if (visitor->last_visited) {
 		next_in_bucket = visitor->last_visited->next;
 	}
+
 	/* The current bucket doesn't have any more items, so let's unlock this one
 	 * and lock the next one, until we find one with at least one item. */
 	while (!next_in_bucket) {
@@ -475,10 +492,12 @@ htable_visitor_next(struct HTableVisitor *visitor)
 		ON_MUTEX_ERR(pthread_mutex_lock(&bucket->guard));
 		next_in_bucket = bucket->head;
 	}
+
 	visitor->last_visited = next_in_bucket;
 	if (visitor->last_visited) {
 		return &visitor->last_visited->file;
 	} else {
+		ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 		return NULL;
 	}
 }
@@ -499,16 +518,18 @@ struct FifoItem
 
 struct Fifo
 {
+	struct HTable *htable;
 	pthread_mutex_t guard;
 	struct FifoItem *head;
 	struct FifoItem *last;
 };
 
 struct Fifo *
-fifo_create(void)
+fifo_create(struct HTable *htable)
 {
 	struct Fifo *fifo = xmalloc(sizeof(struct Fifo));
 	ON_MUTEX_ERR(pthread_mutex_init(&fifo->guard, NULL));
+	fifo->htable = htable;
 	fifo->head = NULL;
 	fifo->last = NULL;
 	return fifo;
@@ -521,14 +542,29 @@ fifo_free(struct Fifo *fifo)
 		return;
 	}
 
-	struct FifoItem *last = fifo->last;
-	while (last) {
-		struct FifoItem *prev = last->prev;
-		free(last->key);
-		free(last);
-		last = prev;
+	struct FifoItem *head = fifo->head;
+	while (head) {
+		struct FifoItem *prev = head->prev;
+		free(head->key);
+		free(head);
+		head = prev;
 	}
 	free(fifo);
+}
+
+void
+fifo_add_file(struct Fifo *fifo, const char *key)
+{
+	char *key_copy = xmalloc(strlen(key) + 1);
+	strcpy(key_copy, key);
+	struct FifoItem *item = xmalloc(sizeof(struct FifoItem));
+
+	item->key = key_copy;
+	item->prev = fifo->head;
+	fifo->head = item;
+	if (!fifo->last) {
+		fifo->last = item;
+	}
 }
 
 char *
@@ -541,6 +577,7 @@ fifo_evict(struct Fifo *fifo)
 		fifo->last = last->prev;
 		char *key = last->key;
 		free(last);
+		htable_remove_file(fifo->htable, key, 0); // FIXME: file descriptor.
 		return key;
 	}
 }
@@ -552,9 +589,11 @@ htable_evict_single_file_segmented_fifo(struct HTable *htable)
 	while (htable->stats.items_count > 0) {
 		size_t i = rand() % htable->buckets_count;
 		struct HTableBucket *bucket = &htable->buckets[i];
+		ON_MUTEX_ERR(pthread_mutex_lock(&bucket->guard));
 		if (!bucket->last) {
 			assert(!bucket->head);
 			// The bucket is empty, so we can't evict anything. Let's try again.
+			ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 			continue;
 		}
 		struct HTableItem *item = bucket->last;
@@ -566,6 +605,7 @@ htable_evict_single_file_segmented_fifo(struct HTable *htable)
 		}
 		item->next = NULL;
 		item->prev = NULL;
+		ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 		return item;
 	}
 	glog_fatal("Trying to evict a file from an empty cache. This is bug!");

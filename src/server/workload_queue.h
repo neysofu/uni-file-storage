@@ -29,4 +29,12 @@ workload_queue_pull(unsigned i);
 void
 workload_queues_free(void);
 
+/* Delete a single workload queue and frees all used memory. */
+void
+workload_queue_free(struct WorkloadQueue *queue);
+
+/* Sends a `pthread_cond_signal` to all workload queues. */
+void
+workload_queues_cond_signal(void);
+
 #endif

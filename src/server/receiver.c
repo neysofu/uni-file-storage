@@ -87,6 +87,7 @@ receiver_cleanup(struct Receiver *r)
 	for (size_t i = 1; i <= last_i; i++) {
 		if (r->active_sockets[i].fd < 0) {
 			close(-r->active_sockets[i].fd);
+			deserializer_free(r->deserializers[i]);
 			r->active_sockets[i] = r->active_sockets[last_i];
 			r->deserializers[i] = r->deserializers[last_i];
 			last_i--;

@@ -132,20 +132,23 @@ inner_main(struct Config *config)
 		}
 		err = receiver_poll(receiver);
 		if (err < 0) {
-			glog_warn("Bad I/O during poll.");
+			glog_error("Bad I/O during poll.");
+			shutdown_soft();
 			break;
 		}
 	}
 	print_summary();
 	glog_info("Exiting.");
+	receiver_free(receiver);
+	glog_info("Waiting for all workers to shut down...");
+	workers_join();
+	glog_info("Done.");
+	htable_free(global_htable);
+	config_free(global_config);
+	workload_queues_free();
 	if (f_log) {
 		fclose(f_log);
 	}
-	receiver_free(receiver);
-	htable_free(global_htable);
-	config_free(global_config);
-	workers_join();
-	workload_queues_free();
 	return 0;
 }
 
