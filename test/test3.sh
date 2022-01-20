@@ -15,3 +15,6 @@ while [ $SECONDS -lt $end ]; do
 	sleep 0.05
 	:
 done
+
+kill -s SIGINT "$(head -n 1 server.pid)"
+exit 0

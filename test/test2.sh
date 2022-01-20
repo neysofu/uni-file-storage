@@ -28,4 +28,5 @@ echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (3 expect
 ./client -p trace -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/7 - L1KaXjH.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1
 echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (3 expected)."
 
+kill -s SIGHUP "$(head -n 1 server.pid)"
 exit 0
