@@ -1,5 +1,4 @@
-#define _POSIX_C_SOURCE 200809L
-/* glibc treats `realpath` as a GNU extension, not POSIX. */
+/* glibc treats `timespec` and `realpath` as GNU extensions, not POSIX. */
 #define _GNU_SOURCE
 
 #include "serverapi.h"
@@ -16,6 +15,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <time.h>
 #include <unistd.h>
 
 /******* GLOBAL STATE */

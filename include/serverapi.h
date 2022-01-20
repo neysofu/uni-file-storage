@@ -1,7 +1,8 @@
 #ifndef SOL_SERVERAPI
 #define SOL_SERVERAPI
 
-#define __USE_POSIX199309
+/* glibc treats `timespec` as a GNU extension, not POSIX. */
+#define _GNU_SOURCE
 #include <time.h>
 
 /* Unique identifiers for all operations available over the public API. */
