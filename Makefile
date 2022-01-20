@@ -17,15 +17,14 @@ CCFLAGS    += \
 	-Wold-style-definition \
 	-Wunreachable-code \
 
-all: lz4 server client test1 test2 test3
+all: server client test1 test2 test3
 
 default_target: all
 .PHONY: default_target
 
 clean: 
 	@echo "Clearing current directory from build artifacts..."
-	@rm -f client server server.out serverapi.o
-	@$(MAKE) clean -C lib/lz4
+	@rm -f client server server.out
 	@echo "Done."
 .PHONY: clean
 
@@ -47,11 +46,7 @@ client:
 	@echo "-- Done building the client binary."
 .PHONY: client
 
-lz4:
-	$(MAKE) -C lib/lz4
-.PHONY: lz4
-
-server: lz4
+server:
 	$(CC) $(CCFLAGS) \
 		-o server \
 		-I include -I lib -I src -I src/server \
@@ -104,7 +99,6 @@ help:
 	@echo "- clean"
 	@echo "- cleanall"
 	@echo "- client"
-	@echo "- lz4"
 	@echo "- server"
 	@echo "- test1"
 	@echo "- test2"
