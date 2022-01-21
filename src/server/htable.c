@@ -602,7 +602,7 @@ htable_evict_single_file_fifo(struct HTable *htable)
 		bucket->last = item->prev;
 	}
 
-	ON_MUTEX_ERR(pthread_mutex_lock(&bucket->guard));
+	ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 	return item;
 }
 
