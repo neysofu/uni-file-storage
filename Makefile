@@ -24,7 +24,7 @@ default_target: all
 
 clean: 
 	@echo "Clearing current directory from build artifacts..."
-	@rm -f client server server.out server.pid
+	@rm -f client server server.log server.out server.pid
 	@echo "Done."
 .PHONY: clean
 

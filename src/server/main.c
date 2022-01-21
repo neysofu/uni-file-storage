@@ -132,7 +132,7 @@ inner_main(struct Config *config)
 		}
 		err = receiver_poll(receiver);
 		if (err < 0) {
-			glog_error("Bad I/O during poll.");
+			glog_warn("Bad I/O during poll.");
 			shutdown_soft();
 			break;
 		}

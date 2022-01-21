@@ -29,4 +29,6 @@ echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (3 expect
 echo "Evicted $(ls -1q $PARENT_PATH/data/target/evicted | wc -l) files (3 expected)."
 
 kill -s SIGHUP "$(head -n 1 server.pid)"
+./statistiche.sh server.log
+
 exit 0

@@ -54,4 +54,6 @@ echo "Got back $(ls -1q $PARENT_PATH/data/target/Pokemon | wc -l) files."
 ./client -p trace -f /tmp/LSOfiletorage.sk -w "$PARENT_PATH/data/Imgur/Nested,n=0" -D "$PARENT_PATH/data/target/evicted" -z 1
 
 kill -s SIGHUP "$(head -n 1 server.pid)"
+./statistiche.sh server.log
+
 exit 0
