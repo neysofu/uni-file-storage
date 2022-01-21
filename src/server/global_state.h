@@ -16,9 +16,21 @@
 #define glog_fatal(...) glog_guarded(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
 #define glog_guarded(...)                                                                  \
 	do {                                                                                   \
-		pthread_mutex_lock(&log_guard);                                                    \
+		int glog_err = pthread_mutex_lock(&log_guard);                                     \
+		if (glog_err != 0) {                                                               \
+			printf("Mutex error (%d) while logging. This is a fatal error, and most "      \
+			       "likely a bug.",                                                        \
+			       glog_err);                                                              \
+			exit(EXIT_FAILURE);                                                            \
+		}                                                                                  \
 		log_log(__VA_ARGS__);                                                              \
-		pthread_mutex_unlock(&log_guard);                                                  \
+		glog_err = pthread_mutex_unlock(&log_guard);                                       \
+		if (glog_err != 0) {                                                               \
+			printf("Mutex error (%d) while logging. This is a fatal error, and most "      \
+			       "likely a bug.",                                                        \
+			       glog_err);                                                              \
+			exit(EXIT_FAILURE);                                                            \
+		}                                                                                  \
 	} while (0)
 
 extern pthread_mutex_t log_guard;

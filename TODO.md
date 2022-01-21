@@ -1,7 +1,6 @@
-- Aggiungere dei test di eviction a test1.sh.
+- Fixare shutdown issues.
 - Directory di riferimento e path relativi/assoluti.
-- Creare test3.sh.
-- Creare un Makefile e testarlo.
+- Creare/fixare test3.sh.
 - Controlla errno.
 - Implementa il sistema di unlocking e attesa.
 - Controlla che compili e funzioni tutto con la VM di Ubuntu.

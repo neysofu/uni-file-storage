@@ -157,7 +157,7 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 		log_io_err(worker);
 		return;
 	}
-	glog_trace("[Worker n.%u] Sending over %d evicted files.", worker->id, evicted_count);
+	glog_trace("[Worker n.%u] Sending over %u evicted files.", worker->id, evicted_count);
 	for (size_t i = 0; i < evicted_count; i++) {
 		glog_trace(
 		  "[Worker n.%u] Sending over the evicted file '%s'.", worker->id, evicted[i].key);
