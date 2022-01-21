@@ -1,4 +1,5 @@
 #include "deserializer.h"
+#include "global_state.h"
 #include "utilities.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -62,6 +63,8 @@ deserializer_missing(const struct Deserializer *de)
 void *
 deserializer_buffer(struct Deserializer *de)
 {
-	de->buffer = xrealloc(de->buffer, de->size_in_bytes + deserializer_missing(de));
+	size_t missing = deserializer_missing(de);
+	glog_trace("The deserializer at %p needs %zu more bytes.", de, missing);
+	de->buffer = xrealloc(de->buffer, de->size_in_bytes + missing);
 	return (char *)(de->buffer) + de->size_in_bytes;
 }
