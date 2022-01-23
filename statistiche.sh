@@ -23,15 +23,15 @@ NUM_EVICTED_FILES='0'
 NUM_WORKERS='0'
 
 while read LINE; do
-	if [[ $LINE == *"The latest message is"* ]]; then
+	if [[ $LINE == *"Now spawning"* ]]; then
+		NUM_WORKERS=`grep -oP '(?<=spawning )[0-9]+(?= worker threads)' <<< $LINE`
+		for (( i=1; i<${NUM_WORKERS}; i++ )); do
+			NUM_OPERATIONS_BY_WORKER_ID+=(0)
+		done
+	elif [[ $LINE == *"The latest message is"* ]]; then
 		WORKER_ID=`grep -oP '(?<=n\.)[0-9]+(?=\])' <<< $LINE`
-		# FIXME
-		if [ "${WORKER_ID}" -ge "${NUM_WORKERS}" ]; then
-			NUM_OPERATIONS_BY_WORKER_ID+=(1)
-			let NUM_WORKERS+=1
-		else
-			NUM_OPERATIONS_BY_WORKER_ID[$WORKER_ID]=$(( $WORKER_ID+1 ))
-		fi
+		#NUM_OPERATIONS_BY_WORKER_ID[$WORKER_ID]=$(( $NUM_OPERATIONS_BY_WORKER_id[$WORKER_ID] + 1 ))
+		let NUM_OPERATIONS_BY_WORKER_ID[$WORKER_ID]+=1
 	elif [[ $LINE == *"This read operation consists of"* ]]; then
 		NUM_BYTES=`grep -oP '(?<=consists of )[0-9]+(?= bytes)' <<< $LINE`
 		NUM_BYTES_READ=$[$NUM_BYTES_READ + $NUM_BYTES]
