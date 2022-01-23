@@ -9,15 +9,25 @@ NUM_NEW_CONNECTIONS=`grep -r "Adding a new connection" $1 | wc -l`
 NUM_LOCKS=`grep -r "New API request \\\`lockFile\\\`" $1 | wc -l`
 NUM_UNLOCKS=`grep -r "New API request \\\`unlockFile\\\`" $1 | wc -l`
 NUM_LOCKED_OPENS=`grep -r "New API request \\\`openFile\\\`, create = 1, lock = 1" $1 | wc -l`
+NUM_READS=`grep -r "New API request \\\`read" $1 | wc -l`
+NUM_WRITES=`grep -r "New API request \\\`writeFile\\\`" $1 | wc -l`
 NUM_OPENS=`grep -r "New API request \\\`openFile\\\`, create = 1, lock = 0." $1 | wc -l`
 NUM_CLOSES=`grep -r "New API request \\\`closeFile\\\`" $1 | wc -l`
+NUM_BYTES_READ='0'
+NUM_BYTES_WRITTEN='0'
 MAX_NUM_CONCURRENT_CONNECTIONS='0'
 NUM_CONNECTIONS=`grep -r "Adding a new connection" $1 | wc -l`
 NUM_EVICTIONS='0'
 NUM_EVICTED_FILES='0'
 
 while read LINE; do
-	if [[ $LINE == *"evicted files"* ]]; then
+	if [[ $LINE == *"This read operation consists of"* ]]; then
+		NUM_BYTES=`grep -oP '(?<=consists of )[0-9]+(?= bytes)' <<< $LINE`
+		NUM_BYTES_READ=$[$NUM_BYTES_READ + $NUM_BYTES]
+	elif [[ $LINE == *"This write operation consists of"* ]]; then
+		NUM_BYTES=`grep -oP '(?<=consists of )[0-9]+(?= bytes)' <<< $LINE`
+		NUM_BYTES_WRITTEN=$[$NUM_BYTES_WRITTEN + $NUM_BYTES]
+	elif [[ $LINE == *"evicted files"* ]]; then
 		NUM_EVICTIONS=$[$NUM_EVICTIONS + 1]
 		NUM_FILES=`grep -oP '(?<=over )[0-9]+(?= evicted files)' <<< $LINE`
 		NUM_EVICTED_FILES=$[$NUM_EVICTED_FILES + $NUM_FILES]
@@ -29,8 +39,12 @@ while read LINE; do
 	fi
 done < "$LOG_FILE"
 
+NUM_BYTES_READ=$[$NUM_BYTES_READ / $NUM_READS]
+NUM_BYTES_WRITTEN=$[$NUM_BYTES_WRITTEN / $NUM_WRITES]
+
 echo "Num. of new connections: $NUM_CONNECTIONS"
-echo "Max. number of concurrent connections: $MAX_NUM_CONCURRENT_CONNECTIONS"
+echo "Num. of read operations: $NUM_READS"
+echo "Num. of write operations: $NUM_WRITES"
 echo "Num. of lock operations: $NUM_LOCKS"
 echo "Num. of unlock operations: $NUM_UNLOCKS"
 echo "Num. of \"locked open\" operations: $NUM_LOCKED_OPENS"
@@ -38,5 +52,8 @@ echo "Num. of open operations: $NUM_OPENS"
 echo "Num. of close operations: $NUM_CLOSES"
 echo "Num. of times the eviction algorithm ran: $NUM_EVICTIONS"
 echo "Num. of evicted files: $NUM_EVICTED_FILES"
+echo "Max. number of concurrent connections: $MAX_NUM_CONCURRENT_CONNECTIONS"
+echo "Avg. size of read operations in bytes: $NUM_BYTES_READ"
+echo "Avg. size of write operations in bytes: $NUM_BYTES_WRITTEN"
 
 exit 0

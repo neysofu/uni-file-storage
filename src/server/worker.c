@@ -69,6 +69,10 @@ worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_
 		return;
 	}
 
+	glog_debug("[Worker n.%u] This read operation consists of %zu bytes.",
+	           worker->id,
+	           file->length_in_bytes);
+
 	uint8_t response[9] = { RESPONSE_OK };
 	u64_to_big_endian(file->length_in_bytes, &response[1]);
 	int err = 0;
@@ -95,6 +99,10 @@ worker_handle_read_n_files(struct Worker *worker, int fd, void *buffer, size_t l
 	struct File *file = NULL;
 	while ((file = htable_visitor_next(visitor))) {
 		glog_debug("[Worker n.%u] Sending '%s' to client.", worker->id, file->key);
+		glog_debug("[Worker n.%u] This read operation consists of %zu bytes.",
+		           worker->id,
+		           file->length_in_bytes);
+
 		uint8_t buf1[8] = { 0 };
 		uint8_t buf2[8] = { 0 };
 		u64_to_big_endian(strlen(file->key), buf1);
@@ -135,6 +143,8 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 	           worker->id,
 	           path,
 	           arg2_size);
+	glog_debug(
+	  "[Worker n.%u] This write operation consists of %zu bytes.", worker->id, arg2_size);
 	struct File *evicted = NULL;
 	unsigned evicted_count = 0;
 	glog_debug("[Worker n.%u] Successfully parsed the latest message.", worker->id);
