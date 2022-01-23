@@ -142,9 +142,10 @@ inner_main(struct Config *config)
 	receiver_free(receiver);
 	glog_info("Waiting for all workers to shut down...");
 	workers_join();
-	glog_info("Done. Goodbye!");
+	glog_info("Done.");
 	htable_free(global_htable);
 	config_free(global_config);
+	glog_info("Goobye!");
 	workload_queues_free();
 	if (f_log) {
 		fclose(f_log);

@@ -114,6 +114,11 @@ htable_free(struct HTable *htable)
 		}
 	}
 	ON_MUTEX_ERR(pthread_mutex_destroy(&htable->stats_guard));
+	glog_info(
+	  "Destroying the hash table at %p. Its maximum size was %zu bytes and %zu items.",
+	  htable,
+	  htable->stats.historical_max_space_in_bytes,
+	  htable->stats.historical_max_items_count);
 	free(htable->buckets);
 	fifo_free(htable->fifo);
 	free(htable);
@@ -285,6 +290,9 @@ htable_create_file(struct HTable *htable, const char *key, int fd, bool lock)
 	htable_stats_lock(htable);
 	htable->stats.open_count++;
 	htable->stats.items_count++;
+	if (htable->stats.items_count > htable->stats.historical_max_items_count) {
+		htable->stats.historical_max_items_count = htable->stats.items_count;
+	}
 	if (htable->policy == CACHE_EVICTION_POLICY_FIFO) {
 		fifo_add_file(htable->fifo, key);
 	}
@@ -396,6 +404,9 @@ htable_replace_file_contents(struct HTable *htable,
 	htable_stats_lock(htable);
 	htable->stats.total_space_in_bytes += size_in_bytes;
 	htable->stats.total_space_in_bytes -= old_size_in_bytes;
+	if (htable->stats.total_space_in_bytes > htable->stats.historical_max_space_in_bytes) {
+		htable->stats.historical_max_space_in_bytes = htable->stats.total_space_in_bytes;
+	}
 	htable_stats_unlock(htable);
 
 	/* We finally evict files if necessary. */
@@ -425,6 +436,9 @@ htable_append_to_file_contents(struct HTable *htable,
 
 	htable_stats_lock(htable);
 	htable->stats.total_space_in_bytes += size_in_bytes;
+	if (htable->stats.total_space_in_bytes > htable->stats.historical_max_space_in_bytes) {
+		htable->stats.historical_max_space_in_bytes = htable->stats.total_space_in_bytes;
+	}
 	htable_stats_unlock(htable);
 
 	return htable_evict_files(htable, evicted, evicted_count);

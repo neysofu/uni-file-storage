@@ -17,13 +17,20 @@ NUM_BYTES_READ='0'
 NUM_OPERATIONS_BY_WORKER_ID=(0)
 NUM_BYTES_WRITTEN='0'
 MAX_NUM_CONCURRENT_CONNECTIONS='0'
+MAX_NUM_STORED_FILES='0'
+MAX_SIZE_IN_MIB='0'
 NUM_CONNECTIONS=`grep -r "Adding a new connection" $1 | wc -l`
 NUM_EVICTIONS='0'
 NUM_EVICTED_FILES='0'
 NUM_WORKERS='0'
 
 while read LINE; do
-	if [[ $LINE == *"Now spawning"* ]]; then
+	if [[ $LINE == *"Its maximum size"* ]]; then
+		SIZE=`grep -oP '(?<=size was )[0-9]+(?= bytes)' <<< $LINE`
+		NUM_FILES=`grep -oP '(?<=and )[0-9]+(?= items)' <<< $LINE`
+		MAX_NUM_STORED_FILES=$NUM_FILES
+		MAX_SIZE_IN_MIB=$(( $SIZE / 1024 / 1024 ))
+	elif [[ $LINE == *"Now spawning"* ]]; then
 		NUM_WORKERS=`grep -oP '(?<=spawning )[0-9]+(?= worker threads)' <<< $LINE`
 		for (( i=1; i<${NUM_WORKERS}; i++ )); do
 			NUM_OPERATIONS_BY_WORKER_ID+=(0)
@@ -69,6 +76,8 @@ echo "Num. of close operations: $NUM_CLOSES"
 echo "Num. of times the eviction algorithm ran: $NUM_EVICTIONS"
 echo "Num. of evicted files: $NUM_EVICTED_FILES"
 echo "Max. number of concurrent connections: $MAX_NUM_CONCURRENT_CONNECTIONS"
+echo "Max. size of the storage in MiB: $MAX_SIZE_IN_MIB"
+echo "Max. number of stored files: $MAX_NUM_STORED_FILES"
 echo "Avg. size of read operations in bytes: $NUM_BYTES_READ"
 echo "Avg. size of write operations in bytes: $NUM_BYTES_WRITTEN"
 
