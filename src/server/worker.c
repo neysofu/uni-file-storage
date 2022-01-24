@@ -342,7 +342,9 @@ worker_entry_point(void *args)
 			/* Shutdown! */
 			break;
 		}
-		glog_trace("[Worker n.%u] New message incoming.", id);
+		glog_trace("[Worker n.%u] New message incoming (size: %zu bytes).",
+		           id,
+		           msg->buffer.size_in_bytes);
 		worker_handle_message(&worker, msg->fd, msg->buffer.raw, msg->buffer.size_in_bytes);
 		free(msg->buffer.raw);
 		free(msg);
