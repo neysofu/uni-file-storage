@@ -262,7 +262,13 @@ static void
 worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	/* Validate the header, which contains the length of the payload in bytes. */
-	assert(big_endian_to_u64(buffer) == len_in_bytes - 8);
+	if (big_endian_to_u64(buffer) == len_in_bytes - 8) {
+		glog_fatal("[Worker n.%u] The message header is invalid. Message length is "
+		           "expected to be %zu, but is now reported to be %zu.",
+		           worker->id,
+		           len_in_bytes,
+		           big_endian_to_u64(buffer) + 8);
+	}
 	/* Check if the buffer only has a header, i.e. it is empty. */
 	if (len_in_bytes == 8) {
 		return;
@@ -326,14 +332,13 @@ worker_entry_point(void *args)
 	unsigned id = ts_counter();
 	struct Worker worker;
 	worker.id = id;
-	while (!detect_shutdown_hard()) {
+	while (true) {
 		struct Message *msg = workload_queue_pull(id);
-		glog_trace("[Worker n.%u] New message incoming. Pulling...", id);
 		if (!msg) {
-			/* Incomplete message. Keep polling. */
-			continue;
+			/* Shutdown! */
+			break;
 		}
-		glog_trace("[Worker n.%u] Done.", id);
+		glog_trace("[Worker n.%u] New message incoming.", id);
 		worker_handle_message(&worker, msg->fd, msg->buffer.raw, msg->buffer.size_in_bytes);
 		free(msg->buffer.raw);
 		free(msg);

@@ -45,8 +45,12 @@ workload_queue_pull(unsigned i)
 	assert(queue);
 
 	ON_MUTEX_ERR(pthread_mutex_lock(&queue->mutex));
-	while (!queue->next_incoming || detect_shutdown_soft()) {
-		if (detect_shutdown_soft()) {
+	while (!queue->next_incoming) {
+		glog_trace("[Worker n.%u] Waiting for a message.", i);
+		if (detect_shutdown_hard()) {
+			glog_debug(
+			  "[Worker n.%u] Shutdown detected while waiting for workload queue contents.",
+			  i);
 			break;
 		}
 		ON_MUTEX_ERR(pthread_cond_wait(&queue->cond, &queue->mutex));

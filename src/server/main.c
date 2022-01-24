@@ -147,11 +147,11 @@ inner_main(struct Config *config)
 			break;
 		}
 	}
+	glog_info("Waiting for all workers to shut down...");
+	workers_join();
 	glog_info("Exiting.");
 	print_summary();
 	receiver_free(receiver);
-	glog_info("Waiting for all workers to shut down...");
-	workers_join();
 	glog_info("Done.");
 	htable_free(global_htable);
 	config_free(global_config);
