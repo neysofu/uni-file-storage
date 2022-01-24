@@ -262,18 +262,21 @@ worker_handle_remove_file(struct Worker *worker, int fd, void *buffer, size_t le
 static void
 worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
+	/* Check if the buffer only has a header, i.e. it is empty. */
+	if (len_in_bytes == 8) {
+		return;
+	}
+
 	/* Validate the header, which contains the length of the payload in bytes. */
-	if (big_endian_to_u64(buffer) == len_in_bytes - 8) {
+	if (big_endian_to_u64(buffer) + 8 != len_in_bytes) {
 		glog_fatal("[Worker n.%u] The message header is invalid. Message length is "
 		           "expected to be %zu, but is now reported to be %zu.",
 		           worker->id,
 		           len_in_bytes,
 		           big_endian_to_u64(buffer) + 8);
+		exit(EXIT_FAILURE);
 	}
-	/* Check if the buffer only has a header, i.e. it is empty. */
-	if (len_in_bytes == 8) {
-		return;
-	}
+
 	/* Read header details from the buffer. */
 	char op = ((char *)(buffer))[8];
 	glog_trace("[Worker n.%u] The latest message is %zu bytes long, with opcode %d.",
