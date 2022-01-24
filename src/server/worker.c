@@ -27,11 +27,12 @@ struct Worker
 	unsigned id;
 };
 
-static void
-log_io_err(const struct Worker *worker)
-{
-	glog_error("[Worker n.%u] Bad I/O during request handling. Ignoring.", worker->id);
-}
+#define LOG_IO_ERR(worker, err)                                                            \
+	glog_error(                                                                            \
+	  "[Worker n.%u] Bad I/O during request handling (error: %d, errno: %d). Ignoring.",   \
+	  worker->id,                                                                          \
+	  err,                                                                                 \
+	  errno)
 
 static void
 free_files(struct File *files, unsigned int size)
@@ -53,7 +54,7 @@ write_response_byte(struct Worker *worker, int fd, int result)
 	}
 	int err = write(fd, response, 1);
 	if (err < 0) {
-		log_io_err(worker);
+		LOG_IO_ERR(worker, err);
 	}
 }
 
@@ -79,7 +80,7 @@ worker_handle_read_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	err |= write_bytes(fd, response, 9);
 	err |= write_bytes(fd, file->contents, file->length_in_bytes);
 	if (err < 0) {
-		log_io_err(worker);
+		LOG_IO_ERR(worker, err);
 	}
 	htable_release_file(global_htable, path);
 	free(path);
@@ -112,14 +113,14 @@ worker_handle_read_n_files(struct Worker *worker, int fd, void *buffer, size_t l
 		err |= write_bytes(fd, file->key, strlen(file->key));
 		err |= write_bytes(fd, file->contents, file->length_in_bytes);
 		if (err < 0) {
-			log_io_err(worker);
+			LOG_IO_ERR(worker, err);
 			break;
 		}
 	}
 	uint8_t buf[8] = { 0 };
 	err |= write_bytes(fd, buf, 8);
 	if (err < 0) {
-		log_io_err(worker);
+		LOG_IO_ERR(worker, err);
 	}
 	htable_visitor_free(visitor);
 }
@@ -164,7 +165,7 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 	if (err < 0) {
 		free(path);
 		free_files(evicted, evicted_count);
-		log_io_err(worker);
+		LOG_IO_ERR(worker, err);
 		return;
 	}
 	glog_trace("[Worker n.%u] Sending over %u evicted files.", worker->id, evicted_count);
@@ -182,7 +183,7 @@ worker_handle_write_file(struct Worker *worker, int fd, void *buffer, size_t len
 		if (err < 0) {
 			free(path);
 			free_files(evicted, evicted_count);
-			log_io_err(worker);
+			LOG_IO_ERR(worker, err);
 			return;
 		}
 	}
@@ -223,7 +224,7 @@ worker_handle_lock_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	}
 	int err = write(fd, response, 1);
 	if (err < 0) {
-		log_io_err(worker);
+		LOG_IO_ERR(worker, err);
 	}
 	free(path);
 }
