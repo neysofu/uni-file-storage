@@ -85,7 +85,10 @@ void
 workload_queues_cond_signal(void)
 {
 	for (size_t i = 0; i < count; i++) {
-		ON_MUTEX_ERR(pthread_cond_signal(&workload_queues[i].cond));
+		struct WorkloadQueue *queue = &workload_queues[i];
+		ON_MUTEX_ERR(pthread_mutex_lock(&queue->mutex));
+		ON_MUTEX_ERR(pthread_cond_signal(&queue->cond));
+		ON_MUTEX_ERR(pthread_mutex_unlock(&queue->mutex));
 	}
 }
 

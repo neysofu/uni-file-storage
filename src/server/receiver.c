@@ -63,6 +63,8 @@ receiver_add_new_connection(struct Receiver *r)
 	/* Faulty new connection. Let's keep going and don't stop the whole server. */
 	if (fd < 0) {
 		glog_warn("Ignoring faulty connection (errno = %d).", errno);
+		read(fd, NULL, 0);
+		r->active_sockets[0].revents = 0;
 		return;
 	}
 	r->active_sockets_count++;
@@ -119,6 +121,13 @@ hand_over_buf_to_worker(struct Receiver *r,
 	workload_queue_add(msg, thread_i);
 }
 
+bool
+receiver_is_dead(const struct Receiver *receiver)
+{
+	assert(receiver);
+	return !receiver->accept_new_connections && receiver->active_sockets_count <= 1;
+}
+
 int
 receiver_poll(struct Receiver *r)
 {
@@ -139,7 +148,11 @@ receiver_poll(struct Receiver *r)
 	}
 	if (receiver_has_new_connection(r)) {
 		num_reads--;
-		receiver_add_new_connection(r);
+		if (r->accept_new_connections) {
+			receiver_add_new_connection(r);
+		} else {
+			r->active_sockets[0].revents = 0;
+		}
 	}
 	/* We start counting from 1 because the first element contains the root
 	 * socket connection and we're not interested in that. */

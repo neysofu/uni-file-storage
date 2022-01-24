@@ -19,7 +19,7 @@
 		int glog_err = pthread_mutex_lock(&log_guard);                                     \
 		if (glog_err != 0) {                                                               \
 			printf("Mutex error (%d) while logging. This is a fatal error, and most "      \
-			       "likely a bug.",                                                        \
+			       "likely a bug.\n",                                                      \
 			       glog_err);                                                              \
 			exit(EXIT_FAILURE);                                                            \
 		}                                                                                  \
@@ -27,7 +27,7 @@
 		glog_err = pthread_mutex_unlock(&log_guard);                                       \
 		if (glog_err != 0) {                                                               \
 			printf("Mutex error (%d) while logging. This is a fatal error, and most "      \
-			       "likely a bug.",                                                        \
+			       "likely a bug.\n",                                                      \
 			       glog_err);                                                              \
 			exit(EXIT_FAILURE);                                                            \
 		}                                                                                  \
@@ -38,7 +38,7 @@ extern struct Config *global_config;
 extern struct HTable *global_htable;
 
 /* Returns the current counter value and then increments the global counter.
- * Thread-safe.
+ * Thread-safe. Used for worker thread IDs.
  *
  * Starts from 0. */
 unsigned

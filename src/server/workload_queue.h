@@ -21,7 +21,8 @@ workload_queues_init(unsigned count);
 void
 workload_queue_add(struct Message *msg, unsigned i);
 
-/* Extracts a message from the queue number `i` (waits until one is available). */
+/* Extracts a message from the queue number `i` (waits until one is available).
+ * May return `NULL` after an arbitrary amount of time without events has passed. */
 struct Message *
 workload_queue_pull(unsigned i);
 

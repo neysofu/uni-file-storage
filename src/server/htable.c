@@ -510,8 +510,6 @@ htable_visitor_next(struct HTableVisitor *visitor)
 void
 htable_visitor_free(struct HTableVisitor *visitor)
 {
-	struct HTableBucket *bucket = &visitor->htable->buckets[visitor->bucket_i];
-	ON_MUTEX_ERR(pthread_mutex_unlock(&bucket->guard));
 	free(visitor);
 }
 

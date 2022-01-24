@@ -3,6 +3,7 @@
 
 #include "deserializer.h"
 #include "serverapi.h"
+#include <stdbool.h>
 #include <stdlib.h>
 
 /* Opaque data structure that simplifies the following actions:
@@ -27,6 +28,11 @@ receiver_create(int socket_fd, unsigned num_workers);
  * keep listening on existing connections. */
 void
 receiver_disable_new_connections(struct Receiver *receiver);
+
+/* Returns `true` if and only if `receiver` doesn't accept new connections
+ * anymore and doesn't have any connections already. */
+bool
+receiver_is_dead(const struct Receiver *receiver);
 
 /* Suspends the execution of the current thread until one or more incoming
  * messages are available. After this call, `*messages` will point to a

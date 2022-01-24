@@ -7,6 +7,7 @@
 #include "utilities.h"
 #include "worker.h"
 #include "workload_queue.h"
+#include <errno.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
@@ -30,6 +31,7 @@ void
 hard_signal_handler(int signum)
 {
 	UNUSED(signum);
+	glog_warn("Received a hard signal. Exiting.");
 	shutdown_hard();
 }
 
@@ -37,6 +39,7 @@ void
 soft_signal_handler(int signum)
 {
 	UNUSED(signum);
+	glog_warn("Received a soft signal. Disabling new connection.");
 	shutdown_soft();
 }
 
@@ -126,26 +129,33 @@ inner_main(struct Config *config)
 	workers_spawn(config->num_workers);
 	glog_info("Done.");
 	struct Receiver *receiver = receiver_create(socket_fd, config->num_workers);
-	while (!detect_shutdown_hard()) {
-		if (detect_shutdown_soft()) {
-			receiver_disable_new_connections(receiver);
+	while (true) {
+		if (receiver_is_dead(receiver)) {
+			glog_info("The polling loop is not accepting new connections anymore and all "
+			          "clients are dead. Exiting.");
+			break;
 		}
 		err = receiver_poll(receiver);
-		if (err < 0) {
-			glog_warn("Bad I/O during poll.");
-			shutdown_soft();
+		/* We want to know if the polling loop stopped due to a signal or some other real
+		 * error. */
+		if (detect_shutdown_hard()) {
+			break;
+		} else if (detect_shutdown_soft()) {
+			receiver_disable_new_connections(receiver);
+		} else if (err < 0) {
+			glog_error("Bad I/O during poll.");
 			break;
 		}
 	}
-	print_summary();
 	glog_info("Exiting.");
+	print_summary();
 	receiver_free(receiver);
 	glog_info("Waiting for all workers to shut down...");
 	workers_join();
 	glog_info("Done.");
 	htable_free(global_htable);
 	config_free(global_config);
-	glog_info("Goobye!");
+	glog_info("Goodbye!");
 	workload_queues_free();
 	if (f_log) {
 		fclose(f_log);

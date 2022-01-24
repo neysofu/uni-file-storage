@@ -326,7 +326,7 @@ worker_entry_point(void *args)
 	unsigned id = ts_counter();
 	struct Worker worker;
 	worker.id = id;
-	while (!detect_shutdown_soft()) {
+	while (!detect_shutdown_hard()) {
 		struct Message *msg = workload_queue_pull(id);
 		glog_trace("[Worker n.%u] New message incoming. Pulling...", id);
 		if (!msg) {

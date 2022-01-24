@@ -1,7 +1,4 @@
 - Fixare shutdown issues.
-- Directory di riferimento e path relativi/assoluti.
 - Creare/fixare test3.sh.
-- Controlla errno.
 - Implementa il sistema di unlocking e attesa.
 - Controlla che compili e funzioni tutto con la VM di Ubuntu.
-- Rileggere tutto il PDF del progetto per vedere se manca qualcosa.

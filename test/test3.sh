@@ -10,7 +10,7 @@ echo ""
 
 START=`date +%s`
 
-while [ $(( $(date +%s) - 3 )) -lt $START ]; do
+while [ $(( $(date +%s) - 30 )) -lt $START ]; do
 	./client -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/1 - cG6STRJ.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1
 	sleep 0.05
 	:
