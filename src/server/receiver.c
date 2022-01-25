@@ -162,7 +162,7 @@ receiver_poll(struct Receiver *r)
 		if (!is_valid) {
 			glog_error(
 			  "The deserializer n.%zu is NOT valid. Dropping connection n.%zu", i, i);
-			r->active_sockets[i].fd = -42;
+			r->active_sockets[i].fd = -r->active_sockets[i].fd;
 			return 0;
 		}
 		size_t missing = deserializer_missing(r->deserializers[i]);
