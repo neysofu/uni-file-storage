@@ -3,6 +3,7 @@
 #include "htable.h"
 #include "server_utilities.h"
 #include <pthread.h>
+#include <signal.h>
 
 pthread_mutex_t log_guard = PTHREAD_MUTEX_INITIALIZER;
 struct Config *global_config = NULL;
@@ -11,9 +12,8 @@ struct HTable *global_htable = NULL;
 static pthread_mutex_t thread_id_guard = PTHREAD_MUTEX_INITIALIZER;
 static unsigned thread_id_counter = 0;
 
-static pthread_mutex_t shutdown_guard = PTHREAD_MUTEX_INITIALIZER;
-static bool soft = false;
-static bool hard = false;
+static volatile sig_atomic_t soft = 0;
+static volatile sig_atomic_t hard = 0;
 
 #define ON_SHUTDOWN_ERR(err)                                                               \
 	ON_ERR((err), "Mutex error during shutdown processing. This is most likely a bug.")
@@ -34,33 +34,23 @@ ts_counter(void)
 void
 shutdown_soft(void)
 {
-	ON_SHUTDOWN_ERR(pthread_mutex_lock(&shutdown_guard));
-	soft = true;
-	ON_SHUTDOWN_ERR(pthread_mutex_unlock(&shutdown_guard));
+	soft = 1;
 }
 
 void
 shutdown_hard(void)
 {
-	ON_SHUTDOWN_ERR(pthread_mutex_lock(&shutdown_guard));
-	hard = true;
-	ON_SHUTDOWN_ERR(pthread_mutex_unlock(&shutdown_guard));
+	hard = 1;
 }
 
 bool
 detect_shutdown_soft(void)
 {
-	ON_SHUTDOWN_ERR(pthread_mutex_lock(&shutdown_guard));
-	bool shutdown = soft;
-	ON_SHUTDOWN_ERR(pthread_mutex_unlock(&shutdown_guard));
-	return shutdown;
+	return soft == 1;
 }
 
 bool
 detect_shutdown_hard(void)
 {
-	ON_SHUTDOWN_ERR(pthread_mutex_lock(&shutdown_guard));
-	bool shutdown = hard;
-	ON_SHUTDOWN_ERR(pthread_mutex_unlock(&shutdown_guard));
-	return shutdown;
+	return hard == 1;
 }
