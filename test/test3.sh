@@ -11,12 +11,17 @@ echo ""
 START=`date +%s`
 
 while [ $(( $(date +%s) - 30 )) -lt $START ]; do
-	./client -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/1 - cG6STRJ.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1
+	for (( n=0; n<10; n++ )); do
+		# TODO: Increase the number of requests per client.
+		./client -f /tmp/LSOfiletorage.sk -W "$PARENT_PATH/data/Imgur/80s/1 - cG6STRJ.jpg" -D "$PARENT_PATH/data/target/evicted" -z 1 &
+	done
 	sleep 0.05
 	:
 done
 
 kill -s SIGINT "$(head -n 1 server.pid)"
 ./statistiche.sh server.log
+
+wait
 
 exit 0
