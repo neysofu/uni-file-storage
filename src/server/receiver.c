@@ -169,7 +169,11 @@ receiver_poll(struct Receiver *r)
 		glog_trace("The deserializer n.%zu needs %zu more bytes.", i, missing);
 	}
 	for (size_t i = 1; i < r->active_sockets_count; i++) {
-		if ((r->active_sockets[i].revents & POLLIN) > 0) {
+		if (r->active_sockets[i].revents > 0 && r->active_sockets[i].revents != POLLIN) {
+			glog_warn("Closing the connection n.%zu", i);
+			r->active_sockets[i].fd = -r->active_sockets[i].fd;
+			return 0;
+		} else if ((r->active_sockets[i].revents & POLLIN) > 0) {
 			glog_trace("Polled a relevant event on connection n.%zu.", i);
 			int fd = r->active_sockets[i].fd;
 			void *buffer = deserializer_buffer(r->deserializers[i]);
