@@ -133,20 +133,10 @@ cli_args_set_read_dir(struct CliArgs *cli_args, char *arg)
 }
 
 void
-cli_args_add_action_wait(struct CliArgs *cli_args, char *arg)
+cli_args_set_wait(struct CliArgs *cli_args, char *arg)
 {
 	assert(cli_args);
-	if (!arg) {
-		cli_args->err = CLIENT_ERR_MISSING_ARG;
-		return;
-	}
-	struct Action action;
-	action.type = 't';
-	action.arg_s1 = NULL;
-	action.arg_s2 = NULL;
-	action.arg_i = atoi(arg);
-	action.next = NULL;
-	cli_args_add_action(cli_args, action);
+	cli_args->msec_between_actions = atoi(arg);
 }
 
 void
@@ -312,7 +302,7 @@ cli_args_parse(int argc, char **argv)
 				}
 				break;
 			case 't':
-				cli_args_add_action_wait(cli_args, optarg);
+				cli_args_set_wait(cli_args, optarg);
 				break;
 			case 'l':
 				cli_args_add_action_lock(cli_args, optarg);

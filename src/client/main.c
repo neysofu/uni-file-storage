@@ -36,7 +36,8 @@ print_help(void)
 	puts("    Specifies the directory where to write files that have been");
 	puts("    read.");
 	puts("-t msec");
-	puts("    Time between subsequent server requests.");
+	puts("    Time between subsequent server requests, expressed in");
+	puts("    milliseconds. 0 by default.");
 	puts("-l file1[,file2]");
 	puts("    Locks some files.");
 	puts("-u file1[,file2]");
@@ -153,6 +154,7 @@ main(int argc, char **argv)
 			log_error("Action failure (error: %d).", err);
 			break;
 		}
+		wait_msec(cli_args->msec_between_actions);
 	}
 	log_info("Closing connection...");
 	err = closeConnection(cli_args->socket_name);
