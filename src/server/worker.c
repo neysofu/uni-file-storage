@@ -205,7 +205,8 @@ worker_handle_open_file(struct Worker *worker,
 	           lock);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	glog_debug("[Worker n.%u] The path is '%s'.", worker->id, path);
-	int result = htable_open_or_create_file(global_htable, path, fd, create, lock);
+	enum HTableError result =
+	  htable_open_or_create_file(global_htable, path, fd, create, lock);
 	free(path);
 	write_response_byte(worker, fd, result);
 }
@@ -216,7 +217,7 @@ worker_handle_lock_file(struct Worker *worker, int fd, void *buffer, size_t len_
 	glog_debug("[Worker n.%u] New API request `lockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
 	char response[1];
-	int result = htable_lock_file(global_htable, path, fd);
+	enum HTableError result = htable_lock_file(global_htable, path, fd);
 	if (result < 0) {
 		response[0] = RESPONSE_ERR;
 	} else {
@@ -234,7 +235,8 @@ worker_handle_unlock_file(struct Worker *worker, int fd, void *buffer, size_t le
 {
 	glog_debug("[Worker n.%u] New API request `unlockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
-	int result = htable_unlock_file(global_htable, path, fd);
+	int new_fd = 0;
+	enum HTableError result = htable_unlock_file(global_htable, path, fd, &new_fd);
 	free(path);
 	write_response_byte(worker, fd, result);
 }
@@ -244,7 +246,7 @@ worker_handle_close_file(struct Worker *worker, int fd, void *buffer, size_t len
 {
 	glog_debug("[Worker n.%u] New API request `closeFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
-	int result = htable_close_file(global_htable, path, fd);
+	enum HTableError result = htable_close_file(global_htable, path, fd);
 	free(path);
 	write_response_byte(worker, fd, result);
 }
@@ -254,7 +256,7 @@ worker_handle_remove_file(struct Worker *worker, int fd, void *buffer, size_t le
 {
 	glog_debug("[Worker n.%u] New API request `removeFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
-	int result = htable_unlock_file(global_htable, path, fd);
+	int result = htable_remove_file(global_htable, path, fd);
 	free(path);
 	write_response_byte(worker, fd, result);
 }
