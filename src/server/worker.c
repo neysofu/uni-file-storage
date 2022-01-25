@@ -235,10 +235,14 @@ worker_handle_unlock_file(struct Worker *worker, int fd, void *buffer, size_t le
 {
 	glog_debug("[Worker n.%u] New API request `unlockFile`.", worker->id);
 	char *path = buf_to_str(buffer, len_in_bytes);
-	int new_fd = 0;
+	int new_fd = -1;
 	enum HTableError result = htable_unlock_file(global_htable, path, fd, &new_fd);
 	free(path);
 	write_response_byte(worker, fd, result);
+
+	if (new_fd != -1) {
+		write_response_byte(worker, new_fd, HTABLE_ERR_OK);
+	}
 }
 
 static void

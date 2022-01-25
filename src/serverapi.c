@@ -18,6 +18,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#define HEADER_MAGIC_CODE 0x86b2f464f65e01ULL
+
 /******* GLOBAL STATE */
 
 struct ConnectionState
@@ -210,6 +212,7 @@ make_simple_request(enum ApiOp op, const char *pathname, int err_response_meanin
 		return err_closed_connection();
 	}
 	int err = 0;
+	err |= write_u64(state.fd, HEADER_MAGIC_CODE);
 	err |= write_u64(state.fd, 1 + strlen(pathname));
 	err |= write_op(state.fd, op);
 	err |= write_bytes(state.fd, (void *)pathname, strlen(pathname));
@@ -252,6 +255,7 @@ make_request_with_two_args(enum ApiOp op,
 	/* Request: */
 	size_t message_size_in_bytes = 1 + 8 + 8 + arg1_size + arg2_size;
 	int err = 0;
+	err |= write_u64(state.fd, HEADER_MAGIC_CODE);
 	err |= write_u64(state.fd, message_size_in_bytes);
 	err |= write_op(state.fd, op);
 	err |= write_u64(state.fd, arg1_size);
@@ -353,6 +357,7 @@ readNFiles(int n, const char *dirname)
 	}
 	int err = 0;
 	/* We'll write 9 bytes: 1 operation code and 8 argument bytes. */
+	err |= write_u64(state.fd, HEADER_MAGIC_CODE);
 	err |= write_u64(state.fd, 1 + 8);
 	err |= write_op(state.fd, API_OP_READ_N_FILES);
 	err |= write_u64(state.fd, n);

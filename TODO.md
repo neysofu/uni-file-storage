@@ -1,4 +1,3 @@
-- Fixare shutdown issues.
 - Creare/fixare test3.sh.
 - Implementa il sistema di unlocking e attesa.
 - Controlla che compili e funzioni tutto con la VM di Ubuntu.

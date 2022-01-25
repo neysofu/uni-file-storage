@@ -7,13 +7,20 @@
 
 enum HTableError
 {
+	/* No error. */
 	HTABLE_ERR_OK = 0,
+	/* No error, but the result of the lock-based operation won't be observed
+	 * immediately. */
+	HTABLE_ERR_OK_WAIT,
+	/* We're trying to do something that was done already. */
 	HTABLE_ERR_ALREADY_LOCKED,
 	HTABLE_ERR_ALREADY_OPEN,
 	HTABLE_ERR_ALREADY_CREATED,
 	HTABLE_ERR_ALREADY_CLOSED,
 	HTABLE_ERR_ALREADY_UNLOCKED,
+	/* Bad query. */
 	HTABLE_ERR_FILE_NOT_FOUND,
+	/* Permission not granted. */
 	HTABLE_ERR_CANT_UNLOCK,
 	HTABLE_ERR_CANT_OPEN,
 	HTABLE_ERR_CANT_CLOSE,
@@ -96,9 +103,11 @@ htable_release_file(struct HTable *htable, const char *key);
 enum HTableError
 htable_lock_file(struct HTable *htable, const char *key, int fd);
 
-/* Unlocks the file with path `key` within `htable`. */
+/* Unlocks the file with path `key` within `htable`. `new_owner_of_lock`, after
+ * this call, will point to the value of the client's file descriptor that owns
+ * the lock, or -1 if none. */
 enum HTableError
-htable_unlock_file(struct HTable *htable, const char *key, int fd);
+htable_unlock_file(struct HTable *htable, const char *key, int fd, int *new_owner_of_lock);
 
 enum HTableError
 htable_close_file(struct HTable *htable, const char *key, int fd);

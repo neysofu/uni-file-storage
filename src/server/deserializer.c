@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define HEADER_SIZE_IN_BYTES 8
+#define HEADER_SIZE_IN_BYTES 16
+#define HEADER_MAGIC_CODE_SIZE_IN_BYTES 8
+#define HEADER_MAGIC_CODE 0x86b2f464f65e01ULL
 
 struct Deserializer
 {
@@ -47,6 +49,17 @@ deserializer_detach(struct Deserializer *de, size_t new_bytes)
 	}
 }
 
+bool
+deserializer_validate(const struct Deserializer *de)
+{
+	if (de->size_in_bytes < HEADER_MAGIC_CODE_SIZE_IN_BYTES) {
+		return true;
+	} else {
+		uint64_t magic_code = big_endian_to_u64(de->buffer);
+		return magic_code == (uint64_t)HEADER_MAGIC_CODE;
+	}
+}
+
 size_t
 deserializer_missing(const struct Deserializer *de)
 {
@@ -55,7 +68,8 @@ deserializer_missing(const struct Deserializer *de)
 		return HEADER_SIZE_IN_BYTES - de->size_in_bytes;
 	} else {
 		/* We have enough data to see exactly how many bytes we need */
-		uint64_t length_prefix = big_endian_to_u64(de->buffer);
+		uint64_t length_prefix =
+		  big_endian_to_u64((uint8_t *)de->buffer + HEADER_MAGIC_CODE_SIZE_IN_BYTES);
 		return length_prefix + HEADER_SIZE_IN_BYTES - de->size_in_bytes;
 	}
 }
@@ -64,7 +78,6 @@ void *
 deserializer_buffer(struct Deserializer *de)
 {
 	size_t missing = deserializer_missing(de);
-	glog_trace("The deserializer at %p needs %zu more bytes.", de, missing);
 	de->buffer = xrealloc(de->buffer, de->size_in_bytes + missing);
 	return (char *)(de->buffer) + de->size_in_bytes;
 }

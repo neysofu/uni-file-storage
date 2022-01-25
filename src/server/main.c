@@ -147,6 +147,7 @@ inner_main(struct Config *config)
 			break;
 		}
 	}
+	shutdown_hard();
 	glog_info("Waiting for all workers to shut down...");
 	workers_join();
 	glog_info("Exiting.");

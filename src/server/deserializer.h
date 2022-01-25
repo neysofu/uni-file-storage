@@ -2,6 +2,7 @@
 #define SOL_SERVER_DESERIALIZER
 
 #include "serverapi.h"
+#include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -22,6 +23,10 @@ deserializer_create(void);
 /* Frees all memory used by `deserializer`. */
 void
 deserializer_free(struct Deserializer *deserializer);
+
+/* Checks that the bytes already parsed are fully valid. */
+bool
+deserializer_validate(const struct Deserializer *deserializer);
 
 /* Parses the contents of `deserializer`'s internal buffer and returns a pointer
  * to a heap-allocated `struct Buffer` in case it is a full message, NULL

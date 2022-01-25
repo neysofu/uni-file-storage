@@ -97,7 +97,9 @@ htable_free(struct HTable *htable)
 		return;
 	}
 	for (size_t i = 0; i < htable->buckets_count; i++) {
-		ON_MUTEX_ERR(pthread_mutex_destroy(&htable->buckets[i].guard));
+		// FIXME: Mutex destruction.
+		// ON_MUTEX_ERR(pthread_mutex_unlock(&htable->buckets[i].guard));
+		// ON_MUTEX_ERR(pthread_mutex_destroy(&htable->buckets[i].guard));
 		struct HTableItem *item = htable->buckets[i].head;
 		while (item) {
 			free(item->file.contents);
@@ -200,9 +202,15 @@ htable_lock_file(struct HTable *htable, const char *key, int fd)
 	if (!file) {
 		return HTABLE_ERR_FILE_NOT_FOUND;
 	} else if (file->is_locked) {
+		struct Subscriber *sub = xmalloc(sizeof(struct Subscriber));
+		sub->fd = fd;
+		sub->next = file->subs;
+		file->subs = sub;
 		htable_release_file(htable, key);
-		return HTABLE_ERR_ALREADY_LOCKED;
+		return HTABLE_ERR_OK_WAIT;
 	} else {
+		/* It looks like the file is not currently locked. */
+		assert(!file->subs);
 		file->is_locked = true;
 		file->fd_owner = fd;
 		htable_release_file(htable, key);
@@ -211,8 +219,9 @@ htable_lock_file(struct HTable *htable, const char *key, int fd)
 }
 
 enum HTableError
-htable_unlock_file(struct HTable *htable, const char *key, int fd)
+htable_unlock_file(struct HTable *htable, const char *key, int fd, int *new_owner_of_lock)
 {
+	*new_owner_of_lock = -1;
 	struct File *file = htable_fetch_file(htable, key);
 	if (!file) {
 		return HTABLE_ERR_FILE_NOT_FOUND;
@@ -221,9 +230,19 @@ htable_unlock_file(struct HTable *htable, const char *key, int fd)
 		return HTABLE_ERR_ALREADY_UNLOCKED;
 	} else if (file->fd_owner != fd) {
 		htable_release_file(htable, key);
-		return HTABLE_ERR_CANT_UNLOCK;
+		return HTABLE_ERR_OK_WAIT;
 	} else {
 		file->is_locked = false;
+
+		struct Subscriber *sub = file->subs;
+		if (sub) {
+			file->subs = sub->next;
+			file->is_locked = true;
+			file->fd_owner = sub->fd;
+			*new_owner_of_lock = sub->fd;
+			free(sub);
+		}
+
 		htable_release_file(htable, key);
 		return HTABLE_ERR_OK;
 	}

@@ -98,10 +98,9 @@ receiver_cleanup(struct Receiver *r)
 	}
 	struct pollfd *new_active_sockets =
 	  xrealloc(r->active_sockets, sizeof(struct pollfd) * r->active_sockets_count);
-	struct Deserializer **new_deserializers =
-	  xrealloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
 	r->active_sockets = new_active_sockets;
-	r->deserializers = new_deserializers;
+	r->deserializers =
+	  xrealloc(r->deserializers, sizeof(struct Deserializer *) * r->active_sockets_count);
 }
 
 void
@@ -138,6 +137,7 @@ receiver_poll(struct Receiver *r)
 	 * main socket, which accepts new incoming connections. */
 	glog_debug("New iteration in the polling loop with %zu connection(s).",
 	           r->active_sockets_count - 1);
+
 	/* Block until something happens. */
 	int num_reads = poll(r->active_sockets, r->active_sockets_count, -1);
 	if (num_reads < 0) {
@@ -154,8 +154,20 @@ receiver_poll(struct Receiver *r)
 			r->active_sockets[0].revents = 0;
 		}
 	}
+
 	/* We start counting from 1 because the first element contains the root
 	 * socket connection and we're not interested in that. */
+	for (size_t i = 1; i < r->active_sockets_count; i++) {
+		bool is_valid = deserializer_validate(r->deserializers[i]);
+		if (!is_valid) {
+			glog_error(
+			  "The deserializer n.%zu is NOT valid. Dropping connection n.%zu", i, i);
+			r->active_sockets[i].fd = -42;
+			return 0;
+		}
+		size_t missing = deserializer_missing(r->deserializers[i]);
+		glog_trace("The deserializer n.%zu needs %zu more bytes.", i, missing);
+	}
 	for (size_t i = 1; i < r->active_sockets_count; i++) {
 		if ((r->active_sockets[i].revents & POLLIN) > 0) {
 			glog_trace("Polled a relevant event on connection n.%zu.", i);
