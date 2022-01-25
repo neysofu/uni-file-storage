@@ -269,9 +269,13 @@ static void
 worker_handle_message(struct Worker *worker, int fd, void *buffer, size_t len_in_bytes)
 {
 	/* Check if the buffer only has a header, i.e. it is empty. */
-	if (len_in_bytes == 8) {
+	if (len_in_bytes == 16) {
 		return;
 	}
+
+	/* Skip magic code. */
+	buffer = (uint8_t *)buffer + 8;
+	len_in_bytes -= 8;
 
 	/* Validate the header, which contains the length of the payload in bytes. */
 	if (big_endian_to_u64(buffer) + 8 != len_in_bytes) {
