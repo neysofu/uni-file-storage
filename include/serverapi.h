@@ -1,7 +1,7 @@
 #ifndef SOL_SERVERAPI
 #define SOL_SERVERAPI
 
-/* glibc treats `timespec` as a GNU extension, not POSIX. */
+/* glibc seems to treat `timespec` as a GNU extension, not POSIX. */
 #define _GNU_SOURCE
 #include <time.h>
 
