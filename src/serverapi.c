@@ -289,7 +289,7 @@ openConnection(const char *sockname, int msec, const struct timespec abstime)
 		log_info("New connection attempt.");
 		int err = attempt_connection(sockname);
 		if (err) {
-			log_warn("Attempt failed.");
+			log_warn("Attempt failed, retrying after %d ms.", msec);
 			wait_msec(msec);
 		} else {
 			log_info("Attempt succeeded.");
