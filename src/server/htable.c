@@ -97,9 +97,6 @@ htable_free(struct HTable *htable)
 		return;
 	}
 	for (size_t i = 0; i < htable->buckets_count; i++) {
-		// FIXME: Mutex destruction.
-		// ON_MUTEX_ERR(pthread_mutex_unlock(&htable->buckets[i].guard));
-		// ON_MUTEX_ERR(pthread_mutex_destroy(&htable->buckets[i].guard));
 		struct HTableItem *item = htable->buckets[i].head;
 		while (item) {
 			free(item->file.contents);
