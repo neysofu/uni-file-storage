@@ -170,7 +170,8 @@ main(int argc, char **argv)
 	glog_debug("Initializing some internal resources.");
 	/* Seed the PRNG (pseudorandom number generator). */
 	srand(time(NULL));
-	/* Set signal handlers. */
+	/* Set signal handlers. This works, but it would be best to switch to
+	 * `sigaction`. */
 	signal(SIGHUP, soft_signal_handler);
 	signal(SIGINT, hard_signal_handler);
 	signal(SIGQUIT, hard_signal_handler);
