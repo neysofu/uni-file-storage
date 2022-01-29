@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:officeooo="http://openoffice.org/2009/office" xmlns:css3t="http://www.w3.org/TR/css3-text/" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rpt="http://openoffice.org/2005/report" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:xforms="http://www.w3.org/2002/xforms" office:version="1.3" office:mimetype="application/vnd.oasis.opendocument.text">
- <office:meta><meta:creation-date>2022-01-22T00:33:14.082866530</meta:creation-date><dc:date>2022-01-24T16:51:17.598784457</dc:date><meta:editing-duration>PT12H37M55S</meta:editing-duration><meta:editing-cycles>12</meta:editing-cycles><meta:generator>LibreOffice/7.2.5.2.0$Linux_X86_64 LibreOffice_project/20$Build-2</meta:generator><meta:document-statistic meta:table-count="0" meta:image-count="0" meta:object-count="0" meta:page-count="3" meta:paragraph-count="50" meta:word-count="1764" meta:character-count="11646" meta:non-whitespace-character-count="9957"/></office:meta>
+ <office:meta><meta:creation-date>2022-01-22T00:33:14.082866530</meta:creation-date><dc:date>2022-01-25T14:13:12.283211646</dc:date><meta:editing-duration>PT12H39M2S</meta:editing-duration><meta:editing-cycles>13</meta:editing-cycles><meta:generator>LibreOffice/7.2.5.2.0$Linux_X86_64 LibreOffice_project/20$Build-2</meta:generator><meta:document-statistic meta:table-count="0" meta:image-count="0" meta:object-count="0" meta:page-count="3" meta:paragraph-count="51" meta:word-count="1778" meta:character-count="11733" meta:non-whitespace-character-count="10033"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
-   <config:config-item config:name="ViewAreaTop" config:type="long">36407</config:config-item>
+   <config:config-item config:name="ViewAreaTop" config:type="long">66887</config:config-item>
    <config:config-item config:name="ViewAreaLeft" config:type="long">0</config:config-item>
    <config:config-item config:name="ViewAreaWidth" config:type="long">23497</config:config-item>
-   <config:config-item config:name="ViewAreaHeight" config:type="long">22782</config:config-item>
+   <config:config-item config:name="ViewAreaHeight" config:type="long">21751</config:config-item>
    <config:config-item config:name="ShowRedlineChanges" config:type="boolean">true</config:config-item>
    <config:config-item config:name="InBrowseMode" config:type="boolean">false</config:config-item>
    <config:config-item-map-indexed config:name="Views">
     <config:config-item-map-entry>
      <config:config-item config:name="ViewId" config:type="string">view2</config:config-item>
-     <config:config-item config:name="ViewLeft" config:type="long">8505</config:config-item>
-     <config:config-item config:name="ViewTop" config:type="long">19290</config:config-item>
+     <config:config-item config:name="ViewLeft" config:type="long">10832</config:config-item>
+     <config:config-item config:name="ViewTop" config:type="long">42769</config:config-item>
      <config:config-item config:name="VisibleLeft" config:type="long">0</config:config-item>
-     <config:config-item config:name="VisibleTop" config:type="long">36407</config:config-item>
+     <config:config-item config:name="VisibleTop" config:type="long">66887</config:config-item>
      <config:config-item config:name="VisibleRight" config:type="long">23495</config:config-item>
-     <config:config-item config:name="VisibleBottom" config:type="long">59187</config:config-item>
+     <config:config-item config:name="VisibleBottom" config:type="long">88635</config:config-item>
      <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutColumns" config:type="short">1</config:config-item>
      <config:config-item config:name="ViewLayoutBookMode" config:type="boolean">false</config:config-item>
@@ -88,7 +88,7 @@
    <config:config-item config:name="ChartAutoUpdate" config:type="boolean">true</config:config-item>
    <config:config-item config:name="PrinterSetup" config:type="base64Binary"/>
    <config:config-item config:name="AddParaTableSpacingAtStart" config:type="boolean">true</config:config-item>
-   <config:config-item config:name="Rsid" config:type="int">1734311</config:config-item>
+   <config:config-item config:name="Rsid" config:type="int">1746278</config:config-item>
    <config:config-item config:name="EmbeddedDatabaseName" config:type="string"/>
    <config:config-item config:name="FieldAutoUpdate" config:type="boolean">true</config:config-item>
    <config:config-item config:name="OutlineLevelYieldsNumbering" config:type="boolean">false</config:config-item>
@@ -153,7 +153,7 @@
  <office:styles>
   <style:default-style style:family="graphic">
    <style:graphic-properties svg:stroke-color="#3465a4" draw:fill-color="#729fcf" fo:wrap-option="no-wrap" draw:shadow-offset-x="0.1181in" draw:shadow-offset-y="0.1181in" draw:start-line-spacing-horizontal="0.1114in" draw:start-line-spacing-vertical="0.1114in" draw:end-line-spacing-horizontal="0.1114in" draw:end-line-spacing-vertical="0.1114in" style:flow-with-text="false"/>
-   <style:paragraph-properties style:text-autospace="ideograph-alpha" style:line-break="strict" style:font-independent-line-spacing="false">
+   <style:paragraph-properties style:text-autospace="ideograph-alpha" style:line-break="strict" style:writing-mode="lr-tb" style:font-independent-line-spacing="false">
     <style:tab-stops/>
    </style:paragraph-properties>
    <style:text-properties style:use-window-font-color="true" loext:opacity="0%" style:font-name="Liberation Serif" fo:font-size="12pt" fo:language="en" fo:country="US" style:letter-kerning="true" style:font-name-asian="WenQuanYi Zen Hei" style:font-size-asian="10.5pt" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="FreeSans" style:font-size-complex="12pt" style:language-complex="hi" style:country-complex="IN"/>
@@ -334,149 +334,149 @@
   </style:style>
   <style:style style:name="P11" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="0007f427" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="001923fe" officeooo:paragraph-rsid="001923fe" style:font-size-asian="11pt" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P12" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="0009d64b" officeooo:paragraph-rsid="0009d64b" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="0007f427" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P13" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="000a6f98" officeooo:paragraph-rsid="000a6f98" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="0009d64b" officeooo:paragraph-rsid="0009d64b" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P14" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="00109830" officeooo:paragraph-rsid="00109830" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="000a6f98" officeooo:paragraph-rsid="000a6f98" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P15" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="0012ccdf" officeooo:paragraph-rsid="0012ccdf" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="00109830" officeooo:paragraph-rsid="00109830" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P16" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="00054602" officeooo:paragraph-rsid="00054602" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="0012ccdf" officeooo:paragraph-rsid="0012ccdf" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P17" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="00054602" officeooo:paragraph-rsid="00054602" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P18" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000a6f98" officeooo:paragraph-rsid="000a6f98" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="001923fe" officeooo:paragraph-rsid="001923fe" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P19" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000a6f98" officeooo:paragraph-rsid="0009d64b" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
   <style:style style:name="P20" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="00109830" officeooo:paragraph-rsid="00109830" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:paragraph-rsid="001923fe" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
   <style:style style:name="P21" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="0006350a" officeooo:paragraph-rsid="00054602" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000a6f98" officeooo:paragraph-rsid="000a6f98" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="P22" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000c9c67" officeooo:paragraph-rsid="000c9c67" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000a6f98" officeooo:paragraph-rsid="0009d64b" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="P23" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="0007f427" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="00109830" officeooo:paragraph-rsid="00109830" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="P24" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="001563e4" officeooo:paragraph-rsid="001563e4" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="0006350a" officeooo:paragraph-rsid="00054602" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="P25" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="00178b4a" officeooo:paragraph-rsid="00178b4a" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000c9c67" officeooo:paragraph-rsid="000c9c67" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="P26" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="bold" officeooo:rsid="00178b4a" officeooo:paragraph-rsid="00178b4a" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="0007f427" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="P27" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-style="italic" officeooo:rsid="001563e4" officeooo:paragraph-rsid="001563e4" style:font-style-asian="italic" style:font-style-complex="italic"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="001563e4" officeooo:paragraph-rsid="001563e4" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="P28" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="00178b4a" officeooo:paragraph-rsid="00178b4a" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="00178b4a" officeooo:paragraph-rsid="00178b4a" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="P29" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" officeooo:paragraph-rsid="0012ccdf"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="bold" officeooo:rsid="00178b4a" officeooo:paragraph-rsid="00178b4a" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P30" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties officeooo:rsid="000c9c67" officeooo:paragraph-rsid="000c9c67"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-style="italic" officeooo:rsid="001563e4" officeooo:paragraph-rsid="001563e4" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="P31" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties officeooo:rsid="0006350a" officeooo:paragraph-rsid="0006350a"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="00178b4a" officeooo:paragraph-rsid="00178b4a" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="P32" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties fo:font-style="italic" officeooo:rsid="0006350a" officeooo:paragraph-rsid="0006350a" style:font-style-asian="italic" style:font-style-complex="italic"/>
+   <style:text-properties style:font-name="Times New Roman" officeooo:paragraph-rsid="0012ccdf"/>
   </style:style>
-  <style:style style:name="P33" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+  <style:style style:name="P33" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+   <style:text-properties officeooo:rsid="000c9c67" officeooo:paragraph-rsid="000c9c67"/>
+  </style:style>
+  <style:style style:name="P34" style:family="paragraph" style:parent-style-name="Standard">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties officeooo:rsid="0006350a" officeooo:paragraph-rsid="0006350a"/>
   </style:style>
-  <style:style style:name="P34" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+  <style:style style:name="P35" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+   <style:text-properties fo:font-style="italic" officeooo:rsid="0006350a" officeooo:paragraph-rsid="0006350a" style:font-style-asian="italic" style:font-style-complex="italic"/>
+  </style:style>
+  <style:style style:name="P36" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+   <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+   <style:text-properties officeooo:rsid="0006350a" officeooo:paragraph-rsid="0006350a"/>
+  </style:style>
+  <style:style style:name="P37" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" officeooo:rsid="000c9c67" officeooo:paragraph-rsid="000c9c67" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P35" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+  <style:style style:name="P38" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" officeooo:rsid="0006350a" officeooo:paragraph-rsid="0006350a" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P36" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L2">
+  <style:style style:name="P39" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L2">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" officeooo:rsid="0007f427" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P37" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" officeooo:rsid="0009d64b" officeooo:paragraph-rsid="0009d64b" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
-  </style:style>
-  <style:style style:name="P38" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+  <style:style style:name="P40" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000c9c67" officeooo:paragraph-rsid="000c9c67" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
-  <style:style style:name="P39" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+  <style:style style:name="P41" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="0007f427" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
-  <style:style style:name="P40" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
+  <style:style style:name="P42" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L1">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="italic" officeooo:rsid="000c9c67" officeooo:paragraph-rsid="000c9c67" style:font-size-asian="11pt" style:font-style-asian="italic" style:font-size-complex="11pt" style:font-style-complex="italic"/>
   </style:style>
-  <style:style style:name="P41" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L2">
+  <style:style style:name="P43" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L2">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="italic" fo:font-weight="normal" officeooo:rsid="0007f427" officeooo:paragraph-rsid="0007f427" style:font-size-asian="11pt" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="italic" style:font-weight-complex="normal"/>
   </style:style>
-  <style:style style:name="P42" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
+  <style:style style:name="P44" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L3">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="001923fe" officeooo:paragraph-rsid="001923fe" style:font-size-asian="11pt" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
-  <style:style style:name="P43" style:family="paragraph" style:parent-style-name="Standard">
+  <style:style style:name="P45" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L3">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="001923fe" officeooo:paragraph-rsid="001923fe" style:font-size-asian="11pt" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="001aa566" officeooo:paragraph-rsid="001aa566" style:font-size-asian="11pt" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
-  <style:style style:name="P44" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:rsid="001923fe" officeooo:paragraph-rsid="001923fe" style:font-size-asian="11pt" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-weight-complex="bold"/>
-  </style:style>
-  <style:style style:name="P45" style:family="paragraph" style:parent-style-name="Standard">
-   <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="bold" officeooo:paragraph-rsid="001923fe" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
-  </style:style>
-  <style:style style:name="P46" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L3">
+  <style:style style:name="P46" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" officeooo:paragraph-rsid="0012ccdf"/>
   </style:style>
-  <style:style style:name="P47" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L3">
+  <style:style style:name="P47" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="L4">
    <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Times New Roman" fo:font-style="italic" officeooo:rsid="001563e4" officeooo:paragraph-rsid="001563e4" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
@@ -602,36 +602,39 @@
    <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="italic" fo:font-weight="normal" officeooo:rsid="001a76a7" style:font-size-asian="11pt" style:font-style-asian="italic" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="italic" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T40" style:family="text">
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="italic" fo:font-weight="bold" officeooo:rsid="001923fe" style:font-size-asian="11pt" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="11pt" style:font-style-complex="italic" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T41" style:family="text">
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000c9c67" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T42" style:family="text">
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="0007f427" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="000c9c67" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T43" style:family="text">
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="001a76a7" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="0007f427" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T44" style:family="text">
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="normal" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-weight="normal" officeooo:rsid="001a76a7" style:font-size-asian="11pt" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T45" style:family="text">
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="000c9c67" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="normal" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T46" style:family="text">
-   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" officeooo:rsid="0009d64b" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" fo:font-style="normal" fo:font-weight="normal" officeooo:rsid="000c9c67" style:font-size-asian="11pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="11pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T47" style:family="text">
-   <style:text-properties officeooo:rsid="00176f96"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="11pt" officeooo:rsid="0009d64b" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
   <style:style style:name="T48" style:family="text">
-   <style:text-properties style:text-underline-style="none" fo:font-weight="normal" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+   <style:text-properties officeooo:rsid="00176f96"/>
   </style:style>
   <style:style style:name="T49" style:family="text">
-   <style:text-properties style:text-underline-style="none" fo:font-weight="normal" officeooo:rsid="0009d5f7" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+   <style:text-properties style:text-underline-style="none" fo:font-weight="normal" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
   </style:style>
   <style:style style:name="T50" style:family="text">
+   <style:text-properties style:text-underline-style="none" fo:font-weight="normal" officeooo:rsid="0009d5f7" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="T51" style:family="text">
    <style:text-properties officeooo:rsid="001a76a7"/>
   </style:style>
   <text:list-style style:name="L1">
@@ -739,6 +742,58 @@
    </text:list-level-style-bullet>
   </text:list-style>
   <text:list-style style:name="L3">
+   <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" loext:num-list-format="%1%." style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.5in" fo:text-indent="-0.25in" fo:margin-left="0.5in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="2" text:style-name="Bullet_20_Symbols" loext:num-list-format="%2%." style:num-suffix="." text:bullet-char="◦">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.75in" fo:text-indent="-0.25in" fo:margin-left="0.75in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" loext:num-list-format="%3%." style:num-suffix="." text:bullet-char="▪">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1in" fo:text-indent="-0.25in" fo:margin-left="1in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" loext:num-list-format="%4%." style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.25in" fo:text-indent="-0.25in" fo:margin-left="1.25in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" loext:num-list-format="%5%." style:num-suffix="." text:bullet-char="◦">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.5in" fo:text-indent="-0.25in" fo:margin-left="1.5in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" loext:num-list-format="%6%." style:num-suffix="." text:bullet-char="▪">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.75in" fo:text-indent="-0.25in" fo:margin-left="1.75in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" loext:num-list-format="%7%." style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2in" fo:text-indent="-0.25in" fo:margin-left="2in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" loext:num-list-format="%8%." style:num-suffix="." text:bullet-char="◦">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.25in" fo:text-indent="-0.25in" fo:margin-left="2.25in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" loext:num-list-format="%9%." style:num-suffix="." text:bullet-char="▪">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.5in" fo:text-indent="-0.25in" fo:margin-left="2.5in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" loext:num-list-format="%10%." style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.75in" fo:text-indent="-0.25in" fo:margin-left="2.75in"/>
+    </style:list-level-properties>
+   </text:list-level-style-bullet>
+  </text:list-style>
+  <text:list-style style:name="L4">
    <text:list-level-style-number text:level="1" text:style-name="Numbering_20_Symbols" loext:num-list-format="%1%." style:num-suffix="." style:num-format="1">
     <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
      <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.5in" fo:text-indent="-0.25in" fo:margin-left="0.5in"/>
@@ -790,58 +845,6 @@
     </style:list-level-properties>
    </text:list-level-style-number>
   </text:list-style>
-  <text:list-style style:name="L4">
-   <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" loext:num-list-format="%1%." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.5in" fo:text-indent="-0.25in" fo:margin-left="0.5in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="2" text:style-name="Bullet_20_Symbols" loext:num-list-format="%2%." text:bullet-char="◦">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.75in" fo:text-indent="-0.25in" fo:margin-left="0.75in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" loext:num-list-format="%3%." text:bullet-char="▪">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1in" fo:text-indent="-0.25in" fo:margin-left="1in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" loext:num-list-format="%4%." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.25in" fo:text-indent="-0.25in" fo:margin-left="1.25in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" loext:num-list-format="%5%." text:bullet-char="◦">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.5in" fo:text-indent="-0.25in" fo:margin-left="1.5in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" loext:num-list-format="%6%." text:bullet-char="▪">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.75in" fo:text-indent="-0.25in" fo:margin-left="1.75in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" loext:num-list-format="%7%." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2in" fo:text-indent="-0.25in" fo:margin-left="2in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" loext:num-list-format="%8%." text:bullet-char="◦">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.25in" fo:text-indent="-0.25in" fo:margin-left="2.25in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" loext:num-list-format="%9%." text:bullet-char="▪">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.5in" fo:text-indent="-0.25in" fo:margin-left="2.5in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" loext:num-list-format="%10%." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.75in" fo:text-indent="-0.25in" fo:margin-left="2.75in"/>
-    </style:list-level-properties>
-   </text:list-level-style-bullet>
-  </text:list-style>
   <style:page-layout style:name="pm1">
    <style:page-layout-properties fo:page-width="8.2701in" fo:page-height="11.6902in" style:num-format="1" style:print-orientation="portrait" fo:margin-top="0.7874in" fo:margin-bottom="0.7874in" fo:margin-left="0.7874in" fo:margin-right="0.7874in" style:writing-mode="lr-tb" style:layout-grid-color="#c0c0c0" style:layout-grid-lines="20" style:layout-grid-base-height="0.278in" style:layout-grid-ruby-height="0.139in" style:layout-grid-mode="none" style:layout-grid-ruby-below="false" style:layout-grid-print="false" style:layout-grid-display="false" style:footnote-max-height="0in" loext:margin-gutter="0in">
     <style:footnote-sep style:width="0.0071in" style:distance-before-sep="0.0398in" style:distance-after-sep="0.0398in" style:line-style="solid" style:adjustment="left" style:rel-width="25%" style:color="#000000"/>
@@ -871,95 +874,100 @@
     <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>
     <text:sequence-decl text:display-outline-level="0" text:name="Figure"/>
    </text:sequence-decls>
-   <text:p text:style-name="P16">Introduzione.</text:p>
+   <text:p text:style-name="P17">Introduzione.</text:p>
    <text:p text:style-name="P3"><text:span text:style-name="T1">Il progetto è </text:span><text:span text:style-name="T2">strutturato in un modulo </text:span><text:span text:style-name="T12">client</text:span><text:span text:style-name="T2"> e un modulo </text:span><text:span text:style-name="T12">server</text:span><text:span text:style-name="T2">, come da specifica. I codici sorgenti C99 dei due moduli si trovano rispettivamente ai path </text:span><text:span text:style-name="T12">src/client</text:span><text:span text:style-name="T2"> e </text:span><text:span text:style-name="T12">src/server</text:span><text:span text:style-name="T2">, mentre </text:span><text:span text:style-name="T6">i</text:span><text:span text:style-name="T2"> </text:span><text:span text:style-name="T6">file</text:span><text:span text:style-name="T2"> top-level di </text:span><text:span text:style-name="T12">src/</text:span><text:span text:style-name="T2"> e </text:span><text:span text:style-name="T12">include/</text:span><text:span text:style-name="T2"> contengono file di supporto, condivisi dai due moduli. L’intero progetto è reso disponibile su licenza MIT e fa uso di tre librerie di supporto, i cui codici sorgenti sono disponibili come </text:span><text:span text:style-name="T12">git submodules</text:span><text:span text:style-name="T2"> in </text:span><text:span text:style-name="T12">lib</text:span><text:span text:style-name="T13">/</text:span><text:span text:style-name="T2">:</text:span></text:p>
-   <text:p text:style-name="P21"/>
-   <text:list xml:id="list3310283645" text:style-name="L1">
+   <text:p text:style-name="P24"/>
+   <text:list xml:id="list890046618" text:style-name="L1">
     <text:list-item>
-     <text:p text:style-name="P33"><text:span text:style-name="T36">log.c</text:span><text:span text:style-name="T40">: </text:span><text:a xlink:type="simple" xlink:href="https://github.com/rxi/log.c" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T40">https://github.com/rxi/log.c</text:span></text:a></text:p>
-     <text:p text:style-name="P34"><text:span text:style-name="T1">Autore: </text:span><text:span text:style-name="T16">user r</text:span><text:span text:style-name="T11">xi</text:span></text:p>
-     <text:p text:style-name="P33"><text:span text:style-name="T40">Licenza: MIT </text:span><text:span text:style-name="T41">(</text:span><text:a xlink:type="simple" xlink:href="https://github.com/rxi/log.c/blob/master/LICENSE" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T41">https://github.com/rxi/log.c/blob/master/LICENSE</text:span></text:a><text:span text:style-name="T41">)</text:span></text:p>
-     <text:p text:style-name="P35"><text:span text:style-name="T1">Utilizzo: Adotto </text:span><text:span text:style-name="T11">log.c</text:span><text:span text:style-name="T1"> per logging da lato </text:span><text:span text:style-name="T9">sia </text:span><text:span text:style-name="T1">server </text:span><text:span text:style-name="T9">che client</text:span><text:span text:style-name="T1">. Ho deciso di utilizzare questa libreria perché è piuttosto conosciuta, stabile, ben mantenuta, produce output di ottima qualità e con un formato facilmente leggibile ma anche interpretabile a macchina.</text:span></text:p>
+     <text:p text:style-name="P36"><text:span text:style-name="T36">log.c</text:span><text:span text:style-name="T41">: </text:span><text:a xlink:type="simple" xlink:href="https://github.com/rxi/log.c" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T41">https://github.com/rxi/log.c</text:span></text:a></text:p>
+     <text:p text:style-name="P37"><text:span text:style-name="T1">Autore: </text:span><text:span text:style-name="T16">user r</text:span><text:span text:style-name="T11">xi</text:span></text:p>
+     <text:p text:style-name="P36"><text:span text:style-name="T41">Licenza: MIT </text:span><text:span text:style-name="T42">(</text:span><text:a xlink:type="simple" xlink:href="https://github.com/rxi/log.c/blob/master/LICENSE" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T42">https://github.com/rxi/log.c/blob/master/LICENSE</text:span></text:a><text:span text:style-name="T42">)</text:span></text:p>
+     <text:p text:style-name="P38"><text:span text:style-name="T1">Utilizzo: Adotto </text:span><text:span text:style-name="T11">log.c</text:span><text:span text:style-name="T1"> per logging da lato </text:span><text:span text:style-name="T9">sia </text:span><text:span text:style-name="T1">server </text:span><text:span text:style-name="T9">che client</text:span><text:span text:style-name="T1">. Ho deciso di utilizzare questa libreria perché è piuttosto conosciuta, stabile, ben mantenuta, produce output di ottima qualità e con un formato facilmente leggibile ma anche interpretabile a macchina.</text:span></text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P33"><text:span text:style-name="T38">t</text:span><text:span text:style-name="T37">omlc99</text:span><text:span text:style-name="T40">: </text:span><text:a xlink:type="simple" xlink:href="https://github.com/cktan/tomlc99" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T40">https://github.com/cktan/tomlc99</text:span></text:a></text:p>
-     <text:p text:style-name="P38">Autore: C.K. Tan</text:p>
-     <text:p text:style-name="P33"><text:span text:style-name="T40">Licenza: MIT </text:span><text:span text:style-name="T41">(</text:span><text:a xlink:type="simple" xlink:href="https://github.com/cktan/tomlc99/blob/master/LICENSE" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T41">https://github.com/cktan/tomlc99/blob/master/LICENSE</text:span></text:a><text:span text:style-name="T41">)</text:span></text:p>
-     <text:p text:style-name="P35"><text:span text:style-name="T1">Utilizzo: Adotto </text:span><text:span text:style-name="T11">tomlc99</text:span><text:span text:style-name="T1"> per effettuare parsing corretto e performante del formato TOML per i file di configurazione del server. Ritengo che affidarsi a file formats conosciuti e noti sia, nella maggior parte delle situazioni, la scelta migliore. TOML è un formato molto semplice -piutto</text:span><text:span text:style-name="T9">sto</text:span><text:span text:style-name="T1"> simile a INI- e </text:span><text:span text:style-name="T11">tomlc99</text:span><text:span text:style-name="T1"> offre ottimo controllo sul parsing dei file dati in input.</text:span></text:p>
+     <text:p text:style-name="P36"><text:span text:style-name="T38">t</text:span><text:span text:style-name="T37">omlc99</text:span><text:span text:style-name="T41">: </text:span><text:a xlink:type="simple" xlink:href="https://github.com/cktan/tomlc99" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T41">https://github.com/cktan/tomlc99</text:span></text:a></text:p>
+     <text:p text:style-name="P40">Autore: C.K. Tan</text:p>
+     <text:p text:style-name="P36"><text:span text:style-name="T41">Licenza: MIT </text:span><text:span text:style-name="T42">(</text:span><text:a xlink:type="simple" xlink:href="https://github.com/cktan/tomlc99/blob/master/LICENSE" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T42">https://github.com/cktan/tomlc99/blob/master/LICENSE</text:span></text:a><text:span text:style-name="T42">)</text:span></text:p>
+     <text:p text:style-name="P38"><text:span text:style-name="T1">Utilizzo: Adotto </text:span><text:span text:style-name="T11">tomlc99</text:span><text:span text:style-name="T1"> per effettuare parsing corretto e performante del formato TOML per i file di configurazione del server. Ritengo che affidarsi a file formats conosciuti e noti sia, nella maggior parte delle situazioni, la scelta migliore. TOML è un formato molto semplice -piutto</text:span><text:span text:style-name="T9">sto</text:span><text:span text:style-name="T1"> simile a INI- e </text:span><text:span text:style-name="T11">tomlc99</text:span><text:span text:style-name="T1"> offre ottimo controllo sul parsing dei file dati in input.</text:span></text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P48"><text:span text:style-name="T41">x</text:span><text:span text:style-name="T40">xHash</text:span><text:span text:style-name="T44">: </text:span><text:a xlink:type="simple" xlink:href="https://github.com/Cyan4973/xxHash" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T44">https://github.com/Cyan4973/xxHas</text:span></text:a><text:a xlink:type="simple" xlink:href="https://github.com/Cyan4973/xxHash" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T45">h</text:span></text:a></text:p>
-     <text:p text:style-name="P40"><text:span text:style-name="T21">A</text:span><text:span text:style-name="T20">utore: Yann Collet</text:span></text:p>
-     <text:p text:style-name="P33"><text:span text:style-name="T40">Licenza: BSD 2-Clause </text:span><text:span text:style-name="T42">(</text:span><text:a xlink:type="simple" xlink:href="https://github.com/Cyan4973/xxHash/blob/dev/LICENSE" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T42">https://github.com/Cyan4973/xxHash/blob/dev/LICENSE</text:span></text:a><text:span text:style-name="T42">, </text:span><text:span text:style-name="T41">sottolineo la compatibilità di BSD 2-Clause con MIT</text:span><text:span text:style-name="T42">)</text:span></text:p>
-     <text:p text:style-name="P39">Utilizzo: Adotto xxHash come funzione di hashing nella tabella hash. xxHash è noto per avere ottime prestazioni, in particolare su stringhe di media lunghezza come <text:span text:style-name="T50">i</text:span> filepaths che fungono da chiave. Viene offerto sia un hash a 32-bit e da 64-bit; ho scelto di affidarmi esclusivamente all’hash a 64-bit per una questione di <text:span text:style-name="T50">semplicità e</text:span> prestazioni (<text:span text:style-name="T50">i</text:span> benchmark su GitHub mostrano che su un’architettura a 64-bit l’hash ha una velocità nettamente superiore). È un hash non crittografico, che nel nostro caso non comporta problemi; notiamo che questo ci esporrebbe ad attacchi di tipo HashDOS nel caso in cui il file storage server ricevesse “untrusted input”. <text:span text:style-name="T50">Questo tipo di attacco è prevalentemente accademico ma è bene esserne consapevoli.</text:span></text:p>
-    </text:list-item>
-   </text:list>
-   <text:p text:style-name="P23"/>
-   <text:p text:style-name="P30"><text:span text:style-name="T40">I codici sorgenti del progetto sono disponibili su GitHub al link </text:span><text:a xlink:type="simple" xlink:href="https://github.com/neysofu/uni-file-storage" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T40">https://github.com/neysofu/uni-file-storage</text:span></text:a><text:span text:style-name="T40"> </text:span><text:span text:style-name="T43">e la </text:span><text:span text:style-name="T39">Git history</text:span><text:span text:style-name="T43"> è molto completa.</text:span><text:span text:style-name="T40"> Nella sezione </text:span><text:span text:style-name="T37">releases</text:span><text:span text:style-name="T40">, invece, è possibile scaricare l’archivio che include sia le sorgenti che i file di test: </text:span><text:a xlink:type="simple" xlink:href="https://github.com/neysofu/uni-file-storage/releases" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T40">https://github.com/neysofu/uni-file-storage/releases</text:span></text:a><text:span text:style-name="T40">. </text:span><text:span text:style-name="T43">In questo documento s</text:span><text:span text:style-name="T40">i fa riferimento all’ultima versione.</text:span></text:p>
-   <text:p text:style-name="P23"/>
-   <text:p text:style-name="P23">La compilazione di queste librerie è gestita interamente dal Makefile che si trova nella top directory del progetto. I target del Makefile sono, come da specifica, I seguenti:</text:p>
-   <text:list xml:id="list596272286" text:style-name="L2">
-    <text:list-item>
-     <text:p text:style-name="P41">server</text:p>
-    </text:list-item>
-    <text:list-item>
-     <text:p text:style-name="P41">client</text:p>
-    </text:list-item>
-    <text:list-item>
-     <text:p text:style-name="P36"><text:span text:style-name="T11">clean</text:span><text:span text:style-name="T1"> (a.k.a. </text:span><text:span text:style-name="T11">cleanall</text:span><text:span text:style-name="T1">)</text:span></text:p>
-    </text:list-item>
-    <text:list-item>
-     <text:p text:style-name="P41">test1</text:p>
-    </text:list-item>
-    <text:list-item>
-     <text:p text:style-name="P41">test2</text:p>
-    </text:list-item>
-    <text:list-item>
-     <text:p text:style-name="P41">test3</text:p>
+     <text:p text:style-name="P48"><text:span text:style-name="T42">x</text:span><text:span text:style-name="T41">xHash</text:span><text:span text:style-name="T45">: </text:span><text:a xlink:type="simple" xlink:href="https://github.com/Cyan4973/xxHash" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T45">https://github.com/Cyan4973/xxHas</text:span></text:a><text:a xlink:type="simple" xlink:href="https://github.com/Cyan4973/xxHash" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T46">h</text:span></text:a></text:p>
+     <text:p text:style-name="P42"><text:span text:style-name="T21">A</text:span><text:span text:style-name="T20">utore: Yann Collet</text:span></text:p>
+     <text:p text:style-name="P36"><text:span text:style-name="T41">Licenza: BSD 2-Clause </text:span><text:span text:style-name="T43">(</text:span><text:a xlink:type="simple" xlink:href="https://github.com/Cyan4973/xxHash/blob/dev/LICENSE" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T43">https://github.com/Cyan4973/xxHash/blob/dev/LICENSE</text:span></text:a><text:span text:style-name="T43">, </text:span><text:span text:style-name="T42">sottolineo la compatibilità di BSD 2-Clause con MIT</text:span><text:span text:style-name="T43">)</text:span></text:p>
+     <text:p text:style-name="P41">Utilizzo: Adotto xxHash come funzione di hashing nella tabella hash. xxHash è noto per avere ottime prestazioni, in particolare su stringhe di media lunghezza come <text:span text:style-name="T51">i</text:span> filepaths che fungono da chiave. Viene offerto sia un hash a 32-bit e da 64-bit; ho scelto di affidarmi esclusivamente all’hash a 64-bit per una questione di <text:span text:style-name="T51">semplicità e</text:span> prestazioni (<text:span text:style-name="T51">i</text:span> benchmark su GitHub mostrano che su un’architettura a 64-bit l’hash ha una velocità nettamente superiore). È un hash non crittografico, che nel nostro caso non comporta problemi; notiamo che questo ci esporrebbe ad attacchi di tipo HashDOS nel caso in cui il file storage server ricevesse “untrusted input”. <text:span text:style-name="T51">Questo tipo di attacco è prevalentemente accademico ma è bene esserne consapevoli.</text:span></text:p>
     </text:list-item>
    </text:list>
-   <text:p text:style-name="P23"/>
-   <text:p text:style-name="P11">Architettura.</text:p>
-   <text:p text:style-name="P45"><text:span text:style-name="T3">La prima scelta effettuata a livello di design di sistema è stata quella del protocollo di comunicazione tra client e server. Il protocollo di comunicazione è </text:span><text:span text:style-name="T14">transport-agnostic</text:span><text:span text:style-name="T3">; questo significa che </text:span><text:span text:style-name="T4">l’utilizzo di Unix sockets di tipo </text:span><text:span text:style-name="T24">SOCK_STREAM</text:span><text:span text:style-name="T4"> non è vincolante, e potrebbe essere sostituito da un protocollo semanticamente simile quale TCP senza alterare il design del sistema. Ogni messaggio inviato dal client al server possiede un header di 8 bytes, che indica la lunghezza del contenuto del messaggio con un intero </text:span><text:span text:style-name="T15">big-endian</text:span><text:span text:style-name="T4"> senza segno. Il contenuto effettivo del messaggio ha come primo byte un tag che individua univocamente il tipo di operazione richiesta e a <text:s/>seguire operandi di tipo, lunghezza e</text:span><text:span text:style-name="T7">d</text:span><text:span text:style-name="T4"> encoding variabile a </text:span><text:soft-page-break/><text:span text:style-name="T4">seconda dell’operazione stessa. I tag rispettano in modo piuttosto fedele l’API offerta dall’</text:span><text:span text:style-name="T15">header file</text:span><text:span text:style-name="T4"> della specifica.</text:span></text:p>
-   <text:p text:style-name="P44"/>
-   <text:p text:style-name="P44"><text:span text:style-name="T1">Il codice sorgente del server è distribuito su un numero non indifferente di files; indico in seguito le principali componenti del server, i relativi file sorgenti e come questi interagiscono fra di loro. A ogni file sorgente </text:span><text:span text:style-name="T11">.c</text:span><text:span text:style-name="T20"> è associato un </text:span><text:span text:style-name="T11">header file</text:span><text:span text:style-name="T20"> con le rispettive APIs.</text:span></text:p>
-   <text:list xml:id="list4216472022" text:style-name="L4">
+   <text:p text:style-name="P26"/>
+   <text:p text:style-name="P33"><text:span text:style-name="T41">I codici sorgenti del progetto sono disponibili su GitHub al link </text:span><text:a xlink:type="simple" xlink:href="https://github.com/neysofu/uni-file-storage" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T41">https://github.com/neysofu/uni-file-storage</text:span></text:a><text:span text:style-name="T41"> </text:span><text:span text:style-name="T44">e la </text:span><text:span text:style-name="T39">Git history</text:span><text:span text:style-name="T44"> è molto completa.</text:span><text:span text:style-name="T41"> Nella sezione </text:span><text:span text:style-name="T37">releases</text:span><text:span text:style-name="T41">, invece, è possibile scaricare l’archivio che include sia le sorgenti che i file di test: </text:span><text:a xlink:type="simple" xlink:href="https://github.com/neysofu/uni-file-storage/releases" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T41">https://github.com/neysofu/uni-file-storage/releases</text:span></text:a><text:span text:style-name="T41">. </text:span><text:span text:style-name="T44">In questo documento s</text:span><text:span text:style-name="T41">i fa riferimento all’ultima versione.</text:span></text:p>
+   <text:p text:style-name="P26"/>
+   <text:p text:style-name="P26">La compilazione di queste librerie è gestita interamente dal Makefile che si trova nella top directory del progetto. I target del Makefile sono, come da specifica, I seguenti:</text:p>
+   <text:list xml:id="list637399832" text:style-name="L2">
     <text:list-item>
-     <text:p text:style-name="P42"><text:span text:style-name="T1">config.c</text:span><text:span text:style-name="T20"> effettua il parsing dei file di configurazione in un </text:span><text:span text:style-name="T1">struct Config</text:span><text:span text:style-name="T20">.</text:span></text:p>
+     <text:p text:style-name="P43">server</text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P42"><text:span text:style-name="T1">htable.c</text:span><text:span text:style-name="T20"> implementa lo storage, offerro la struttura dati </text:span><text:span text:style-name="T1">thread-safe</text:span><text:span text:style-name="T20"> che mantiene in memoria principale i contenuti dei file salvati nel server. All’interno del file viene anche implementato il </text:span><text:span text:style-name="T1">visitor pattern</text:span><text:span text:style-name="T20"> (fondamentale per </text:span><text:span text:style-name="T1">readNFiles</text:span><text:span text:style-name="T20">) e le politiche di rimpiazzamento della cache.</text:span></text:p>
+     <text:p text:style-name="P43">client</text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P42"><text:span text:style-name="T1">deserializer.c</text:span><text:span text:style-name="T20"> implementa una macchina a stati finiti che fa il decoding di un messaggio con contenuti arbitrari e con un</text:span><text:span text:style-name="T1"> length prefix</text:span><text:span text:style-name="T20"> di 64-bit in</text:span><text:span text:style-name="T1"> big-endian</text:span><text:span text:style-name="T20">.</text:span></text:p>
+     <text:p text:style-name="P39"><text:span text:style-name="T11">clean</text:span><text:span text:style-name="T1"> (a.k.a. </text:span><text:span text:style-name="T11">cleanall</text:span><text:span text:style-name="T1">)</text:span></text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P42"><text:span text:style-name="T1">receiver.c</text:span><text:span text:style-name="T20"> è un </text:span><text:span text:style-name="T1">polling loop</text:span><text:span text:style-name="T20"> che mantiene un </text:span><text:span text:style-name="T1">struct Deserializer</text:span><text:span text:style-name="T20"> per ogni </text:span><text:span text:style-name="T1">file descriptor</text:span><text:span text:style-name="T20"> da cui </text:span><text:span text:style-name="T1">select()</text:span><text:span text:style-name="T20"> legge dati in ingresso. Quando il </text:span><text:span text:style-name="T1">deserializer</text:span><text:span text:style-name="T20"> ottiene un messaggio completo, viene scelto un worker thread a caso e il messaggio viene aggiunto alla relativa </text:span><text:span text:style-name="T1">queue</text:span><text:span text:style-name="T20">.</text:span></text:p>
+     <text:p text:style-name="P43">test1</text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P42"><text:span text:style-name="T1">worker.c</text:span><text:span text:style-name="T20"> effettua ulteriore decoding dei messaggi estratti dalla </text:span><text:span text:style-name="T1">queue</text:span><text:span text:style-name="T20"> del </text:span><text:span text:style-name="T1">worker</text:span><text:span text:style-name="T20"> e si interfaccia con la</text:span><text:span text:style-name="T1"> struct Htable</text:span><text:span text:style-name="T20"> che contiene i dati per produrre una risposta alla </text:span><text:span text:style-name="T1">query</text:span><text:span text:style-name="T20">.</text:span></text:p>
+     <text:p text:style-name="P43">test2</text:p>
     </text:list-item>
     <text:list-item>
-     <text:p text:style-name="P42"><text:span text:style-name="T1">workload_queue.c</text:span><text:span text:style-name="T20"> implementa la </text:span><text:span text:style-name="T48">queue</text:span><text:span text:style-name="T23"> sopracitata da cui ogni </text:span><text:span text:style-name="T48">worker</text:span><text:span text:style-name="T23"> estrae i messaggi in ingresso.</text:span></text:p>
+     <text:p text:style-name="P43">test3</text:p>
     </text:list-item>
    </text:list>
-   <text:p text:style-name="P43"><text:span text:style-name="T49">global_state.c</text:span><text:span text:style-name="T24"> contiene varie variabili globali e il codice di gestione di stato condiviso. Ho evitato lo stato globale quanto più possibile e per motivi di mantenibilità ho deciso di dichiarare le rimanenti variabili di stato globale in un unico file.</text:span></text:p>
-   <text:p text:style-name="P12"/>
-   <text:p text:style-name="P12">Worker threads.</text:p>
+   <text:p text:style-name="P26"/>
+   <text:p text:style-name="P12">Architettura.</text:p>
+   <text:p text:style-name="P20"><text:span text:style-name="T3">La prima scelta effettuata a livello di design di sistema è stata quella del protocollo di comunicazione tra client e server. Il protocollo di comunicazione è </text:span><text:span text:style-name="T14">transport-agnostic</text:span><text:span text:style-name="T3">; questo significa che </text:span><text:span text:style-name="T4">l’utilizzo di Unix sockets di tipo </text:span><text:span text:style-name="T24">SOCK_STREAM</text:span><text:span text:style-name="T4"> non è vincolante, e potrebbe essere sostituito da un protocollo semanticamente simile quale TCP senza alterare il design del sistema. Ogni messaggio inviato dal client al server possiede un header di 8 bytes, che indica la lunghezza del contenuto del messaggio con un intero </text:span><text:span text:style-name="T15">big-endian</text:span><text:span text:style-name="T4"> senza segno. Il contenuto effettivo del messaggio ha come primo byte un tag che individua univocamente il tipo di operazione richiesta e a <text:s/>seguire operandi di tipo, lunghezza e</text:span><text:span text:style-name="T7">d</text:span><text:span text:style-name="T4"> encoding variabile a </text:span><text:soft-page-break/><text:span text:style-name="T4">seconda dell’operazione stessa. I tag rispettano in modo piuttosto fedele l’API offerta dall’</text:span><text:span text:style-name="T15">header file</text:span><text:span text:style-name="T4"> della specifica.</text:span></text:p>
+   <text:p text:style-name="P18"/>
+   <text:p text:style-name="P18"><text:span text:style-name="T1">Il codice sorgente del server è distribuito su un numero non indifferente di files; indico in seguito le principali componenti del server, i relativi file sorgenti e come questi interagiscono fra di loro. A ogni file sorgente </text:span><text:span text:style-name="T11">.c</text:span><text:span text:style-name="T20"> è associato un </text:span><text:span text:style-name="T11">header file</text:span><text:span text:style-name="T20"> con le rispettive APIs.</text:span></text:p>
+   <text:list xml:id="list3407026113" text:style-name="L3">
+    <text:list-item>
+     <text:p text:style-name="P44"><text:span text:style-name="T1">config.c</text:span><text:span text:style-name="T20"> effettua il parsing dei file di configurazione in un </text:span><text:span text:style-name="T1">struct Config</text:span><text:span text:style-name="T20">.</text:span></text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P44"><text:span text:style-name="T1">htable.c</text:span><text:span text:style-name="T20"> implementa lo storage, offerro la struttura dati </text:span><text:span text:style-name="T1">thread-safe</text:span><text:span text:style-name="T20"> che mantiene in memoria principale i contenuti dei file salvati nel server. All’interno del file viene anche implementato il </text:span><text:span text:style-name="T1">visitor pattern</text:span><text:span text:style-name="T20"> (fondamentale per </text:span><text:span text:style-name="T1">readNFiles</text:span><text:span text:style-name="T20">) e le politiche di rimpiazzamento della cache.</text:span></text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P44"><text:span text:style-name="T1">deserializer.c</text:span><text:span text:style-name="T20"> implementa una macchina a stati finiti che fa il decoding di un messaggio con contenuti arbitrari e con un</text:span><text:span text:style-name="T1"> length prefix</text:span><text:span text:style-name="T20"> di 64-bit in</text:span><text:span text:style-name="T1"> big-endian</text:span><text:span text:style-name="T20">.</text:span></text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P44"><text:span text:style-name="T1">receiver.c</text:span><text:span text:style-name="T20"> è un </text:span><text:span text:style-name="T1">polling loop</text:span><text:span text:style-name="T20"> che mantiene un </text:span><text:span text:style-name="T1">struct Deserializer</text:span><text:span text:style-name="T20"> per ogni </text:span><text:span text:style-name="T1">file descriptor</text:span><text:span text:style-name="T20"> da cui </text:span><text:span text:style-name="T1">select()</text:span><text:span text:style-name="T20"> legge dati in ingresso. Quando il </text:span><text:span text:style-name="T1">deserializer</text:span><text:span text:style-name="T20"> ottiene un messaggio completo, viene scelto un worker thread a caso e il messaggio viene aggiunto alla relativa </text:span><text:span text:style-name="T1">queue</text:span><text:span text:style-name="T20">.</text:span></text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P44"><text:span text:style-name="T1">worker.c</text:span><text:span text:style-name="T20"> effettua ulteriore decoding dei messaggi estratti dalla </text:span><text:span text:style-name="T1">queue</text:span><text:span text:style-name="T20"> del </text:span><text:span text:style-name="T1">worker</text:span><text:span text:style-name="T20"> e si interfaccia con la</text:span><text:span text:style-name="T1"> struct Htable</text:span><text:span text:style-name="T20"> che contiene i dati per produrre una risposta alla </text:span><text:span text:style-name="T1">query</text:span><text:span text:style-name="T20">.</text:span></text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P44"><text:span text:style-name="T1">workload_queue.c</text:span><text:span text:style-name="T20"> implementa la </text:span><text:span text:style-name="T49">queue</text:span><text:span text:style-name="T23"> sopracitata da cui ogni </text:span><text:span text:style-name="T49">worker</text:span><text:span text:style-name="T23"> estrae i messaggi in ingresso.</text:span></text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P45"><text:span text:style-name="T50">global_state.c</text:span><text:span text:style-name="T24"> contiene varie variabili globali e il codice di gestione di stato condiviso. Ho evitato lo stato globale quanto più possibile e per motivi di mantenibilità ho deciso di dichiarare le rimanenti variabili di stato globale in un unico file.</text:span></text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P45"><text:span text:style-name="T24">serverapi.c implementa il protocollo di comunicazione su socket tra clients e server.</text:span></text:p>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="P13"/>
+   <text:p text:style-name="P13">Worker threads.</text:p>
    <text:p text:style-name="P4"><text:span text:style-name="T1">All’avvio del server, viene inizializzato un numero di </text:span><text:span text:style-name="T11">worker threads</text:span><text:span text:style-name="T1"> indicato dal file di configurazione. Ognuno di questi worker threads ha accesso alla sua queue di messaggi in arrivo, salvati in memoria e in attesa di essere processati dal worker thread. Per immettere I messaggi in arrivo nelle queues dei worker threads, il server deve effettuare due operazioni fondamentali: (1) decoding dei messaggi in arrivo e (2) una volta completato il decoding di un messaggio, scegliere a quale worker thread affidare il messaggio. In alternativa, sarebbe possibile disporre di un’unica </text:span><text:span text:style-name="T11">queue</text:span><text:span text:style-name="T1"> condivisa tra tutti I worker threads: si tratta di un’architettura più semplice ma che potrebbe sottoporre il server a maggior thread starvation in momenti di stress. D’altra parte, un load balancer implementato male può facilmente annullare qualsiasi beneficio ottenuto con questa scelta. Ho scelto un semplice algoritmo di scelta casuale, che nei momenti di stress per la legge dei grandi numeri si comporta in modo piuttosto prevedibile e performante ed è molto utilizzato anche in ambito web. Si ottiene così un modello totalmente asincrono tra </text:span><text:span text:style-name="T8">i</text:span><text:span text:style-name="T1"> messaggi ricevuti dal server, in cui l’ordinamento cronologico è parziale e </text:span><text:span text:style-name="T5">ristretto</text:span><text:span text:style-name="T1"> all’interno </text:span><text:span text:style-name="T5">di un unico worker thread: non si ha modo di sapere quale fra due messaggi appartenenti a queues diverse sia arrivato prima. Con scelte opportune di strutture dati interne, questo non è un problema.</text:span></text:p>
-   <text:p text:style-name="P19"/>
-   <text:p text:style-name="P13">Storage.</text:p>
-   <text:p text:style-name="P18">La struttura dati che funge da <text:span text:style-name="T10">storage</text:span> interno in memoria principale dei file memorizzati dal server è senza dubbio la parte più complessa del progetto. Intuitivamente, c’è bisogno di un meccanismo sincronizzato tra thread di associazione tra <text:span text:style-name="T10">filepaths</text:span> e dati binari (la funzion<text:span text:style-name="T25">al</text:span>ità di <text:span text:style-name="T10">locking</text:span> complica un po’ questa definizione, ma non cambia l’idea di fondo). Una possibilità sarebbe quella di usare un <text:span text:style-name="T10">mutex</text:span> di guardia che regoli l’accesso a una tabella hash: le operazioni di modifica, inserimento e (un)locking di file memorizzati nella tabella hash, tuttavia, sono piuttosto costose: richiedono l’utilizzo di ingenti quantità di RAM, il che ha un costo non indiffente su architetture moderne con cache gerarchiche di memoria. Sincronizzare <text:span text:style-name="T25">queste</text:span> <text:span text:style-name="T25">costose </text:span>operazioni con un unico mutex risulterebbe in prestazioni ridotte.</text:p>
-   <text:p text:style-name="P18">Ho perciò optato per una tabella hash con liste di <text:span text:style-name="T34">trabocco</text:span> “a sincronizzazione locale”: l’accesso a ogni lista di <text:span text:style-name="T47">trabocco</text:span> è protetto da un mutex unico a tale lista, e quindi operazioni di lettura e scrittura sulla tabella hash possono procedere in parallelo (a meno che le chiavi non risultino in una <text:span text:style-name="T10">hash collision</text:span> sulla stessa lista di trabocco, in tal caso non è possibile nessun parallelismo). Per alcune operazioni rimane necessario adottare un meccanismo di sincronizzazione globale, ma si tratta di operazioni semplici e veloci mirate quasi esclusivamente a raccogliere statistiche interne sull’utilizzo della tabella hash al fine di produrre un report finale d’utilizzo.</text:p>
-   <text:p text:style-name="P18"/>
-   <text:p text:style-name="P20"><text:soft-page-break/>L’utilizzo di liste di <text:span text:style-name="T34">trabocco</text:span> a sincronizzazione locale permette pattern di accesso altamente parallelizzabili. Prendiamo come esempio l’implementazione di <text:span text:style-name="T10">readNFiles</text:span><text:span text:style-name="T17">: questa si appoggia all’API </text:span><text:span text:style-name="T10">visitor</text:span><text:span text:style-name="T17"> esposta in </text:span><text:span text:style-name="T10">htable.h</text:span><text:span text:style-name="T17">. In seguito alla creazione di un </text:span><text:span text:style-name="T10">visitor</text:span><text:span text:style-name="T17"> con </text:span><text:span text:style-name="T10">htable_visit</text:span><text:span text:style-name="T17">, le successive chiamate a </text:span><text:span text:style-name="T10">htable_visitor_next</text:span><text:span text:style-name="T17"> mantengono il locking sul mutex sulla listra di </text:span><text:span text:style-name="T18">trabocco</text:span><text:span text:style-name="T17"> dell’ultimo elemento visitato. Questo permette di effettuare chiamate a </text:span><text:span text:style-name="T10">readNFiles</text:span><text:span text:style-name="T17"> che raccolgono ingenti quantità di dati (quindi costose) senza bloccare l’accesso in lettura e/o scrittura alla maggior parte degli altri file.</text:span></text:p>
-   <text:p text:style-name="P18"/>
-   <text:p text:style-name="P14">Logging<text:span text:style-name="T1">.</text:span></text:p>
-   <text:p text:style-name="P14"><text:span text:style-name="T1">Come accennato in precedenza, il logging su lato server è effettuato con la libreria </text:span><text:span text:style-name="T11">log.c</text:span><text:span text:style-name="T20">. Nel file </text:span><text:span text:style-name="T11">src/server/global_state.h</text:span><text:span text:style-name="T20"> ho reso disponibili dei wrappers thread-safe per effettuare logging sincronizzato tra worker threads. Notiamo che fare locking e successivamente unlocking di un mutex globale per ogni operazione di logging è molto costoso e ho fatto questa scelta per semplicità. In un sistema </text:span><text:span text:style-name="T11">production-ready</text:span><text:span text:style-name="T20">, sarebbe opportuno riservare un thread unicamente al logging </text:span><text:span text:style-name="T22">e usare un meccanismo ottimizzato di message-passing.</text:span></text:p>
    <text:p text:style-name="P22"/>
-   <text:p text:style-name="P15">Test.</text:p>
+   <text:p text:style-name="P14">Storage.</text:p>
+   <text:p text:style-name="P21">La struttura dati che funge da <text:span text:style-name="T10">storage</text:span> interno in memoria principale dei file memorizzati dal server è senza dubbio la parte più complessa del progetto. Intuitivamente, c’è bisogno di un meccanismo sincronizzato tra thread di associazione tra <text:span text:style-name="T10">filepaths</text:span> e dati binari (la funzion<text:span text:style-name="T25">al</text:span>ità di <text:span text:style-name="T10">locking</text:span> complica un po’ questa definizione, ma non cambia l’idea di fondo). Una possibilità sarebbe quella di usare un <text:span text:style-name="T10">mutex</text:span> di guardia che regoli l’accesso a una tabella hash: le operazioni di modifica, inserimento e (un)locking di file memorizzati nella tabella hash, tuttavia, sono piuttosto costose: richiedono l’utilizzo di ingenti quantità di RAM, il che ha un costo non indiffente su architetture moderne con cache gerarchiche di memoria. Sincronizzare <text:span text:style-name="T25">queste</text:span> <text:span text:style-name="T25">costose </text:span>operazioni con un unico mutex risulterebbe in prestazioni ridotte.</text:p>
+   <text:p text:style-name="P21">Ho perciò optato per una tabella hash con liste di <text:span text:style-name="T34">trabocco</text:span> “a sincronizzazione locale”: l’accesso a ogni lista di <text:span text:style-name="T48">trabocco</text:span> è protetto da un mutex unico a tale lista, e quindi operazioni di lettura e scrittura sulla tabella hash possono procedere in parallelo (a meno che le chiavi non risultino in una <text:span text:style-name="T10">hash collision</text:span> sulla stessa lista di trabocco, in tal caso non è possibile nessun parallelismo). Per alcune operazioni rimane necessario adottare un meccanismo di sincronizzazione globale, ma si tratta di operazioni semplici e veloci mirate quasi esclusivamente a raccogliere statistiche interne sull’utilizzo della tabella hash al fine di produrre un report finale d’utilizzo.</text:p>
+   <text:p text:style-name="P21"><text:soft-page-break/></text:p>
+   <text:p text:style-name="P23">L’utilizzo di liste di <text:span text:style-name="T34">trabocco</text:span> a sincronizzazione locale permette pattern di accesso altamente parallelizzabili. Prendiamo come esempio l’implementazione di <text:span text:style-name="T10">readNFiles</text:span><text:span text:style-name="T17">: questa si appoggia all’API </text:span><text:span text:style-name="T10">visitor</text:span><text:span text:style-name="T17"> esposta in </text:span><text:span text:style-name="T10">htable.h</text:span><text:span text:style-name="T17">. In seguito alla creazione di un </text:span><text:span text:style-name="T10">visitor</text:span><text:span text:style-name="T17"> con </text:span><text:span text:style-name="T10">htable_visit</text:span><text:span text:style-name="T17">, le successive chiamate a </text:span><text:span text:style-name="T10">htable_visitor_next</text:span><text:span text:style-name="T17"> mantengono il locking sul mutex sulla listra di </text:span><text:span text:style-name="T18">trabocco</text:span><text:span text:style-name="T17"> dell’ultimo elemento visitato. Questo permette di effettuare chiamate a </text:span><text:span text:style-name="T10">readNFiles</text:span><text:span text:style-name="T17"> che raccolgono ingenti quantità di dati (quindi costose) senza bloccare l’accesso in lettura e/o scrittura alla maggior parte degli altri file.</text:span></text:p>
+   <text:p text:style-name="P21"/>
+   <text:p text:style-name="P15">Logging<text:span text:style-name="T1">.</text:span></text:p>
+   <text:p text:style-name="P15"><text:span text:style-name="T1">Come accennato in precedenza, il logging su lato server è effettuato con la libreria </text:span><text:span text:style-name="T11">log.c</text:span><text:span text:style-name="T20">. Nel file </text:span><text:span text:style-name="T11">src/server/global_state.h</text:span><text:span text:style-name="T20"> ho reso disponibili dei wrappers thread-safe per effettuare logging sincronizzato tra worker threads. Notiamo che fare locking e successivamente unlocking di un mutex globale per ogni operazione di logging è molto costoso e ho fatto questa scelta per semplicità. In un sistema </text:span><text:span text:style-name="T11">production-ready</text:span><text:span text:style-name="T20">, sarebbe opportuno riservare un thread unicamente al logging </text:span><text:span text:style-name="T22">e usare un meccanismo ottimizzato di message-passing.</text:span></text:p>
+   <text:p text:style-name="P25"/>
+   <text:p text:style-name="P16">Test.</text:p>
    <text:p text:style-name="P8"><text:span text:style-name="T17">Tutti i test usano come file di prova I contenuti della cartella</text:span> test/data/Imgur<text:span text:style-name="T17">, che contiene un gran numero di immagini scaricate dal sito di condivisione immagini Imgur. </text:span><text:span text:style-name="T19">Tutti I test stampano a schermo il resoconto prodotto da </text:span><text:span text:style-name="T35">statistiche.sh</text:span><text:span text:style-name="T19">, per convenienza di debugging e completezza, nonostante non richiesto espressamente dalla specifica. </text:span></text:p>
-   <text:list xml:id="list3498649412" text:style-name="L3">
+   <text:list xml:id="list1341712931" text:style-name="L4">
     <text:list-item>
      <text:p text:style-name="P46"><text:span text:style-name="T26">test/test1.sh</text:span><text:span text:style-name="T31"> è un test generale delle funzionalità del sistema e memorizza sul server molti file. Il test può richiedere un po’ di tempo e al termine dell’esecuzione I file </text:span><text:span text:style-name="T32">letti</text:span><text:span text:style-name="T31"> dal server si trovano in </text:span><text:span text:style-name="T27">test/data/Imgur/target</text:span><text:span text:style-name="T32"> e quelli rimossi dalla cache nella sottocartella </text:span><text:span text:style-name="T27">evicted</text:span><text:span text:style-name="T32">.</text:span></text:p>
     </text:list-item>
@@ -970,12 +978,12 @@
      <text:p text:style-name="P47"><text:span text:style-name="T28">test/test3.sh</text:span><text:span text:style-name="T30"> ha una durata esatta di 30 secondi e, più che qualche funzionalità in particolare, mira a testare la capacità del server di rimanere attivo e funzionante anche quando sotto una mole di carico notevole.</text:span></text:p>
     </text:list-item>
    </text:list>
-   <text:p text:style-name="P27"><text:span text:style-name="T30">Nota bene: I file di configurazione dei test, contenuti nella cartella </text:span><text:span text:style-name="T28">config/</text:span><text:span text:style-name="T30">, specificano l’uso di un file socket in </text:span><text:span text:style-name="T28">/tmp/</text:span><text:span text:style-name="T30"> il cui accesso potrebbe richiedere privilegi </text:span><text:span text:style-name="T28">root</text:span><text:span text:style-name="T30">, e.g. </text:span><text:span text:style-name="T28">sudo make test2</text:span><text:span text:style-name="T30">.</text:span></text:p>
-   <text:p text:style-name="P24"/>
-   <text:p text:style-name="P26">Sviluppi opzionali.</text:p>
-   <text:p text:style-name="P28"><text:span text:style-name="T30">Oltre alla </text:span><text:span text:style-name="T28">cache eviction policy</text:span><text:span text:style-name="T30"> FIFO, ho implementato una </text:span><text:span text:style-name="T28">policy</text:span><text:span text:style-name="T30"> alternativa che sfrutta il design della tabella hash ad accesso parallelo: le liste di trabocco vengono perciò usate come </text:span><text:span text:style-name="T28">queue</text:span><text:span text:style-name="T30"> FIFO a tutti gli effetti, e la cache assume un grado di </text:span><text:span text:style-name="T28">associativity</text:span><text:span text:style-name="T30"> pari al numero di </text:span><text:span text:style-name="T28">buckets</text:span><text:span text:style-name="T30">. Questa tecnica non richiede alun overhead di memoria. Nel codice, do a questa politica di rimpiazzamento il nome di </text:span><text:span text:style-name="T28">segmented FIFO</text:span><text:span text:style-name="T30">. Non è utilizzata nei test per evitare confusione, dato che può portare a comportamenti ed rimozioni di file inaspettate rispetto a un algoritmo più prevedibile come FIFO.</text:span></text:p>
-   <text:p text:style-name="P25"/>
-   <text:p text:style-name="P28"><text:span text:style-name="T30">Ho valutato la possibilità di comprimere i contenuti dei file in memoria con LZ4 (</text:span><text:a xlink:type="simple" xlink:href="https://github.com/lz4/lz4" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T30">https://github.com/lz4/lz4</text:span></text:a><text:span text:style-name="T30">), ma ho </text:span><text:span text:style-name="T33">successivamente deciso di</text:span><text:span text:style-name="T30"> evita</text:span><text:span text:style-name="T33">re</text:span><text:span text:style-name="T30"> per ragioni di tempistiche.</text:span></text:p>
+   <text:p text:style-name="P30"><text:span text:style-name="T30">Nota bene: I file di configurazione dei test, contenuti nella cartella </text:span><text:span text:style-name="T28">config/</text:span><text:span text:style-name="T30">, specificano l’uso di un file socket in </text:span><text:span text:style-name="T28">/tmp/</text:span><text:span text:style-name="T30"> il cui accesso potrebbe richiedere privilegi </text:span><text:span text:style-name="T28">root</text:span><text:span text:style-name="T30">, e.g. </text:span><text:span text:style-name="T28">sudo make test2</text:span><text:span text:style-name="T30">.</text:span></text:p>
+   <text:p text:style-name="P27"/>
+   <text:p text:style-name="P29">Sviluppi opzionali.</text:p>
+   <text:p text:style-name="P31"><text:span text:style-name="T30">Oltre alla </text:span><text:span text:style-name="T28">cache eviction policy</text:span><text:span text:style-name="T30"> FIFO, ho implementato una </text:span><text:span text:style-name="T28">policy</text:span><text:span text:style-name="T30"> alternativa che sfrutta il design della tabella hash ad accesso parallelo: le liste di trabocco vengono perciò usate come </text:span><text:span text:style-name="T28">queue</text:span><text:span text:style-name="T30"> FIFO a tutti gli effetti, e la cache assume un grado di </text:span><text:span text:style-name="T28">associativity</text:span><text:span text:style-name="T30"> pari al numero di </text:span><text:span text:style-name="T28">buckets</text:span><text:span text:style-name="T30">. Questa tecnica non richiede alun overhead di memoria. Nel codice, do a questa politica di rimpiazzamento il nome di </text:span><text:span text:style-name="T28">segmented FIFO</text:span><text:span text:style-name="T30">. Non è utilizzata nei test per evitare confusione, dato che può portare a comportamenti ed rimozioni di file inaspettate rispetto a un algoritmo più prevedibile come FIFO.</text:span></text:p>
+   <text:p text:style-name="P28"/>
+   <text:p text:style-name="P31"><text:span text:style-name="T30">Ho valutato la possibilità di comprimere i contenuti dei file in memoria con LZ4 (</text:span><text:a xlink:type="simple" xlink:href="https://github.com/lz4/lz4" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link"><text:span text:style-name="T30">https://github.com/lz4/lz4</text:span></text:a><text:span text:style-name="T30">), ma ho </text:span><text:span text:style-name="T33">successivamente deciso di</text:span><text:span text:style-name="T30"> evita</text:span><text:span text:style-name="T33">re</text:span><text:span text:style-name="T30"> per ragioni di tempistiche.</text:span></text:p>
   </office:text>
  </office:body>
 </office:document>
